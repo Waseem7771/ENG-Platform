@@ -98,7 +98,7 @@ Sidebar: **Learn · Practice · Classes · Progress** + language toggle + user c
 
 ### 5.3 Onboarding (target: playable content in 60 seconds)
 
-1. Signup with role set **atomically** via better-auth `additionalFields` (delete `/api/auth/set-role`). "I'm a Teacher" on marketing links to `/signup?role=teacher` preselected.
+1. Signup with role set **atomically and server-side** (delete `/api/auth/set-role`). Constraint: `role`/`level` are deliberately `input:false` in better-auth so clients can never set them via sign-up/update-user — keep that. The mechanism (signup database hook reading a server-validated intent, or a one-time-only server action that refuses if role is already set) is decided at plan time against better-auth docs. "I'm a Teacher" on marketing links to `/signup?role=teacher` preselected.
 2. Student → 5-question mini-placement (one per screen, instant level estimate).
 3. Auto-start the first level-matched exercise immediately.
 4. Then reveal the Path home, already populated.
@@ -155,7 +155,7 @@ Schema (additive + one migration):
 
 API:
 
-- Delete `/api/auth/set-role`; role via better-auth `additionalFields` at signup.
+- Delete `/api/auth/set-role`; role assigned server-side at signup (see §5.3 constraint — `input:false` stays).
 - Add forgot-password/reset (better-auth built-in) — and evaluate Google OAuth as a stretch item.
 - `PATCH /api/exercises/[id]`, `PATCH /api/classes/[id]`, `DELETE /api/classes/[id]/students/[studentId]`.
 - `/api/exercises` GET: include `user.level` for students by default.
