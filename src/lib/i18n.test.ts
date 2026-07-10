@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { pickLocale, dirFor, getMessages, translate } from "@/lib/i18n";
+import { pickLocale, dirFor, translate } from "@/lib/i18n-shared";
+import { getMessages } from "@/lib/i18n";
 import en from "../../messages/en.json";
 import ar from "../../messages/ar.json";
 
