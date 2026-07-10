@@ -13,7 +13,6 @@ export {
   pickLocale,
   translate,
 } from "./i18n-shared";
-export type { Locale, Messages } from "./i18n-shared";
 
 import type { Locale, Messages } from "./i18n-shared";
 import { pickLocale, LOCALE_COOKIE } from "./i18n-shared";
