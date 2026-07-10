@@ -30,7 +30,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-export const proxyConfig = {
+export const config = {
   // Skip Next internals, well-known metadata files, and any request with a
   // static-asset file extension so public assets aren't bounced to /login.
   matcher: [
