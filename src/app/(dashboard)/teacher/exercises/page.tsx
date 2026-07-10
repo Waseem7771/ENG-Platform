@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Clock, PenSquare, Trash2, Users } from "lucide-react";
 import { FloatingParticles } from "@/components/shared/floating-particles";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { ErrorState, EmptyState, ListSkeleton } from "@/components/teacher/state-views";
 import { LevelBadge, ExerciseTypeBadge, EXERCISE_TYPE_META } from "@/components/teacher/badges";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
@@ -142,7 +141,7 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
 
 function ExerciseRow({ exercise, onDelete }: { exercise: TeacherExerciseListItem; onDelete: () => void }) {
   return (
-    <SpotlightCard className="rounded-2xl border-white/5 bg-white/[0.02] p-5">
+    <div className="rounded-card border-2 border-border bg-card shadow-sticker p-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -178,6 +177,6 @@ function ExerciseRow({ exercise, onDelete }: { exercise: TeacherExerciseListItem
           onConfirm={onDelete}
         />
       </div>
-    </SpotlightCard>
+    </div>
   );
 }

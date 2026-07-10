@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { toast } from "sonner";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { FloatingParticles } from "@/components/shared/floating-particles";
 import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/shared/count-up";
@@ -194,14 +193,14 @@ function StatCard({ title, value, description, color }: { title: string; value: 
   };
 
   return (
-    <SpotlightCard className={`rounded-2xl border bg-gradient-to-b ${colors[color]} p-6`}>
+    <div className={`rounded-card border-2 border-border bg-card shadow-sticker p-6 bg-gradient-to-b ${colors[color]}`}>
       <div className="flex items-center gap-2 mb-3">
         <div className={`h-2 w-2 rounded-full ${dotColors[color]}`} />
         <span className="text-xs uppercase tracking-wider text-white/40">{title}</span>
       </div>
       <p className="text-3xl font-bold tracking-tight">{value}</p>
       <p className="mt-1 text-xs text-white/30">{description}</p>
-    </SpotlightCard>
+    </div>
   );
 }
 

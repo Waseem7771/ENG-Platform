@@ -5,7 +5,6 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { TextReveal } from "@/components/shared/text-reveal";
 import { Button } from "@/components/ui/button";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { SpotlightBeam } from "@/components/shared/spotlight-beam";
 import { GridBackground } from "@/components/shared/grid-background";
 import { FloatingParticles } from "@/components/shared/floating-particles";
@@ -266,10 +265,7 @@ export default function LandingPage() {
           >
             {features.map((f, i) => (
               <motion.div key={f.title} variants={fadeInUp} custom={i}>
-                <SpotlightCard
-                  className="h-full rounded-2xl border border-white/5 bg-white/[0.02] p-7 transition-colors duration-500 hover:border-white/10 hover:bg-white/[0.04]"
-                  spotlightColor="rgba(139, 92, 246, 0.08)"
-                >
+                <div className="rounded-card border-2 border-border bg-card shadow-sticker h-full p-7">
                   <div className={`mb-5 inline-flex rounded-xl bg-gradient-to-br ${f.accent} p-3 text-2xl`}>
                     {f.icon}
                   </div>
@@ -279,7 +275,7 @@ export default function LandingPage() {
                   <p className="text-sm leading-relaxed text-white/40">
                     {f.description}
                   </p>
-                </SpotlightCard>
+                </div>
               </motion.div>
             ))}
           </motion.div>

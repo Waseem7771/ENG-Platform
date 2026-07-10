@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Radio, Users } from "lucide-react";
 import { FloatingParticles } from "@/components/shared/floating-particles";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { ErrorState, EmptyState, ListSkeleton } from "@/components/teacher/state-views";
 import { SessionStatusBadge } from "@/components/teacher/badges";
 import { StartSessionDialog } from "@/components/teacher/sessions/start-session-dialog";
@@ -108,7 +107,7 @@ export default function TeacherSessionsPage() {
 
 function SessionRow({ session }: { session: TeacherSessionListItem }) {
   return (
-    <SpotlightCard className="rounded-2xl border-white/5 bg-white/[0.02] p-0">
+    <div className="rounded-card border-2 border-border bg-card shadow-sticker p-0">
       <Link href={`/teacher/sessions/${session.id}`} className="flex items-center justify-between gap-4 p-5">
         <div className="min-w-0">
           <div className="mb-1.5 flex items-center gap-2">
@@ -129,6 +128,6 @@ function SessionRow({ session }: { session: TeacherSessionListItem }) {
           <ArrowRight className="h-3.5 w-3.5" />
         </span>
       </Link>
-    </SpotlightCard>
+    </div>
   );
 }

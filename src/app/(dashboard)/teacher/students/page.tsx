@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Flame, Search, Trophy, Users } from "lucide-react";
 import { FloatingParticles } from "@/components/shared/floating-particles";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { ErrorState, EmptyState, ListSkeleton } from "@/components/teacher/state-views";
 import { LevelBadge } from "@/components/teacher/badges";
 import { StudentDetailDialog } from "@/components/teacher/students/student-detail-dialog";
@@ -101,7 +100,7 @@ export default function TeacherStudentsPage() {
 
 function StudentRow({ student, onOpen }: { student: TeacherStudentListItem; onOpen: () => void }) {
   return (
-    <SpotlightCard className="rounded-2xl border-white/5 bg-white/[0.02] p-0">
+    <div className="rounded-card border-2 border-border bg-card shadow-sticker p-0">
       <button type="button" onClick={onOpen} className="w-full p-5 text-left">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -139,7 +138,7 @@ function StudentRow({ student, onOpen }: { student: TeacherStudentListItem; onOp
           <span className="text-xs text-white/40">{student.avgScore}% avg score</span>
         </div>
       </button>
-    </SpotlightCard>
+    </div>
   );
 }
 

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Radio, PenSquare, Plus, Video, Users } from "lucide-react";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { FloatingParticles } from "@/components/shared/floating-particles";
 import { CountUp } from "@/components/shared/count-up";
 import { ErrorState } from "@/components/teacher/state-views";
@@ -169,7 +168,7 @@ function StatCard({ title, value, loading, color }: { title: string; value: numb
   };
 
   return (
-    <SpotlightCard className={`rounded-2xl border bg-gradient-to-b ${colors[color]} p-6`} spotlightColor="rgba(16, 185, 129, 0.08)">
+    <div className={`rounded-card border-2 border-border bg-card shadow-sticker p-6 bg-gradient-to-b ${colors[color]}`}>
       <div className="mb-3 flex items-center gap-2">
         <div className={`h-2 w-2 rounded-full ${dotColors[color]}`} />
         <span className="text-xs uppercase tracking-wider text-white/40">{title}</span>
@@ -181,7 +180,7 @@ function StatCard({ title, value, loading, color }: { title: string; value: numb
           <CountUp end={value} duration={1.2} />
         </p>
       )}
-    </SpotlightCard>
+    </div>
   );
 }
 

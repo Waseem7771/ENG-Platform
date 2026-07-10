@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { BookOpen, Users, Video } from "lucide-react";
 import { FloatingParticles } from "@/components/shared/floating-particles";
-import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { GridSkeleton, ErrorState, EmptyState } from "@/components/teacher/state-views";
 import { LevelBadge } from "@/components/teacher/badges";
 import { CopyCode } from "@/components/teacher/copy-code";
@@ -84,7 +83,7 @@ export default function TeacherClassesPage() {
 
 function ClassCard({ classItem }: { classItem: TeacherClassListItem }) {
   return (
-    <SpotlightCard className="h-full rounded-2xl border-white/5 bg-white/[0.02] p-0">
+    <div className="rounded-card border-2 border-border bg-card shadow-sticker h-full p-0">
       <Link href={`/teacher/classes/${classItem.id}`} className="block p-6">
         <div className="mb-3 flex items-start justify-between gap-2">
           <h3 className="text-lg font-semibold tracking-tight text-white/90">{classItem.name}</h3>
@@ -108,6 +107,6 @@ function ClassCard({ classItem }: { classItem: TeacherClassListItem }) {
         <span className="text-[11px] uppercase tracking-widest text-white/25">Join code</span>
         <CopyCode code={classItem.code} />
       </div>
-    </SpotlightCard>
+    </div>
   );
 }
