@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { api, ApiClientError } from "@/lib/api";
-import { GlowButton } from "@/components/shared/glow-button";
+import { Button } from "@/components/ui/button";
 import { ScoreRing } from "@/components/shared/score-ring";
 import type { PlacementQuestionPublic, PlacementResult } from "@/types";
 
@@ -89,9 +89,9 @@ export default function PlacementExamPage() {
             <InfoRow icon="🎯" title="3 Levels" subtitle="Beginner, Intermediate, Advanced" />
           </div>
 
-          <GlowButton onClick={startExam} className="mt-7 w-full">
+          <Button onClick={startExam} className="mt-7 w-full">
             {data.taken ? "Retake Exam" : "Start Exam"}
-          </GlowButton>
+          </Button>
         </div>
       </div>
     );
@@ -177,9 +177,9 @@ export default function PlacementExamPage() {
           <BreakdownBar label="Reading" value={result.breakdown.reading} />
         </div>
 
-        <GlowButton onClick={() => router.push("/student")} className="w-full sm:w-auto">
+        <Button onClick={() => router.push("/student")} className="w-full sm:w-auto">
           Continue to Dashboard
-        </GlowButton>
+        </Button>
       </div>
     );
   }

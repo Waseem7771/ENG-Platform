@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { signUp } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GlowButton } from "@/components/shared/glow-button";
+import { Button } from "@/components/ui/button";
 import { SpotlightBeam } from "@/components/shared/spotlight-beam";
 import { GridBackground } from "@/components/shared/grid-background";
 import { FloatingParticles } from "@/components/shared/floating-particles";
@@ -168,9 +168,9 @@ export default function SignupPage() {
               />
             </div>
 
-            <GlowButton variant="primary" className="w-full py-3.5" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Create account"}
-            </GlowButton>
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-white/30">

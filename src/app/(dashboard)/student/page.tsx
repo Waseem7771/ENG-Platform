@@ -6,7 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { FloatingParticles } from "@/components/shared/floating-particles";
-import { GlowButton } from "@/components/shared/glow-button";
+import { Button } from "@/components/ui/button";
 import { CountUp } from "@/components/shared/count-up";
 import { useApi } from "@/hooks/use-api";
 import { api, ApiClientError } from "@/lib/api";
@@ -93,7 +93,7 @@ export default function StudentDashboard() {
                   <p className="font-semibold text-white">You haven&apos;t taken the placement exam yet</p>
                   <p className="mt-1 text-sm text-white/50">Find your level in about 15 minutes and unlock personalized exercises.</p>
                 </div>
-                <GlowButton variant="primary" className="shrink-0">Take the placement exam</GlowButton>
+                <Button className="shrink-0">Take the placement exam</Button>
               </div>
             </Link>
           </motion.div>
@@ -151,9 +151,9 @@ export default function StudentDashboard() {
                 aria-label="Class code"
                 className="h-12 flex-1 rounded-xl border border-white/10 bg-white/[0.02] px-4 font-mono text-lg tracking-[0.3em] text-white placeholder:text-white/20 focus:border-violet-500/40 focus:outline-none sm:max-w-xs"
               />
-              <GlowButton type="submit" disabled={joining} variant="secondary">
+              <Button type="submit" disabled={joining}>
                 {joining ? "Joining…" : "Join Class"}
-              </GlowButton>
+              </Button>
             </form>
 
             <div className="mt-6 space-y-2">

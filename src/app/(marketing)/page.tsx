@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { TextReveal } from "@/components/shared/text-reveal";
-import { GlowButton } from "@/components/shared/glow-button";
+import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "@/components/shared/spotlight-card";
 import { SpotlightBeam } from "@/components/shared/spotlight-beam";
 import { GridBackground } from "@/components/shared/grid-background";
@@ -112,9 +112,9 @@ export default function LandingPage() {
             >
               Log in
             </Link>
-            <GlowButton href="/signup" variant="primary" className="text-xs">
+            <Button render={<Link href="/signup" />} size="sm">
               Get Started
-            </GlowButton>
+            </Button>
           </nav>
         </div>
       </motion.header>
@@ -180,12 +180,12 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease }}
           >
-            <GlowButton href="/signup" variant="primary" className="px-10 py-4 text-sm">
+            <Button render={<Link href="/signup" />} size="lg">
               Start Learning Free →
-            </GlowButton>
-            <GlowButton href="/login" variant="secondary" className="px-10 py-4 text-sm">
+            </Button>
+            <Button render={<Link href="/login" />} variant="ghost" size="lg">
               I&apos;m a Teacher
-            </GlowButton>
+            </Button>
           </motion.div>
 
           {/* Stats */}
@@ -374,9 +374,9 @@ export default function LandingPage() {
               card, no commitment — just start learning.
             </p>
             <div className="mt-10">
-              <GlowButton href="/signup" variant="primary" className="px-12 py-4 text-sm">
+              <Button render={<Link href="/signup" />} size="lg">
                 Create Free Account →
-              </GlowButton>
+              </Button>
             </div>
           </motion.div>
         </div>

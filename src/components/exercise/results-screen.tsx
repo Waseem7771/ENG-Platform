@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ScoreRing } from "@/components/shared/score-ring";
 import { CountUp } from "@/components/shared/count-up";
-import { GlowButton } from "@/components/shared/glow-button";
+import { Button } from "@/components/ui/button";
 import type { SubmitResponse } from "@/types";
 
 const itemVariants = {
@@ -122,14 +122,14 @@ export function ResultsScreen({
 
       <motion.div variants={itemVariants} className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-center">
         {onRetry && (
-          <GlowButton variant="secondary" onClick={onRetry}>
+          <Button variant="ghost" onClick={onRetry}>
             {retryLabel}
-          </GlowButton>
+          </Button>
         )}
         {onBack && (
-          <GlowButton variant="primary" onClick={onBack}>
+          <Button variant="ghost" onClick={onBack}>
             {backLabel}
-          </GlowButton>
+          </Button>
         )}
       </motion.div>
     </motion.div>
