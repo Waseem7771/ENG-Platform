@@ -53,6 +53,12 @@ export const auth = betterAuth({
         required: false,
         input: false,
       },
+      locale: {
+        type: "string",
+        required: false,
+        defaultValue: "ar",
+        input: true,
+      },
     },
   },
 });

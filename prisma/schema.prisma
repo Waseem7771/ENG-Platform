@@ -17,6 +17,7 @@ model User {
   image         String?
   role          String    @default("STUDENT") // STUDENT | TEACHER
   level         String?   // BEGINNER | INTERMEDIATE | ADVANCED
+  locale        String    @default("ar") // ar | en — UI language
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
