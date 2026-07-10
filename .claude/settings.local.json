@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx skills:*)"
+      "Bash(npx skills:*)",
+      "Bash(npx prisma:*)",
+      "Bash(curl -s -L \"https://oryzo.ai/?ref=landing.love\" -o /tmp/oryzo.html)",
+      "Read(//tmp/**)"
     ]
   }
 }

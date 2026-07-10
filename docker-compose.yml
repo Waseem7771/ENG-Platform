@@ -1,0 +1,55 @@
+services:
+  migrate:
+    build:
+      context: .
+      target: migrator
+    env_file: .env.production
+    volumes:
+      - app_data:/app/data
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    restart: unless-stopped
+    env_file: .env.production
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - "3000"
+    volumes:
+      - app_data:/app/data
+    networks: [web]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # e.g. SITE_ADDRESS=speakpath.example.com for automatic HTTPS,
+      # or leave the default :80 to serve plain HTTP on the VPS IP.
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [web]
+    depends_on:
+      - app
+
+networks:
+  web: {}
+
+volumes:
+  app_data: {}
+  caddy_data: {}
+  caddy_config: {}

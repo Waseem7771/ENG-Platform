@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+dev.db
+dev.db-journal
+*.log
+docs
+.claude
+.vscode
+README.md
+SpeakPath-*.md
+Dockerfile
+docker-compose.yml
+Caddyfile

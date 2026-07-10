@@ -15,6 +15,7 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # Debug
 npm-debug.log*
@@ -56,3 +57,5 @@ Thumbs.db
 .trae/
 .windsurf/
 .zencoder/
+
+/src/generated/prisma
