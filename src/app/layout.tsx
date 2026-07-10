@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Rubik, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { LocaleProvider } from "@/components/providers/locale-provider";
+import { getLocale, getMessages } from "@/lib/i18n";
+import { dirFor } from "@/lib/i18n-shared";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["latin", "arabic"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -16,22 +20,27 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SpeakPath — Your Path to Speaking English",
   description:
-    "Interactive English learning platform for Arabic speakers. Learn through AI conversations, live sessions, games, and exercises.",
+    "Interactive English learning for Arabic speakers — AI conversations, live sessions, and a path that fits your level.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const locale = await getLocale();
+  const messages = getMessages(locale);
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang={locale}
+      dir={dirFor(locale)}
+      className={`${rubik.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster />
+        <LocaleProvider locale={locale} messages={messages}>
+          {children}
+          <Toaster />
+        </LocaleProvider>
       </body>
     </html>
   );
