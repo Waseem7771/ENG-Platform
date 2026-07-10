@@ -29,6 +29,7 @@ next-env.d.ts
 # Prisma
 *.db
 *.db-journal
+prisma/test.db*
 
 # OS
 .DS_Store
