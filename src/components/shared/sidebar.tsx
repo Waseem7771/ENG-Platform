@@ -11,11 +11,10 @@ import {
   Video,
   PencilLine,
   Users,
-  MessageCircle,
-  ClipboardList,
   Languages,
   LogOut,
   Route,
+  LineChart,
   type LucideIcon,
 } from "lucide-react";
 import { useT, useLocale } from "@/components/providers/locale-provider";
@@ -38,11 +37,10 @@ const teacherNav: NavItem[] = [
 ];
 
 const studentNav: NavItem[] = [
-  { key: "nav.dashboard", href: "/student", icon: LayoutDashboard },
-  { key: "nav.sessions", href: "/student/sessions", icon: Video },
-  { key: "nav.exercises", href: "/student/exercises", icon: PencilLine },
-  { key: "nav.aiChat", href: "/student/ai-chat", icon: MessageCircle },
-  { key: "nav.placement", href: "/student/placement", icon: ClipboardList },
+  { key: "nav.learn", href: "/student", icon: Route },
+  { key: "nav.practice", href: "/student/practice", icon: PencilLine },
+  { key: "nav.myClasses", href: "/student/classes", icon: BookOpen },
+  { key: "nav.progress", href: "/student/progress", icon: LineChart },
 ];
 
 export function Sidebar({

@@ -20,7 +20,7 @@ describe("Sidebar", () => {
         <Sidebar role="STUDENT" />
       </LocaleProvider>,
     );
-    expect(screen.getByText("التمارين")).toBeTruthy();
+    expect(screen.getByText("تدرّب")).toBeTruthy();
     expect(screen.queryByText("📊")).toBeNull();
   });
   it("renders localized teacher nav in English", () => {
