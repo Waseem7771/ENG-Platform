@@ -1,5 +1,33 @@
 import { describe, it, expect } from "vitest";
-import { studentExerciseWhere } from "@/app/api/exercises/route";
+import { studentExerciseWhere, validateDifficultyParam } from "@/app/api/exercises/route";
+import { ApiError } from "@/lib/guard";
+
+describe("validateDifficultyParam", () => {
+  it("accepts undefined for both roles", () => {
+    expect(() => validateDifficultyParam(null, "TEACHER")).not.toThrow();
+    expect(() => validateDifficultyParam(null, "STUDENT")).not.toThrow();
+  });
+
+  it("accepts valid LEVELS for both roles", () => {
+    expect(() => validateDifficultyParam("BEGINNER", "TEACHER")).not.toThrow();
+    expect(() => validateDifficultyParam("INTERMEDIATE", "TEACHER")).not.toThrow();
+    expect(() => validateDifficultyParam("ADVANCED", "TEACHER")).not.toThrow();
+    expect(() => validateDifficultyParam("BEGINNER", "STUDENT")).not.toThrow();
+  });
+
+  it("rejects ALL for teachers", () => {
+    expect(() => validateDifficultyParam("ALL", "TEACHER")).toThrow(ApiError);
+  });
+
+  it("accepts ALL for students", () => {
+    expect(() => validateDifficultyParam("ALL", "STUDENT")).not.toThrow();
+  });
+
+  it("rejects invalid values for both roles", () => {
+    expect(() => validateDifficultyParam("INVALID", "TEACHER")).toThrow(ApiError);
+    expect(() => validateDifficultyParam("INVALID", "STUDENT")).toThrow(ApiError);
+  });
+});
 
 describe("studentExerciseWhere", () => {
   it("defaults to the user's level when no difficulty given", () => {

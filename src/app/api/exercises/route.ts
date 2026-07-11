@@ -1,7 +1,7 @@
 import { ApiError, errorResponse, requireTeacher, requireUser } from "@/lib/guard";
 import { db } from "@/lib/db";
 import { EXERCISE_TYPES } from "@/types";
-import type { ExerciseType, Level } from "@/types";
+import type { ExerciseType, Level, UserRole } from "@/types";
 
 const LEVELS: Level[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
 const GRAMMAR_MC_KINDS = new Set(["fill-blank", "error-correction"]);
@@ -31,6 +31,23 @@ function nonEmptyString(value: unknown): value is string {
 
 function nonEmptyStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.length > 0 && value.every((v) => typeof v === "string");
+}
+
+/** Validate difficulty parameter based on user role. Teachers cannot use "ALL"; students can. */
+export function validateDifficultyParam(difficulty: string | null, role: UserRole): void {
+  if (!difficulty) return; // undefined/null is always valid
+
+  if (role === "TEACHER") {
+    // Teachers can only use valid LEVELS, no "ALL"
+    if (!LEVELS.includes(difficulty as Level)) {
+      throw new ApiError(400, "Invalid difficulty filter");
+    }
+  } else {
+    // Students can use "ALL" or valid LEVELS
+    if (difficulty !== "ALL" && !LEVELS.includes(difficulty as Level)) {
+      throw new ApiError(400, "Invalid difficulty filter");
+    }
+  }
 }
 
 /** Structurally validate `data` against the contract for the given exercise type. Throws ApiError(400,...) on failure. */
@@ -186,14 +203,12 @@ export async function GET(request: Request) {
     if (type && !EXERCISE_TYPES.includes(type as ExerciseType)) {
       throw new ApiError(400, "Invalid type filter");
     }
-    if (difficulty && difficulty !== "ALL" && !LEVELS.includes(difficulty as Level)) {
-      throw new ApiError(400, "Invalid difficulty filter");
-    }
+    validateDifficultyParam(difficulty, user.role);
 
     if (user.role === "TEACHER") {
       const where: Record<string, unknown> = {};
       if (type) where.type = type;
-      if (difficulty && difficulty !== "ALL") where.difficulty = difficulty;
+      if (difficulty) where.difficulty = difficulty;
       where.createdById = user.id;
       const exercises = await db.exercise.findMany({
         where,
