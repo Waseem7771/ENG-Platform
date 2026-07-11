@@ -63,10 +63,10 @@ export function derivePath(
 
   const units: PathUnit[] = [];
   let cont: PathResponse["continue"] = null;
-  let previousUnitCheckpointDone = true; // unit 1 is always unlocked
+  let previousUnitCheckpointDone: boolean = true; // unit 1 is always unlocked
 
   for (const unitNum of unitNumbers) {
-    const unlocked = previousUnitCheckpointDone;
+    const unlocked: boolean = previousUnitCheckpointDone;
     const unitLessons = lessonsByUnit.get(unitNum) ?? [];
 
     let currentAssigned = false;
@@ -85,6 +85,7 @@ export function derivePath(
         };
       });
 
+      // A lesson with zero exercises is vacuously done (passes the every() check).
       const lessonDone = pathExercises.every((ex) => ex.completed);
 
       let status: LessonStatus;
@@ -112,6 +113,10 @@ export function derivePath(
         }
       }
 
+      // A unit's checkpoint only counts as done for gating the next unit if both:
+      // (1) the checkpoint lesson is passed, AND
+      // (2) the unit itself is unlocked (not locked due to previous unit's checkpoint failure).
+      // This assumes every unit has exactly one checkpoint lesson; units without one keep later units locked.
       if (lesson.isCheckpoint && lessonDone) checkpointDone = true;
 
       pathLessons.push({
@@ -125,7 +130,7 @@ export function derivePath(
     }
 
     units.push({ unit: unitNum, lessons: pathLessons, unlocked });
-    previousUnitCheckpointDone = checkpointDone;
+    previousUnitCheckpointDone = unlocked && checkpointDone;
   }
 
   return { units, continue: cont };

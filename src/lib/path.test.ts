@@ -45,4 +45,17 @@ describe("derivePath", () => {
     expect(cont).toBeNull();
     expect(units.every((u) => u.lessons.every((l) => l.status === "done"))).toBe(true);
   });
+  it("a locked unit's checkpoint pass does not unlock the next unit", () => {
+    const threeUnits = [
+      lesson("u1l1", 1, 1, ["a"]),
+      lesson("u1cp", 1, 2, ["q1"], true),
+      lesson("u2l1", 2, 1, ["b"]),
+      lesson("u2cp", 2, 2, ["q2"], true),
+      lesson("u3l1", 3, 1, ["c"]),
+    ];
+    // u1 checkpoint NOT passed, but u2's checkpoint exercise somehow passed (free practice)
+    const { units } = derivePath(threeUnits, new Map([["q2", 90]]));
+    expect(units[1].unlocked).toBe(false);
+    expect(units[2].unlocked).toBe(false);
+  });
 });
