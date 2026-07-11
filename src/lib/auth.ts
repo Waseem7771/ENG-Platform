@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "./db";
+import { sendEmail } from "./email";
 
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
@@ -27,6 +28,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your SpeakPath password",
+        text: `Reset your password: ${url}\nIf you didn't ask for this, ignore this email.`,
+      });
+    },
   },
   session: {
     modelName: "authSession",
