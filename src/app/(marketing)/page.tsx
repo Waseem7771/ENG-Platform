@@ -1,15 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
-import { TextReveal } from "@/components/shared/text-reveal";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { SpotlightBeam } from "@/components/shared/spotlight-beam";
-import { GridBackground } from "@/components/shared/grid-background";
-import { FloatingParticles } from "@/components/shared/floating-particles";
-import { RotatingText } from "@/components/shared/rotating-text";
-import { CountUp } from "@/components/shared/count-up";
 
 const ease = [0.35, 0.35, 0, 1] as const;
 
@@ -77,37 +70,28 @@ const stats = [
 ];
 
 export default function LandingPage() {
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
-  const heroY = useTransform(scrollYProgress, [0, 0.8], [0, -60]);
-
   return (
-    <div className="relative min-h-screen bg-background noise">
+    <div className="relative min-h-screen bg-background">
       {/* ═══════ NAVBAR ═══════ */}
       <motion.header
-        className="fixed top-0 z-50 w-full border-b border-white/5 bg-background/60 backdrop-blur-2xl"
+        className="fixed top-0 z-50 w-full border-b border-border bg-background/60"
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.9, ease }}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-blue-500 text-sm font-bold text-white shadow-lg shadow-violet-500/20">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-lg shadow-violet-500/20">
               S
             </div>
             <span className="text-lg font-semibold tracking-tight">
-              Speak<span className="text-violet-400">Path</span>
+              Speak<span className="text-primary">Path</span>
             </span>
           </Link>
           <nav className="flex items-center gap-3">
             <Link
               href="/login"
-              className="rounded-full px-5 py-2 text-sm font-medium text-white/60 transition-colors duration-300 hover:text-white"
+              className="rounded-full px-5 py-2 text-sm font-medium text-muted-foreground transition-colors duration-300 hover:text-foreground"
             >
               Log in
             </Link>
@@ -119,21 +103,14 @@ export default function LandingPage() {
       </motion.header>
 
       {/* ═══════ HERO SECTION ═══════ */}
-      <section ref={heroRef} className="relative min-h-screen overflow-hidden pt-24">
-        <SpotlightBeam />
-        <FloatingParticles count={25} />
-        <GridBackground className="absolute inset-0" />
-
-        <motion.div
-          className="relative z-10 mx-auto flex min-h-[85vh] max-w-5xl flex-col items-center justify-center px-6 text-center"
-          style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-        >
+      <section className="relative min-h-screen overflow-hidden pt-24">
+        <div className="relative z-10 mx-auto flex min-h-[85vh] max-w-5xl flex-col items-center justify-center px-6 text-center">
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, ease }}
-            className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-1.5 text-xs uppercase tracking-widest text-violet-300"
+            className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-primary/25 bg-violet-500/5 px-4 py-1.5 text-xs uppercase tracking-widest text-primary"
           >
             <span className="relative flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75" />
@@ -151,19 +128,12 @@ export default function LandingPage() {
           >
             <span className="text-foreground">Your Path to</span>
             <br />
-            <span className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-              Speaking{" "}
-              <RotatingText
-                words={["English", "Fluently", "Boldly"]}
-                interval={2500}
-                className="bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent"
-              />
-            </span>
+            <span className="text-primary">Speaking English</span>
           </motion.h1>
 
           {/* Subtitle */}
           <motion.p
-            className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-white/40 sm:text-lg"
+            className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35, ease }}
@@ -189,7 +159,7 @@ export default function LandingPage() {
 
           {/* Stats */}
           <motion.div
-            className="mt-20 grid w-full max-w-lg grid-cols-4 gap-px overflow-hidden rounded-2xl border border-white/5 bg-white/5"
+            className="mt-20 grid w-full max-w-lg grid-cols-4 gap-px overflow-hidden rounded-2xl border border-border bg-muted"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7, ease }}
@@ -197,22 +167,18 @@ export default function LandingPage() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="bg-background/80 p-4 text-center backdrop-blur-sm"
+                className="bg-background/80 p-4 text-center"
               >
-                <div className="text-xl font-bold text-violet-400 sm:text-2xl">
-                  {stat.text ? (
-                    stat.text
-                  ) : (
-                    <CountUp end={stat.value} suffix={stat.suffix} duration={2} />
-                  )}
+                <div className="text-xl font-bold text-primary sm:text-2xl">
+                  {stat.text ?? `${stat.value}${stat.suffix}`}
                 </div>
-                <div className="mt-1 text-[10px] uppercase tracking-wider text-white/30">
+                <div className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
                   {stat.label}
                 </div>
               </div>
             ))}
           </motion.div>
-        </motion.div>
+        </div>
 
         {/* Scroll indicator */}
         <motion.div
@@ -222,7 +188,7 @@ export default function LandingPage() {
           transition={{ delay: 1.5, duration: 1 }}
         >
           <motion.div
-            className="flex h-8 w-5 items-start justify-center rounded-full border border-white/15 p-1"
+            className="flex h-8 w-5 items-start justify-center rounded-full border border-border p-1"
             animate={{ opacity: [0.3, 0.7, 0.3] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
@@ -240,7 +206,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-20 max-w-2xl">
             <motion.p
-              className="mb-4 text-xs uppercase tracking-[0.2em] text-violet-400"
+              className="mb-4 text-xs uppercase tracking-[0.2em] text-primary"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
@@ -248,12 +214,9 @@ export default function LandingPage() {
             >
               Why SpeakPath
             </motion.p>
-            <TextReveal
-              text="Everything you need to go from beginner to fluent."
-              className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl"
-              as="h2"
-              staggerDelay={0.02}
-            />
+            <h2 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+              Everything you need to go from beginner to fluent.
+            </h2>
           </div>
 
           <motion.div
@@ -272,7 +235,7 @@ export default function LandingPage() {
                   <h3 className="mb-2 text-lg font-semibold tracking-tight">
                     {f.title}
                   </h3>
-                  <p className="text-sm leading-relaxed text-white/40">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {f.description}
                   </p>
                 </div>
@@ -283,23 +246,20 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ HOW IT WORKS ═══════ */}
-      <section className="relative border-t border-white/5 py-32">
+      <section className="relative border-t border-border py-32">
         <div className="mx-auto max-w-4xl px-6">
           <div className="mb-20 text-center">
             <motion.p
-              className="mb-4 text-xs uppercase tracking-[0.2em] text-cyan-400"
+              className="mb-4 text-xs uppercase tracking-[0.2em] text-primary"
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
             >
               How It Works
             </motion.p>
-            <TextReveal
-              text="Three steps to fluency."
-              className="text-3xl font-bold tracking-tight sm:text-5xl"
-              as="h2"
-              staggerDelay={0.025}
-            />
+            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+              Three steps to fluency.
+            </h2>
           </div>
 
           <motion.div
@@ -330,16 +290,16 @@ export default function LandingPage() {
                 key={item.step}
                 variants={fadeInUp}
                 custom={0}
-                className="group flex gap-8 border-b border-white/5 py-10 transition-colors duration-500 hover:border-white/10"
+                className="group flex gap-8 border-b border-border py-10 transition-colors duration-500 hover:border-border"
               >
-                <span className="text-4xl font-bold text-white/10 transition-colors duration-500 group-hover:text-violet-500/50 sm:text-5xl">
+                <span className="text-4xl font-bold text-muted-foreground transition-colors duration-500 group-hover:text-violet-500/50 sm:text-5xl">
                   {item.step}
                 </span>
                 <div>
                   <h3 className="mb-2 text-xl font-semibold tracking-tight sm:text-2xl">
                     {item.title}
                   </h3>
-                  <p className="max-w-md text-sm leading-relaxed text-white/40">
+                  <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
                     {item.desc}
                   </p>
                 </div>
@@ -350,8 +310,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ CTA SECTION ═══════ */}
-      <section className="relative overflow-hidden border-t border-white/5 py-32">
-        <SpotlightBeam />
+      <section className="relative overflow-hidden border-t border-border py-32">
         <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -359,13 +318,10 @@ export default function LandingPage() {
             viewport={{ once: true }}
             transition={{ duration: 1, ease }}
           >
-            <TextReveal
-              text="Ready to speak with confidence?"
-              className="text-3xl font-bold tracking-tight sm:text-5xl"
-              as="h2"
-              staggerDelay={0.02}
-            />
-            <p className="mx-auto mt-6 max-w-md text-base text-white/40">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-5xl">
+              Ready to speak with confidence?
+            </h2>
+            <p className="mx-auto mt-6 max-w-md text-base text-muted-foreground">
               Join SpeakPath and start your English journey today. No credit
               card, no commitment — just start learning.
             </p>
@@ -379,17 +335,17 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════ FOOTER ═══════ */}
-      <footer className="border-t border-white/5 py-10">
+      <footer className="border-t border-border py-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-600 to-blue-500 text-[10px] font-bold text-white">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-[10px] font-bold text-primary-foreground">
               S
             </div>
-            <span className="text-sm text-white/30">
+            <span className="text-sm text-muted-foreground">
               SpeakPath &copy; 2026
             </span>
           </div>
-          <div className="flex gap-6 text-xs text-white/20">
+          <div className="flex gap-6 text-xs text-muted-foreground">
             <span>Privacy</span>
             <span>Terms</span>
           </div>

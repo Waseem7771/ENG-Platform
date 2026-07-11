@@ -8,9 +8,6 @@ import { authClient, signIn } from "@/lib/auth-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { SpotlightBeam } from "@/components/shared/spotlight-beam";
-import { GridBackground } from "@/components/shared/grid-background";
-import { FloatingParticles } from "@/components/shared/floating-particles";
 
 const ease = [0.35, 0.35, 0, 1] as const;
 
@@ -64,28 +61,24 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
-      <SpotlightBeam />
-      <FloatingParticles count={15} />
-      <GridBackground className="absolute inset-0" />
-
       <motion.div
         className="relative z-10 w-full max-w-md"
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.8, ease }}
       >
-        <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-8 backdrop-blur-xl">
+        <div className="rounded-card border-2 border-border bg-card shadow-sticker p-8">
           <div className="mb-8 text-center">
             <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-blue-500 text-sm font-bold text-white shadow-lg shadow-violet-500/20">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-lg shadow-violet-500/20">
                 S
               </div>
               <span className="text-xl font-semibold tracking-tight">
-                Speak<span className="text-violet-400">Path</span>
+                Speak<span className="text-primary">Path</span>
               </span>
             </Link>
             <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-            <p className="mt-1 text-sm text-white/40">
+            <p className="mt-1 text-sm text-muted-foreground">
               Sign in to continue learning
             </p>
           </div>
@@ -95,14 +88,14 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
-                className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400"
+                className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
               >
                 {error}
               </motion.div>
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs uppercase tracking-wider text-white/50">
+              <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">
                 Email
               </Label>
               <Input
@@ -111,13 +104,13 @@ export default function LoginPage() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12 rounded-xl border-white/10 bg-white/5 text-foreground placeholder:text-white/20 focus:border-violet-500/50 focus:ring-violet-500/20"
+                className="h-12 rounded-xl"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs uppercase tracking-wider text-white/50">
+              <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">
                 Password
               </Label>
               <Input
@@ -126,7 +119,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl border-white/10 bg-white/5 text-foreground placeholder:text-white/20 focus:border-violet-500/50 focus:ring-violet-500/20"
+                className="h-12 rounded-xl"
                 required
               />
             </div>
@@ -136,11 +129,11 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-white/30">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="font-medium text-violet-400 transition-colors hover:text-violet-300"
+              className="font-medium text-primary transition-colors hover:text-primary"
             >
               Sign up
             </Link>
