@@ -2,6 +2,7 @@ import { ApiError, errorResponse, requireStudent } from "@/lib/guard";
 import { db } from "@/lib/db";
 import { applyGamification, xpForScore } from "@/lib/gamification";
 import { scoreConversation, scorePicture, scoreStory, scoreTranslation } from "@/lib/ai";
+import { scoreObjectiveItems, type ObjectiveItem } from "@/lib/review";
 import type {
   ChatMessage,
   ConversationData,
@@ -16,40 +17,6 @@ import type {
   TranslationData,
   VocabularyData,
 } from "@/types";
-
-function normalize(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-interface ObjectiveItem {
-  id: string;
-  answer: string;
-  explanation?: string;
-}
-
-function scoreObjectiveItems(
-  items: ObjectiveItem[],
-  answers: Record<string, unknown>,
-  includeExplanation: boolean
-) {
-  const perItem: NonNullable<SubmitFeedback["perItem"]> = {};
-  let correctCount = 0;
-
-  for (const item of items) {
-    const given = typeof answers?.[item.id] === "string" ? (answers[item.id] as string) : "";
-    const correct = given.length > 0 && normalize(given) === normalize(item.answer);
-    if (correct) correctCount++;
-    perItem[item.id] = {
-      correct,
-      expected: item.answer,
-      ...(includeExplanation && item.explanation ? { note: item.explanation } : {}),
-    };
-  }
-
-  const total = items.length;
-  const score = total > 0 ? Math.round((100 * correctCount) / total) : 0;
-  return { score, perItem, correctCount, total };
-}
 
 function asNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;

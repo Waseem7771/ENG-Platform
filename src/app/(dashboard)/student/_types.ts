@@ -7,6 +7,7 @@ export interface ProgressRow {
   score: number;
   streak: number;
   xp: number;
+  updatedAt: string;
 }
 
 export interface MeResponse {
@@ -96,4 +97,37 @@ export interface SessionDetail {
   messages: SessionMessageDTO[];
   pushedExercise: PushedExercise | null;
   serverTime: string;
+}
+
+// ==================== /api/results ====================
+
+export interface ResultSummary {
+  id: string;
+  exerciseId: string;
+  exerciseTitle: string;
+  type: ExerciseType;
+  score: number;
+  xpEarned: null;
+  completedAt: string;
+}
+
+export interface ResultsResponse {
+  results: ResultSummary[];
+}
+
+// ==================== /api/results/[id]/review ====================
+
+export interface ReviewItemDTO {
+  prompt: string;
+  given: string;
+  expected: string | null;
+  correct: boolean;
+  note: string | null;
+}
+
+export interface ReviewResponse {
+  score: number;
+  exerciseTitle: string;
+  type: ExerciseType;
+  items: ReviewItemDTO[] | null;
 }
