@@ -152,7 +152,7 @@ export default function LandingPage() {
             <Button render={<Link href="/signup" />} nativeButton={false} size="lg">
               Start Learning Free →
             </Button>
-            <Button render={<Link href="/login" />} nativeButton={false} variant="ghost" size="lg">
+            <Button render={<Link href="/signup?role=teacher" />} nativeButton={false} variant="ghost" size="lg">
               I&apos;m a Teacher
             </Button>
           </motion.div>

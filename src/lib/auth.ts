@@ -39,9 +39,10 @@ export const auth = betterAuth({
       // input:false is a SECURITY boundary: it stops clients from setting
       // role/level through sign-up or the generic /api/auth/update-user route
       // (which would be privilege escalation + a placement-exam bypass).
-      // role is assigned server-side via /api/auth/set-role during onboarding;
-      // level is written only by the placement scorer and gamification. Both
-      // still default/return normally.
+      // role is assigned atomically at signup by the databaseHooks.user.create
+      // hook below (read server-side from the sign-up request's query string,
+      // never from the request body); level is written only by the placement
+      // scorer and gamification. Both still default/return normally.
       role: {
         type: "string",
         required: false,
@@ -58,6 +59,24 @@ export const auth = betterAuth({
         required: false,
         defaultValue: "ar",
         input: true,
+      },
+    },
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user, ctx) => {
+          // The ONLY write path for role at signup. Reads from the sign-up
+          // request's query string (never the body, which additionalFields
+          // input:false already strips) so a client can never self-promote by
+          // stuffing `role` into the JSON payload. Any value other than the
+          // literal "TEACHER" coerces to "STUDENT" — unknown/garbage input
+          // fails closed, not open.
+          const q = (ctx?.query ?? {}) as Record<string, string | undefined>;
+          const role = q.role === "TEACHER" ? "TEACHER" : "STUDENT";
+          const locale = q.locale === "en" ? "en" : "ar";
+          return { data: { ...user, role, locale } };
+        },
       },
     },
   },

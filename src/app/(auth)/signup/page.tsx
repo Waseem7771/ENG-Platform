@@ -1,23 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { GraduationCap, Presentation } from "lucide-react";
 import { signUp } from "@/lib/auth-client";
+import { useLocale, useT } from "@/components/providers/locale-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
 const ease = [0.35, 0.35, 0, 1] as const;
 
-export default function SignupPage() {
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const locale = useLocale();
+  const t = useT();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
+  const [role, setRole] = useState<"STUDENT" | "TEACHER">(
+    searchParams.get("role") === "teacher" ? "TEACHER" : "STUDENT"
+  );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,25 +33,20 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const result = await signUp.email({ email, password, name });
+      const result = await signUp.email({
+        email,
+        password,
+        name,
+        fetchOptions: { query: { role, locale } },
+      });
       if (result.error) {
-        setError(result.error.message || "Failed to create account");
+        setError(result.error.message ?? t("common.error"));
       } else {
-        const roleRes = await fetch("/api/auth/set-role", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role }),
-        });
-        if (!roleRes.ok) {
-          // Don't silently drop a Teacher choice down to Student.
-          setError("Your account was created but we couldn't set your role. Please sign in and try again.");
-          return;
-        }
         router.push(role === "TEACHER" ? "/teacher" : "/student");
         router.refresh();
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -86,7 +87,9 @@ export default function SignupPage() {
 
             {/* Role Selection */}
             <div className="space-y-3">
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">I am a</Label>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+                {t("auth.signupRoleQuestion")}
+              </Label>
               <div className="grid grid-cols-2 gap-3">
                 <motion.button
                   type="button"
@@ -100,7 +103,7 @@ export default function SignupPage() {
                   }`}
                 >
                   <GraduationCap className="mx-auto mb-1.5 h-6 w-6" />
-                  <div className="text-sm font-semibold">Student</div>
+                  <div className="text-sm font-semibold">{t("auth.iAmStudent")}</div>
                   <div className="text-[10px] text-muted-foreground mt-0.5">I want to learn</div>
                 </motion.button>
 
@@ -116,14 +119,16 @@ export default function SignupPage() {
                   }`}
                 >
                   <Presentation className="mx-auto mb-1.5 h-6 w-6" />
-                  <div className="text-sm font-semibold">Teacher</div>
+                  <div className="text-sm font-semibold">{t("auth.iAmTeacher")}</div>
                   <div className="text-[10px] text-muted-foreground mt-0.5">I want to teach</div>
                 </motion.button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">Full Name</Label>
+              <Label htmlFor="name" className="text-xs uppercase tracking-wider text-muted-foreground">
+                {t("auth.name")}
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -136,7 +141,9 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">Email</Label>
+              <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">
+                {t("auth.email")}
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -149,7 +156,9 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">Password</Label>
+              <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">
+                {t("auth.password")}
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -163,18 +172,26 @@ export default function SignupPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create account"}
+              {loading ? t("common.loading") : t("auth.signUp")}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {t("auth.haveAccount")}{" "}
             <Link href="/login" className="font-medium text-primary transition-colors hover:text-primary">
-              Sign in
+              {t("auth.signIn")}
             </Link>
           </p>
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
   );
 }
