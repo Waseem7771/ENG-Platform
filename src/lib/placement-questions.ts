@@ -260,6 +260,24 @@ export function publicQuestions(): PlacementQuestionPublic[] {
   }));
 }
 
+/** IDs of the 5 questions used for the short "mini" placement flow. */
+export const MINI_QUESTION_IDS = ["g1", "g4", "v1", "v5", "r1"] as const;
+
+export function miniQuestions(): PlacementQuestionPublic[] {
+  const byId = new Map(PLACEMENT_QUESTIONS.map((q) => [q.id, q]));
+  return MINI_QUESTION_IDS.map((id) => {
+    const q = byId.get(id)!;
+    const { category, passage, question, options } = q;
+    return {
+      id,
+      category,
+      ...(passage ? { passage } : {}),
+      question,
+      options,
+    };
+  });
+}
+
 export interface PlacementScoreResult {
   score: number;
   level: Level;
@@ -295,4 +313,35 @@ export function scorePlacement(answers: Record<string, string>): PlacementScoreR
   const level: Level = score >= 70 ? "ADVANCED" : score >= 40 ? "INTERMEDIATE" : "BEGINNER";
 
   return { score, level, breakdown };
+}
+
+export interface PlacementSubsetScoreResult {
+  score: number;
+  level: Level;
+}
+
+/**
+ * Weighted % correct over only the given question ids (e.g. the mini-placement
+ * subset). Same thresholds as `scorePlacement`: >=70 ADVANCED, >=40 INTERMEDIATE,
+ * else BEGINNER.
+ */
+export function scorePlacementSubset(
+  answers: Record<string, string>,
+  ids: readonly string[],
+): PlacementSubsetScoreResult {
+  const byId = new Map(PLACEMENT_QUESTIONS.map((q) => [q.id, q]));
+
+  let earned = 0;
+  let possible = 0;
+  for (const id of ids) {
+    const q = byId.get(id);
+    if (!q) continue;
+    possible += q.weight;
+    if (answers[id] === q.answer) earned += q.weight;
+  }
+
+  const score = possible === 0 ? 0 : Math.round((100 * earned) / possible);
+  const level: Level = score >= 70 ? "ADVANCED" : score >= 40 ? "INTERMEDIATE" : "BEGINNER";
+
+  return { score, level };
 }

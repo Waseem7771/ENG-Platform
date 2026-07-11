@@ -1,12 +1,21 @@
 import { ApiError, errorResponse, requireStudent } from "@/lib/guard";
 import { db } from "@/lib/db";
-import { publicQuestions, scorePlacement } from "@/lib/placement-questions";
+import {
+  MINI_QUESTION_IDS,
+  miniQuestions,
+  publicQuestions,
+  scorePlacement,
+  scorePlacementSubset,
+} from "@/lib/placement-questions";
 
 const SKILL_CATEGORIES = ["GRAMMAR", "VOCABULARY", "LISTENING", "TRANSLATION", "SPEAKING"] as const;
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const user = await requireStudent();
+    const url = new URL(request.url);
+    const mode = url.searchParams.get("mode");
+    const isMini = mode === "mini";
 
     const last = await db.placementExam.findFirst({
       where: { studentId: user.id },
@@ -14,7 +23,7 @@ export async function GET() {
     });
 
     return Response.json({
-      questions: publicQuestions(),
+      questions: isMini ? miniQuestions() : publicQuestions(),
       taken: Boolean(last),
       lastResult: last
         ? {
@@ -39,10 +48,42 @@ export async function POST(request: Request) {
       throw new ApiError(400, "answers must be an object of { questionId: answer }");
     }
 
+    if (body.mode !== undefined && body.mode !== "mini") {
+      throw new ApiError(400, "mode must be \"mini\" or omitted");
+    }
+
     const answers: Record<string, string> = {};
     for (const [key, value] of Object.entries(body.answers as Record<string, unknown>)) {
       if (typeof value !== "string") throw new ApiError(400, "Each answer must be a string");
       answers[key] = value;
+    }
+
+    if (body.mode === "mini") {
+      const miniIds = new Set<string>(MINI_QUESTION_IDS);
+      for (const id of Object.keys(answers)) {
+        if (!miniIds.has(id)) {
+          throw new ApiError(400, "answers may only reference mini-placement question ids");
+        }
+      }
+
+      const result = scorePlacementSubset(answers, MINI_QUESTION_IDS);
+
+      await db.placementExam.create({
+        data: {
+          studentId: user.id,
+          score: result.score,
+          level: result.level,
+          answers: JSON.stringify({ mini: true, answers }),
+        },
+      });
+
+      await db.user.update({ where: { id: user.id }, data: { level: result.level } });
+
+      return Response.json({
+        score: result.score,
+        level: result.level,
+        mini: true,
+      });
     }
 
     const result = scorePlacement(answers);
