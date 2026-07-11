@@ -69,7 +69,7 @@ export default function StudentPathPage() {
             <div className="rounded-card border-2 border-primary/25 bg-secondary p-8 text-center shadow-sticker">
               <h2 className="text-xl font-bold tracking-tight text-foreground">{t("path.placementCardTitle")}</h2>
               <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">{t("path.placementCardBody")}</p>
-              <Button className="mt-6" render={<Link href="/student/onboarding" />} nativeButton={false}>
+              <Button className="mt-6" render={<Link href="/student/onboarding" />} nativeButton={false} role="link">
                 {t("path.start")}
               </Button>
             </div>
@@ -95,6 +95,7 @@ export default function StudentPathPage() {
               className="mt-6"
               render={<Link href={`/student/exercises/${cont.exerciseId}`} />}
               nativeButton={false}
+              role="link"
             >
               {t("path.start")}
             </Button>
@@ -142,13 +143,27 @@ function UnitSection({ unit, t }: { unit: PathUnit; t: T }) {
 function LessonRow({ lesson, isFirst, prevDone, t }: { lesson: PathLesson; isFirst: boolean; prevDone: boolean; t: T }) {
   const locked = lesson.status === "locked";
   const nodeClass = lesson.isCheckpoint
-    ? "rounded-btn border-2 border-sun bg-sun-soft text-sun-deep"
+    ? lesson.status === "done"
+      ? "rounded-btn bg-primary border-primary text-primary-foreground"
+      : lesson.status === "current"
+        ? "rounded-btn border-2 border-sun bg-sun-soft text-sun-deep"
+        : "rounded-btn bg-muted border-line-strong text-muted-foreground"
     : lesson.status === "done"
       ? "rounded-full bg-primary text-primary-foreground"
       : lesson.status === "current"
         ? "rounded-full border-2 border-primary bg-card text-primary"
         : "rounded-full bg-muted text-muted-foreground";
-  const Icon = lesson.isCheckpoint ? Flag : lesson.status === "done" ? Check : lesson.status === "current" ? Star : Lock;
+  const Icon = lesson.isCheckpoint
+    ? lesson.status === "done"
+      ? Check
+      : lesson.status === "current"
+        ? Flag
+        : Lock
+    : lesson.status === "done"
+      ? Check
+      : lesson.status === "current"
+        ? Star
+        : Lock;
 
   return (
     <div className="flex gap-4">
@@ -169,8 +184,10 @@ function LessonRow({ lesson, isFirst, prevDone, t }: { lesson: PathLesson; isFir
             </span>
           )}
         </div>
-        {lesson.isCheckpoint && <p className="mt-0.5 text-xs text-muted-foreground">{t("path.checkpointHint")}</p>}
-        {!lesson.isCheckpoint && (lesson.status === "done" || locked) && (
+        {lesson.isCheckpoint && lesson.status === "current" && (
+          <p className="mt-0.5 text-xs text-muted-foreground">{t("path.checkpointHint")}</p>
+        )}
+        {(lesson.status === "done" || locked) && (
           <p className="mt-0.5 text-xs text-muted-foreground">{t(lesson.status === "done" ? "path.done" : "path.locked")}</p>
         )}
         <div className="mt-2 flex flex-wrap gap-1.5">
