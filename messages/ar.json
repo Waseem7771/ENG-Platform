@@ -73,5 +73,14 @@
   "path.placementCardTitle": "حدد مستواك",
   "path.placementCardBody": "أجب عن 5 أسئلة سريعة لفتح مسارك الشخصي.",
   "path.streakDays": "سلسلة {n} يوم",
-  "path.xp": "{n} نقطة"
+  "path.xp": "{n} نقطة",
+  "classes.title": "صفوفي",
+  "classes.joinTitle": "انضم إلى صف",
+  "classes.joinBody": "أدخل الرمز المكوّن من 6 أحرف من معلمك.",
+  "classes.codePlaceholder": "ABC123",
+  "classes.join": "انضم",
+  "classes.joined": "انضممت إلى {name}!",
+  "classes.empty": "لا صفوف بعد. اطلب رمز الانضمام من معلمك.",
+  "classes.teacherLabel": "المعلم: {name}",
+  "classes.viewSessions": "الجلسات المباشرة"
 }

@@ -73,5 +73,14 @@
   "path.placementCardTitle": "Find your level",
   "path.placementCardBody": "Answer 5 quick questions to unlock your personal path.",
   "path.streakDays": "{n} day streak",
-  "path.xp": "{n} XP"
+  "path.xp": "{n} XP",
+  "classes.title": "My classes",
+  "classes.joinTitle": "Join a class",
+  "classes.joinBody": "Enter the 6-character code from your teacher.",
+  "classes.codePlaceholder": "ABC123",
+  "classes.join": "Join",
+  "classes.joined": "You joined {name}!",
+  "classes.empty": "No classes yet. Ask your teacher for a join code.",
+  "classes.teacherLabel": "Teacher: {name}",
+  "classes.viewSessions": "Live sessions"
 }
