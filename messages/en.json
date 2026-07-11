@@ -90,5 +90,7 @@
   "practice.allLevels": "All levels",
   "practice.completed": "Completed",
   "practice.best": "Best {score}%",
-  "practice.empty": "No exercises match these filters."
+  "practice.empty": "No exercises match these filters.",
+  "conversation.back": "All scenarios",
+  "conversation.leaveWarning": "You have an unfinished conversation."
 }

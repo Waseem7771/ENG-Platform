@@ -90,5 +90,7 @@
   "practice.allLevels": "كل المستويات",
   "practice.completed": "مكتمل",
   "practice.best": "أفضل نتيجة {score}%",
-  "practice.empty": "لا تمارين تطابق هذه التصفية."
+  "practice.empty": "لا تمارين تطابق هذه التصفية.",
+  "conversation.back": "كل السيناريوهات",
+  "conversation.leaveWarning": "لديك محادثة غير مكتملة."
 }

@@ -5,13 +5,42 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { api, ApiClientError } from "@/lib/api";
 import type { PlayerProps } from "./player-types";
-import type { ChatFeedback, ChatMessage, ConversationData } from "@/types";
+import type { ChatFeedback, ChatMessage, ConversationData, ConversationScenario } from "@/types";
 
 type Payload = { messages: ChatMessage[] };
 type LocalMsg = ChatMessage & { id: number; feedback?: ChatFeedback | null };
 
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_SENT = 39;
+
+function isValidLocalMsg(value: unknown): value is LocalMsg {
+  if (!value || typeof value !== "object") return false;
+  const m = value as Partial<LocalMsg>;
+  return typeof m.id === "number" && (m.role === "user" || m.role === "assistant") && typeof m.content === "string";
+}
+
+/**
+ * Restores a persisted transcript for `persistKey`, falling back to the scenario's
+ * opening line on ANY parse failure or malformed data (also covers structurally
+ * invalid JSON like `[]`/`{}`, since an empty transcript would break the
+ * `canEnd`/`beforeunload` invariants below). SSR-safe: returns the seed whenever
+ * `window` isn't available (no `persistKey` means zero behavior change too).
+ */
+function loadPersistedMessages(persistKey: string | undefined, scenario: ConversationScenario): LocalMsg[] {
+  const seed: LocalMsg[] = [{ id: 0, role: "assistant", content: scenario.opening }];
+  if (!persistKey || typeof window === "undefined") return seed;
+  try {
+    const raw = window.sessionStorage.getItem(persistKey);
+    if (!raw) return seed;
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(isValidLocalMsg)) {
+      return parsed;
+    }
+    return seed;
+  } catch {
+    return seed;
+  }
+}
 
 interface MinimalSpeechRecognition extends EventTarget {
   lang: string;
@@ -29,16 +58,24 @@ function getSpeechRecognitionCtor(): SpeechRecognitionCtor | undefined {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition;
 }
 
-export function ConversationChat({ exercise, data, onSubmit, submitting, registerForceSubmit }: PlayerProps<ConversationData, Payload>) {
+export function ConversationChat({
+  exercise,
+  data,
+  onSubmit,
+  submitting,
+  registerForceSubmit,
+  persistKey,
+}: PlayerProps<ConversationData, Payload> & { persistKey?: string }) {
   const scenario = data.scenario;
-  const [messages, setMessages] = useState<LocalMsg[]>([{ id: 0, role: "assistant", content: scenario.opening }]);
+  const [messages, setMessages] = useState<LocalMsg[]>(() => loadPersistedMessages(persistKey, scenario));
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [listening, setListening] = useState(false);
   const [timeUpNotice, setTimeUpNotice] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const recognitionRef = useRef<MinimalSpeechRecognition | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const nextId = useRef(1);
+  const nextId = useRef(messages.reduce((max, m) => Math.max(max, m.id), -1) + 1);
   const micSupported = getSpeechRecognitionCtor() !== undefined;
 
   const userCount = messages.filter((m) => m.role === "user").length;
@@ -48,6 +85,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
     if (!registerForceSubmit) return;
     registerForceSubmit(() => {
       if (userCount >= 2) {
+        setSubmitted(true);
         onSubmit({ messages: messages.map(({ role, content }) => ({ role, content })) });
       } else {
         setTimeUpNotice(true);
@@ -58,6 +96,29 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, sending]);
+
+  // Persist the transcript on every change so a refresh restores it (no-op without persistKey).
+  useEffect(() => {
+    if (!persistKey || typeof window === "undefined") return;
+    try {
+      window.sessionStorage.setItem(persistKey, JSON.stringify(messages));
+    } catch {
+      // sessionStorage may be unavailable (private mode / quota) — non-fatal.
+    }
+  }, [messages, persistKey]);
+
+  // Warn on tab close/refresh while there's an unsubmitted, non-trivial transcript.
+  useEffect(() => {
+    if (!persistKey) return;
+    const dirty = messages.length > 1 && !submitted;
+    if (!dirty) return;
+    function handleBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [persistKey, messages.length, submitted]);
 
   async function send() {
     const text = input.trim();
@@ -216,7 +277,10 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               type="button"
-              onClick={() => onSubmit({ messages: messages.map(({ role, content }) => ({ role, content })) })}
+              onClick={() => {
+                setSubmitted(true);
+                onSubmit({ messages: messages.map(({ role, content }) => ({ role, content })) });
+              }}
               disabled={submitting}
               className="w-full rounded-full border border-border px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-foreground transition hover:border-line-strong disabled:opacity-50"
             >
