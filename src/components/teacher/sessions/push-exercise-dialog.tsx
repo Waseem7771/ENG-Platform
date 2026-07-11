@@ -98,7 +98,7 @@ export function PushExerciseDialog({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search exercises..."
-              className="h-10 w-full rounded-lg border border-border bg-muted pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50"
+              className="h-10 w-full rounded-lg border border-border bg-muted ps-9 pe-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50"
             />
           </div>
         </div>

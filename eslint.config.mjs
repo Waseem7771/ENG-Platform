@@ -13,6 +13,31 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/generated/**"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/text-white\\u002F/]",
+          message: "Use text-foreground / text-muted-foreground tokens (spec §3.1).",
+        },
+        {
+          selector: "Literal[value=/(bg|text|border)-\\[#(?!4A3200)/]",
+          message: "No raw hex in className — add a token to globals.css.",
+        },
+        {
+          selector: "Literal[value=/\\b(pl|pr|ml|mr)-\\d/]",
+          message: "Use logical spacing (ps-/pe-/ms-/me-) for RTL support.",
+        },
+        {
+          selector: "Literal[value=/\\bborder-(l|r)(-|\\s|\")/]",
+          message: "Use border-s / border-e for RTL support.",
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

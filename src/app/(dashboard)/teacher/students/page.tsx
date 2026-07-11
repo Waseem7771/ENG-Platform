@@ -54,7 +54,7 @@ export default function TeacherStudentsPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name or email..."
-            className="h-10 w-full rounded-xl border border-border bg-muted pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+            className="h-10 w-full rounded-xl border border-border bg-muted ps-9 pe-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
           />
         </div>
       )}

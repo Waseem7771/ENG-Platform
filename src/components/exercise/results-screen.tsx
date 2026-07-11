@@ -112,7 +112,7 @@ export function ResultsScreen({
                 <span className="font-medium">
                   {fb.correct ? "✓" : "✗"} Question {i + 1}
                 </span>
-                {fb.expected && <span className="ml-2 text-muted-foreground">expected: {fb.expected}</span>}
+                {fb.expected && <span className="ms-2 text-muted-foreground">expected: {fb.expected}</span>}
                 {fb.note && <p className="mt-1 text-muted-foreground">{fb.note}</p>}
               </li>
             ))}

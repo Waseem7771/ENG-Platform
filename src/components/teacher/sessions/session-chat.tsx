@@ -68,7 +68,7 @@ export function SessionChat({
                 <div className="flex items-center gap-2 rounded-full border border-primary/25 bg-secondary px-4 py-2 text-sm text-primary">
                   <Radio className="h-3.5 w-3.5" />
                   Pushed{info ? `: ${info.title}` : " an exercise"}
-                  {info && <ExerciseTypeBadge type={info.type} className="ml-1" />}
+                  {info && <ExerciseTypeBadge type={info.type} className="ms-1" />}
                 </div>
               </div>
             );

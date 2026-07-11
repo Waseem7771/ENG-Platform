@@ -117,7 +117,7 @@ function ExerciseCard({ exercise }: { exercise: ExerciseListItem }) {
           </div>
         </div>
         {exercise.completed && (
-          <div className="ml-3 flex shrink-0 flex-col items-end">
+          <div className="ms-3 flex shrink-0 flex-col items-end">
             <span className="text-leaf-text">✓</span>
             {exercise.bestScore !== null && <span className="text-xs text-muted-foreground">{exercise.bestScore}%</span>}
           </div>

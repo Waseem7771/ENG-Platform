@@ -195,7 +195,7 @@ function RosterTable({ students }: { students: TeacherClassDetail["students"] })
             <th className="pb-3 font-medium">Name</th>
             <th className="pb-3 font-medium">Level</th>
             <th className="pb-3 font-medium">Overall score</th>
-            <th className="pb-3 pr-0 text-right font-medium">XP</th>
+            <th className="pb-3 pe-0 text-right font-medium">XP</th>
           </tr>
         </thead>
         <tbody>
