@@ -1,6 +1,9 @@
 import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { seedCurriculum } from "./curriculum";
 
 /**
  * Idempotent seed script. Safe to run repeatedly — every row is upserted by a
@@ -1572,7 +1575,10 @@ const allExercises: SeedExercise[] = [
   ...storyExercises,
 ];
 
-async function main() {
+// Library-only seeding: system teacher + the 46 fixed-id exercises. Exported
+// so tests/curriculum.test.ts can seed the exercise library it depends on
+// (via a client of its own, e.g. @/lib/db) without shelling out to this file.
+export async function seedLibrary(db: PrismaClient) {
   // Wait up to 10s for a busy DB lock instead of failing instantly: on
   // redeploy the app may briefly hold a write lock while this seed runs.
   try {
@@ -1640,20 +1646,36 @@ async function main() {
   return counts;
 }
 
-main()
-  .then(async (counts) => {
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    console.log("Seed complete.");
-    console.log(`  System teacher: ${SYSTEM_TEACHER_ID}`);
-    console.log(`  Exercises seeded: ${total}`);
-    for (const [type, count] of Object.entries(counts)) {
-      console.log(`    ${type}: ${count}`);
-    }
-    await db.$disconnect();
-    process.exit(0);
-  })
-  .catch(async (error) => {
-    console.error("Seed failed:", error);
-    await db.$disconnect();
-    process.exit(1);
-  });
+async function main() {
+  const counts = await seedLibrary(db);
+  await seedCurriculum(db);
+  return counts;
+}
+
+// Only auto-run (and process.exit) when this file is the process entry point
+// (`npx tsx prisma/seed.ts` / `npm run db:seed`) — NOT when it's imported as a
+// module (e.g. tests/curriculum.test.ts dynamically imports `seedLibrary`).
+// Without this guard, importing this file for its named export would also
+// run the whole seed and call process.exit(), killing the test runner.
+const isEntryPoint =
+  !!process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isEntryPoint) {
+  main()
+    .then(async (counts) => {
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      console.log("Seed complete.");
+      console.log(`  System teacher: ${SYSTEM_TEACHER_ID}`);
+      console.log(`  Exercises seeded: ${total}`);
+      for (const [type, count] of Object.entries(counts)) {
+        console.log(`    ${type}: ${count}`);
+      }
+      await db.$disconnect();
+      process.exit(0);
+    })
+    .catch(async (error) => {
+      console.error("Seed failed:", error);
+      await db.$disconnect();
+      process.exit(1);
+    });
+}

@@ -9,6 +9,11 @@ export default defineConfig({
     globalSetup: ["./tests/global-setup.ts"],
     setupFiles: ["./tests/setup.ts"],
     environment: "node",
+    // All test files share one on-disk SQLite db (tests/global-setup.ts).
+    // Running files in parallel opens multiple concurrent connections against
+    // it and write-heavy suites (e.g. tests/curriculum.test.ts) can trip
+    // SQLITE_BUSY on the others. Serialize file execution instead.
+    fileParallelism: false,
   },
   resolve: {
     alias: {
