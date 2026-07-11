@@ -19,9 +19,9 @@ const EXERCISE_TYPE_META: { type: ExerciseType; label: string; icon: string; des
 ];
 
 const difficultyColor: Record<string, string> = {
-  BEGINNER: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  INTERMEDIATE: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-  ADVANCED: "border-red-500/30 bg-red-500/10 text-red-300",
+  BEGINNER: "border-leaf bg-leaf-soft text-leaf-text",
+  INTERMEDIATE: "border-sun-deep/30 bg-sun-soft text-sun-deep",
+  ADVANCED: "border-destructive/30 bg-coral-soft text-destructive",
 };
 
 const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } };
@@ -46,7 +46,7 @@ export default function StudentExercisesPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Exercises</h1>
-        <p className="mt-1 text-white/40">Choose an exercise type to practice</p>
+        <p className="mt-1 text-muted-foreground">Choose an exercise type to practice</p>
       </div>
 
       {loading && <TypeGridSkeleton />}
@@ -93,13 +93,13 @@ function TypeCard({ label, icon, description, count, active }: { label: string; 
   return (
     <div
       className={`h-full rounded-2xl border p-6 transition-all duration-300 ${
-        active ? "border-violet-500/40 bg-violet-500/10 shadow-[0_0_25px_-8px_rgba(124,58,237,0.5)]" : "border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04]"
+        active ? "border-primary bg-secondary" : "border-border bg-card hover:border-border hover:bg-card"
       }`}
     >
       <div className="mb-3 text-3xl">{icon}</div>
-      <h3 className="font-semibold tracking-tight text-white">{label}</h3>
-      <p className="mt-1 text-xs text-white/40">{description}</p>
-      <p className="mt-3 text-xs uppercase tracking-wider text-white/30">{count} exercise{count === 1 ? "" : "s"}</p>
+      <h3 className="font-semibold tracking-tight text-foreground">{label}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+      <p className="mt-3 text-xs uppercase tracking-wider text-muted-foreground">{count} exercise{count === 1 ? "" : "s"}</p>
     </div>
   );
 }
@@ -107,19 +107,19 @@ function TypeCard({ label, icon, description, count, active }: { label: string; 
 function ExerciseCard({ exercise }: { exercise: ExerciseListItem }) {
   return (
     <Link href={`/student/exercises/${exercise.id}`}>
-      <div className="flex items-center justify-between rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.04]">
+      <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-border hover:bg-card">
         <div className="min-w-0">
-          <p className="truncate font-medium text-white">{exercise.title}</p>
+          <p className="truncate font-medium text-foreground">{exercise.title}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${difficultyColor[exercise.difficulty]}`}>{exercise.difficulty}</span>
-            <span className="text-xs text-white/30">{exercise.points} pts</span>
-            {exercise.timeLimit && <span className="text-xs text-white/30">⏱ {exercise.timeLimit}s</span>}
+            <span className="text-xs text-muted-foreground">{exercise.points} pts</span>
+            {exercise.timeLimit && <span className="text-xs text-muted-foreground">⏱ {exercise.timeLimit}s</span>}
           </div>
         </div>
         {exercise.completed && (
           <div className="ml-3 flex shrink-0 flex-col items-end">
-            <span className="text-emerald-400">✓</span>
-            {exercise.bestScore !== null && <span className="text-xs text-white/40">{exercise.bestScore}%</span>}
+            <span className="text-leaf-text">✓</span>
+            {exercise.bestScore !== null && <span className="text-xs text-muted-foreground">{exercise.bestScore}%</span>}
           </div>
         )}
       </div>
@@ -131,7 +131,7 @@ function TypeGridSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="h-36 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+        <div key={i} className="h-36 animate-pulse rounded-2xl border border-border bg-card" />
       ))}
     </div>
   );
@@ -139,9 +139,9 @@ function TypeGridSkeleton() {
 
 function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-      <p className="text-white/70">{message}</p>
-      <button onClick={onRetry} className="mt-4 rounded-full border border-white/15 px-5 py-2 text-sm text-white/80 hover:border-white/30">
+    <div className="rounded-2xl border border-destructive/20 bg-coral-soft p-8 text-center">
+      <p className="text-foreground">{message}</p>
+      <button onClick={onRetry} className="mt-4 rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong">
         Retry
       </button>
     </div>
@@ -150,8 +150,8 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
 
 function EmptyState() {
   return (
-    <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-10 text-center">
-      <p className="text-white/50">No exercises here yet — check back soon or try another type.</p>
+    <div className="rounded-2xl border border-border bg-card p-10 text-center">
+      <p className="text-muted-foreground">No exercises here yet — check back soon or try another type.</p>
     </div>
   );
 }

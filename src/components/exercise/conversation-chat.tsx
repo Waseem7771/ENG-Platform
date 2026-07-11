@@ -112,19 +112,19 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
   }
 
   return (
-    <div className="flex h-full min-h-[520px] flex-col rounded-2xl border border-white/5 bg-white/[0.02]">
-      <div className="border-b border-white/5 p-5">
+    <div className="flex h-full min-h-[520px] flex-col rounded-2xl border border-border bg-card">
+      <div className="border-b border-border p-5">
         <div className="flex items-center gap-3">
           <span className="text-3xl">{scenario.emoji}</span>
           <div>
-            <h2 className="text-lg font-semibold tracking-tight text-white">{scenario.title}</h2>
-            <p className="text-xs text-white/40">{scenario.description}</p>
+            <h2 className="text-lg font-semibold tracking-tight text-foreground">{scenario.title}</h2>
+            <p className="text-xs text-muted-foreground">{scenario.description}</p>
           </div>
         </div>
         {scenario.objectives?.length > 0 && (
           <ul className="mt-3 flex flex-wrap gap-2">
             {scenario.objectives.map((o, i) => (
-              <li key={i} className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 text-[11px] text-white/50">
+              <li key={i} className="rounded-full border border-border bg-card px-3 py-1 text-[11px] text-muted-foreground">
                 {o}
               </li>
             ))}
@@ -138,30 +138,30 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
             <div
               dir="auto"
               className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
-                m.role === "user" ? "bg-gradient-to-r from-violet-600 to-blue-500 text-white" : "border border-white/10 bg-white/[0.03] text-white/80"
+                m.role === "user" ? "bg-primary text-foreground" : "border border-border bg-card text-foreground"
               }`}
             >
               {m.content}
             </div>
             {m.feedback?.hasIssues && m.feedback.corrections.length > 0 && (
-              <div className="mt-1.5 max-w-[80%] rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-xs text-amber-200">
+              <div className="mt-1.5 max-w-[80%] rounded-xl border border-sun-deep/20 bg-sun-soft p-3 text-xs text-sun-deep">
                 {m.feedback.corrections.map((c, i) => (
                   <p key={i}>
                     <span className="line-through opacity-60">{c.original}</span> → <span className="font-medium">{c.corrected}</span>
-                    {c.note && <span className="block text-amber-200/60">{c.note}</span>}
+                    {c.note && <span className="block text-sun-deep/70">{c.note}</span>}
                   </p>
                 ))}
-                {m.feedback.tip && <p className="mt-1 text-amber-200/70">Tip: {m.feedback.tip}</p>}
+                {m.feedback.tip && <p className="mt-1 text-sun-deep/70">Tip: {m.feedback.tip}</p>}
               </div>
             )}
           </div>
         ))}
         {sending && (
-          <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 w-fit">
+          <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-card px-4 py-3 w-fit">
             {[0, 1, 2].map((i) => (
               <motion.span
                 key={i}
-                className="h-1.5 w-1.5 rounded-full bg-white/40"
+                className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40"
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
               />
@@ -170,9 +170,9 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
         )}
       </div>
 
-      <div className="space-y-3 border-t border-white/5 p-4">
+      <div className="space-y-3 border-t border-border p-4">
         {timeUpNotice && !canEnd && (
-          <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-xs text-amber-200">
+          <p className="rounded-xl border border-sun-deep/20 bg-sun-soft px-4 py-2 text-xs text-sun-deep">
             Time&apos;s up — send at least 2 replies, then End &amp; Get Score.
           </p>
         )}
@@ -185,7 +185,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
             aria-label="Message"
             dir="auto"
             maxLength={MAX_MESSAGE_LENGTH}
-            className="h-11 flex-1 rounded-xl border border-white/10 bg-white/[0.02] px-4 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none"
+            className="h-11 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
           />
           {micSupported && (
             <button
@@ -193,7 +193,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
               onClick={toggleMic}
               aria-label={listening ? "Stop dictation" : "Start dictation"}
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-lg transition ${
-                listening ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-white/10 bg-white/[0.02] text-white/60 hover:border-white/20"
+                listening ? "border-destructive/40 bg-coral-soft text-destructive" : "border-border bg-card text-muted-foreground hover:border-border"
               }`}
             >
               🎤
@@ -203,7 +203,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
             type="button"
             onClick={send}
             disabled={sending || !input.trim()}
-            className="h-11 shrink-0 rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-5 text-sm font-medium text-white transition disabled:opacity-40"
+            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-foreground transition disabled:opacity-40"
           >
             Send
           </button>
@@ -216,7 +216,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
               type="button"
               onClick={() => onSubmit({ messages: messages.map(({ role, content }) => ({ role, content })) })}
               disabled={submitting}
-              className="w-full rounded-full border border-white/15 px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-white/80 transition hover:border-white/30 disabled:opacity-50"
+              className="w-full rounded-full border border-border px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-foreground transition hover:border-line-strong disabled:opacity-50"
             >
               {submitting ? "Scoring…" : "End & Get Score"}
             </motion.button>

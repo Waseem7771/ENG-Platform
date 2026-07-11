@@ -98,22 +98,22 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
   }
 
   function cellClass(isSelected: boolean, isMatched: boolean) {
-    if (isMatched) return "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 cursor-default";
-    if (isSelected && wrongFlash) return "border-red-500/50 bg-red-500/10 text-red-300";
-    if (isSelected) return "border-violet-500/50 bg-violet-500/10 text-white";
-    return "border-white/10 bg-white/[0.02] text-white/80 hover:border-white/20 hover:bg-white/[0.05]";
+    if (isMatched) return "border-leaf bg-leaf-soft text-leaf-text cursor-default";
+    if (isSelected && wrongFlash) return "border-destructive bg-coral-soft text-destructive";
+    if (isSelected) return "border-primary bg-secondary text-foreground";
+    return "border-border bg-card text-foreground hover:border-border hover:bg-card";
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between text-xs text-white/40">
+      <div className="flex justify-between text-xs text-muted-foreground">
         <span>Matched {matched.size} / {pairs.length}</span>
         <span>Mistakes: {mistakes}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <p className="mb-1 text-[10px] uppercase tracking-widest text-white/30">Words</p>
+          <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Words</p>
           {words.map((tile) => {
             const isMatched = matched.has(tile.pairIdx);
             return (
@@ -130,7 +130,7 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
           })}
         </div>
         <div className="space-y-2">
-          <p className="mb-1 text-[10px] uppercase tracking-widest text-white/30">Meanings</p>
+          <p className="mb-1 text-[10px] uppercase tracking-widest text-muted-foreground">Meanings</p>
           {meanings.map((tile) => {
             const isMatched = matched.has(tile.pairIdx);
             return (
@@ -153,7 +153,7 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
           type="button"
           onClick={finish}
           disabled={submitting}
-          className="w-full rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-medium uppercase tracking-wider text-white disabled:opacity-50"
+          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground disabled:opacity-50"
         >
           {submitting ? "Submitting…" : "See Results"}
         </button>

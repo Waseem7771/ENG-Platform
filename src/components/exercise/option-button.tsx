@@ -27,11 +27,11 @@ export function OptionButton({
   }
 
   const styles: Record<typeof state, string> = {
-    idle: "border-white/10 bg-white/[0.02] text-white/80 hover:border-white/20 hover:bg-white/[0.05]",
-    selected: "border-violet-500/50 bg-violet-500/10 text-white",
-    correct: "border-emerald-500/50 bg-emerald-500/10 text-emerald-300",
-    wrong: "border-red-500/50 bg-red-500/10 text-red-300",
-    muted: "border-white/5 bg-white/[0.01] text-white/30",
+    idle: "border-line-strong bg-card text-foreground hover:border-primary/40",
+    selected: "border-primary bg-secondary text-foreground",
+    correct: "border-leaf bg-leaf-soft text-leaf-text",
+    wrong: "border-destructive bg-coral-soft text-destructive",
+    muted: "border-line-strong bg-card text-muted-foreground",
   };
 
   return (
@@ -39,7 +39,7 @@ export function OptionButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all duration-200 disabled:cursor-default ${styles[state]}`}
+      className={`w-full rounded-btn border-2 px-4 py-3 text-left text-sm font-medium transition-all duration-200 disabled:cursor-default ${styles[state]}`}
     >
       {label}
     </button>

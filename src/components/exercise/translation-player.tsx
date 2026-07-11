@@ -36,30 +36,30 @@ export function TranslationPlayer({ data, onSubmit, submitting, registerForceSub
   return (
     <div className="space-y-6">
       <div>
-        <div className="mb-2 flex justify-between text-xs text-white/30">
+        <div className="mb-2 flex justify-between text-xs text-muted-foreground">
           <span>Item {index + 1} of {items.length}</span>
           <span className="uppercase tracking-wider">{isSourceArabic ? "Arabic → English" : "English → Arabic"}</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+            className="h-full rounded-full bg-primary"
             animate={{ width: `${((index + 1) / items.length) * 100}%` }}
             transition={{ duration: 0.4 }}
           />
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-6">
+      <div className="rounded-2xl border border-border bg-card p-6">
         <p
           dir={isSourceArabic ? "rtl" : "ltr"}
-          className={isSourceArabic ? "text-2xl font-medium leading-relaxed text-white" : "text-lg font-medium text-white"}
+          className={isSourceArabic ? "text-2xl font-medium leading-relaxed text-foreground" : "text-lg font-medium text-foreground"}
         >
           {item.source}
         </p>
       </div>
 
       <div>
-        <label htmlFor="translation-input" className="mb-2 block text-xs uppercase tracking-wider text-white/40">
+        <label htmlFor="translation-input" className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
           Your translation
         </label>
         <textarea
@@ -69,7 +69,7 @@ export function TranslationPlayer({ data, onSubmit, submitting, registerForceSub
           dir={isSourceArabic ? "ltr" : "rtl"}
           rows={4}
           placeholder="Type your translation…"
-          className="w-full rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none"
+          className="w-full rounded-xl border border-border bg-card p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
         />
       </div>
 
@@ -77,7 +77,7 @@ export function TranslationPlayer({ data, onSubmit, submitting, registerForceSub
         type="button"
         onClick={next}
         disabled={submitting || !answers[item.id]?.trim()}
-        className="w-full rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-medium uppercase tracking-wider text-white transition disabled:opacity-30"
+        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground transition disabled:opacity-30"
       >
         {isLast ? (submitting ? "Submitting…" : "Finish") : "Next"}
       </button>

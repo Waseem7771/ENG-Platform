@@ -24,15 +24,15 @@ export function PicturePlayer({ data, onSubmit, submitting, registerForceSubmit 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-10 text-center">
         <p className="text-7xl tracking-widest">{scene.emojis}</p>
-        <h2 className="text-lg font-semibold tracking-tight text-white">{scene.title}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">{scene.title}</h2>
       </div>
 
       {scene.hints.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {scene.hints.map((h, i) => (
-            <span key={i} className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 text-xs text-white/50">
+            <span key={i} className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">
               {h}
             </span>
           ))}
@@ -40,7 +40,7 @@ export function PicturePlayer({ data, onSubmit, submitting, registerForceSubmit 
       )}
 
       <div>
-        <label htmlFor="picture-desc" className="mb-2 block text-xs uppercase tracking-wider text-white/40">
+        <label htmlFor="picture-desc" className="mb-2 block text-xs uppercase tracking-wider text-muted-foreground">
           Describe what you see
         </label>
         <textarea
@@ -49,9 +49,9 @@ export function PicturePlayer({ data, onSubmit, submitting, registerForceSubmit 
           onChange={(e) => setText(e.target.value)}
           rows={6}
           placeholder="Start writing…"
-          className="w-full rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none"
+          className="w-full rounded-xl border border-border bg-card p-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
         />
-        <p className={`mt-2 text-xs ${canSubmit ? "text-emerald-300" : "text-white/30"}`}>
+        <p className={`mt-2 text-xs ${canSubmit ? "text-leaf-text" : "text-muted-foreground"}`}>
           {wordCount} / {scene.minWords} words
         </p>
       </div>
@@ -60,7 +60,7 @@ export function PicturePlayer({ data, onSubmit, submitting, registerForceSubmit 
         type="button"
         onClick={finish}
         disabled={!canSubmit || submitting}
-        className="w-full rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-medium uppercase tracking-wider text-white transition disabled:opacity-30"
+        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground transition disabled:opacity-30"
       >
         {submitting ? "Submitting…" : "Submit"}
       </button>

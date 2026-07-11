@@ -34,21 +34,21 @@ export default function StudentSessionsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Live Sessions</h1>
-        <p className="mt-1 text-white/40">Join your teacher&apos;s live sessions and learn together in real-time</p>
+        <p className="mt-1 text-muted-foreground">Join your teacher&apos;s live sessions and learn together in real-time</p>
       </div>
 
       {loading && (
         <div className="grid gap-4 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+            <div key={i} className="h-28 animate-pulse rounded-2xl border border-border bg-card" />
           ))}
         </div>
       )}
 
       {error && !loading && (
-        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-          <p className="text-white/70">{error}</p>
-          <button onClick={refetch} className="mt-4 rounded-full border border-white/15 px-5 py-2 text-sm text-white/80 hover:border-white/30">
+        <div className="rounded-2xl border border-destructive/20 bg-coral-soft p-8 text-center">
+          <p className="text-foreground">{error}</p>
+          <button onClick={refetch} className="mt-4 rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong">
             Retry
           </button>
         </div>
@@ -57,9 +57,9 @@ export default function StudentSessionsPage() {
       {!loading && !error && sessions && (
         <>
           {sessions.length === 0 ? (
-            <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-10 text-center">
-              <p className="font-medium text-white/70">No active sessions</p>
-              <p className="mt-2 text-sm text-white/40">
+            <div className="rounded-2xl border border-border bg-card p-10 text-center">
+              <p className="font-medium text-foreground">No active sessions</p>
+              <p className="mt-2 text-sm text-muted-foreground">
                 When your teacher starts a live session, it will appear here. Join to learn together with your classmates in real-time.
               </p>
             </div>
@@ -110,28 +110,28 @@ function SessionSection({
 
   return (
     <div>
-      <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white/40">
-        {pulsing && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>}
+      <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        {pulsing && <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-leaf opacity-75" /><span className="relative inline-flex h-2 w-2 rounded-full bg-leaf" /></span>}
         {title}
       </h2>
       <motion.div initial="hidden" animate="visible" variants={container} className="grid gap-4 md:grid-cols-2">
         {sessions.map((s) => (
-          <motion.div key={s.id} variants={item} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+          <motion.div key={s.id} variants={item} className="rounded-2xl border border-border bg-card p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="truncate font-medium text-white">{s.title}</p>
-                <p className="mt-1 text-xs text-white/40">{s.className} · {s.teacherName}</p>
-                <p className="mt-1 text-xs text-white/30">{s.participantCount} participant{s.participantCount === 1 ? "" : "s"}</p>
+                <p className="truncate font-medium text-foreground">{s.title}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{s.className} · {s.teacherName}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{s.participantCount} participant{s.participantCount === 1 ? "" : "s"}</p>
               </div>
               {s.status === "ENDED" ? (
-                <button onClick={() => router.push(`/student/sessions/${s.id}`)} className="shrink-0 rounded-full border border-white/15 px-4 py-1.5 text-xs text-white/60 hover:border-white/30">
+                <button onClick={() => router.push(`/student/sessions/${s.id}`)} className="shrink-0 rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground hover:border-line-strong">
                   View
                 </button>
               ) : (
                 <button
                   onClick={() => onJoin(s.id)}
                   disabled={joiningId === s.id}
-                  className="shrink-0 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white shadow-lg shadow-violet-500/20 disabled:opacity-50"
+                  className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
                 >
                   {joiningId === s.id ? "Joining…" : "Join"}
                 </button>

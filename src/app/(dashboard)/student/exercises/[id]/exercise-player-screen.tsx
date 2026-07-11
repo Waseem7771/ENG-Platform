@@ -30,9 +30,9 @@ import type {
 } from "@/types";
 
 const difficultyColor: Record<string, string> = {
-  BEGINNER: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  INTERMEDIATE: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-  ADVANCED: "border-red-500/30 bg-red-500/10 text-red-300",
+  BEGINNER: "border-leaf bg-leaf-soft text-leaf-text",
+  INTERMEDIATE: "border-sun-deep/30 bg-sun-soft text-sun-deep",
+  ADVANCED: "border-destructive/30 bg-coral-soft text-destructive",
 };
 
 export function ExercisePlayerScreen({ id }: { id: string }) {
@@ -101,13 +101,13 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
   if (loading) return <PlayerSkeleton />;
   if (error || !exercise) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-        <p className="text-white/70">{error ?? "Exercise not found."}</p>
+      <div className="mx-auto max-w-lg rounded-2xl border border-destructive/20 bg-coral-soft p-8 text-center">
+        <p className="text-foreground">{error ?? "Exercise not found."}</p>
         <div className="mt-4 flex justify-center gap-3">
-          <button onClick={() => refetch()} className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/80 hover:border-white/30">
+          <button onClick={() => refetch()} className="rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong">
             Retry
           </button>
-          <Link href="/student/exercises" className="rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2 text-sm text-white">
+          <Link href="/student/exercises" className="rounded-full bg-primary px-5 py-2 text-sm text-foreground">
             Back to Exercises
           </Link>
         </div>
@@ -136,16 +136,16 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
     <div className="mx-auto max-w-3xl space-y-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/student/exercises" className="text-xs text-white/30 hover:text-white/60">
+          <Link href="/student/exercises" className="text-xs text-muted-foreground hover:text-muted-foreground">
             ← Back to Exercises
           </Link>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">{exercise.title}</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">{exercise.title}</h1>
         </div>
         <div className="flex items-center gap-2">
           <span className={`rounded-full border px-3 py-1 text-xs font-medium ${difficultyColor[exercise.difficulty]}`}>{exercise.difficulty}</span>
-          <span className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1 text-xs text-white/50">{exercise.points} pts</span>
+          <span className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">{exercise.points} pts</span>
           {timeLeft !== null && (
-            <span className={`rounded-full border px-3 py-1 text-xs font-mono ${timeLeft <= 10 ? "border-red-500/40 bg-red-500/10 text-red-300" : "border-white/10 bg-white/[0.02] text-white/60"}`}>
+            <span className={`rounded-full border px-3 py-1 text-xs font-mono ${timeLeft <= 10 ? "border-destructive bg-coral-soft text-destructive" : "border-border bg-card text-muted-foreground"}`}>
               {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
             </span>
           )}
@@ -153,12 +153,12 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
       </div>
 
       {submitFailed && !submitting && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-coral-soft px-4 py-3 text-sm text-destructive">
           <span>Your last submission failed to save.</span>
           <button
             type="button"
             onClick={retrySubmit}
-            className="shrink-0 rounded-full border border-red-500/30 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-red-200 transition hover:border-red-500/50"
+            className="shrink-0 rounded-full border border-destructive/30 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-destructive transition hover:border-destructive/50"
           >
             Try again
           </button>
@@ -205,16 +205,16 @@ function renderPlayer(
         </div>
       );
     default:
-      return <p className="text-white/50">This exercise type isn&apos;t supported yet.</p>;
+      return <p className="text-muted-foreground">This exercise type isn&apos;t supported yet.</p>;
   }
 }
 
 function PlayerSkeleton() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 py-4">
-      <div className="h-8 w-64 animate-pulse rounded-lg bg-white/5" />
-      <div className="h-2 w-full animate-pulse rounded-full bg-white/5" />
-      <div className="h-64 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+      <div className="h-8 w-64 animate-pulse rounded-lg bg-muted" />
+      <div className="h-2 w-full animate-pulse rounded-full bg-muted" />
+      <div className="h-64 animate-pulse rounded-2xl border border-border bg-card" />
     </div>
   );
 }

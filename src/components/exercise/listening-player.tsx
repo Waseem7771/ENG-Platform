@@ -65,38 +65,38 @@ export function ListeningPlayer({ data, onSubmit, submitting, registerForceSubmi
   return (
     <div className="space-y-6">
       <div>
-        <div className="mb-2 flex justify-between text-xs text-white/30">
+        <div className="mb-2 flex justify-between text-xs text-muted-foreground">
           <span>Item {index + 1} of {items.length}</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500"
+            className="h-full rounded-full bg-primary"
             animate={{ width: `${((index + 1) / items.length) * 100}%` }}
             transition={{ duration: 0.4 }}
           />
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-8">
+      <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card p-8">
         <button
           type="button"
           onClick={play}
           disabled={!speechSupported}
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 text-2xl text-white shadow-lg shadow-cyan-500/20 transition disabled:opacity-30"
+          className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-2xl text-primary-foreground shadow-lg shadow-primary/20 transition disabled:opacity-30"
         >
           {speaking ? "🔊" : "▶"}
         </button>
-        <p className="text-xs text-white/30">{speechSupported ? "Tap to play — replay as many times as you need" : "Audio isn't supported on this device"}</p>
+        <p className="text-xs text-muted-foreground">{speechSupported ? "Tap to play — replay as many times as you need" : "Audio isn't supported on this device"}</p>
         {!speechSupported && (
-          <button type="button" onClick={() => setShowTranscript((s) => !s)} className="text-xs text-violet-300 underline">
+          <button type="button" onClick={() => setShowTranscript((s) => !s)} className="text-xs text-primary underline">
             {showTranscript ? "Hide transcript" : "Read transcript"}
           </button>
         )}
-        {showTranscript && <p className="max-w-md text-center text-sm text-white/60">{item.transcript}</p>}
+        {showTranscript && <p className="max-w-md text-center text-sm text-muted-foreground">{item.transcript}</p>}
       </div>
 
       <div>
-        <p className="mb-3 text-base font-medium text-white">{item.question}</p>
+        <p className="mb-3 text-base font-medium text-foreground">{item.question}</p>
         <div className="space-y-3">
           {item.options.map((opt) => (
             <OptionButton
@@ -119,7 +119,7 @@ export function ListeningPlayer({ data, onSubmit, submitting, registerForceSubmi
             type="button"
             onClick={next}
             disabled={submitting}
-            className="w-full rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-medium uppercase tracking-wider text-white disabled:opacity-50"
+            className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground disabled:opacity-50"
           >
             {isLast ? (submitting ? "Submitting…" : "Finish") : "Next"}
           </button>

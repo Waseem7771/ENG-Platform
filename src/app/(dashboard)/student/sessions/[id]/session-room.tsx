@@ -11,9 +11,9 @@ import type { SessionDetail, SessionMessageDTO } from "../../_types";
 const POLL_MS = 2500;
 
 const statusColor: Record<string, string> = {
-  ACTIVE: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  WAITING: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-  ENDED: "border-white/10 bg-white/[0.02] text-white/40",
+  ACTIVE: "border-leaf bg-leaf-soft text-leaf-text",
+  WAITING: "border-sun-deep/30 bg-sun-soft text-sun-deep",
+  ENDED: "border-border bg-card text-muted-foreground",
 };
 
 export function SessionRoom({ id }: { id: string }) {
@@ -111,19 +111,19 @@ export function SessionRoom({ id }: { id: string }) {
   if (loading) return <RoomSkeleton />;
   if (error || !detail) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-red-500/20 bg-red-500/5 p-8 text-center">
-        <p className="text-white/70">{error ?? "Session not found."}</p>
+      <div className="mx-auto max-w-lg rounded-2xl border border-destructive/20 bg-coral-soft p-8 text-center">
+        <p className="text-foreground">{error ?? "Session not found."}</p>
         <div className="mt-4 flex justify-center gap-3">
           <button
             onClick={() => {
               setLoading(true);
               fetchUpdates(true);
             }}
-            className="rounded-full border border-white/15 px-5 py-2 text-sm text-white/80 hover:border-white/30"
+            className="rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong"
           >
             Retry
           </button>
-          <Link href="/student/sessions" className="rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2 text-sm text-white">
+          <Link href="/student/sessions" className="rounded-full bg-primary px-5 py-2 text-sm text-foreground">
             Back to Sessions
           </Link>
         </div>
@@ -135,11 +135,11 @@ export function SessionRoom({ id }: { id: string }) {
 
   return (
     <div className="relative flex h-[calc(100vh-4rem)] flex-col gap-4 lg:flex-row">
-      <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-white/5 bg-white/[0.02]">
-        <div className="flex items-center justify-between border-b border-white/5 p-4">
+      <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card">
+        <div className="flex items-center justify-between border-b border-border p-4">
           <div>
-            <p className="font-medium text-white">{detail.session.title}</p>
-            <p className="text-xs text-white/30">{detail.session.className} · {detail.session.teacherName}</p>
+            <p className="font-medium text-foreground">{detail.session.title}</p>
+            <p className="text-xs text-muted-foreground">{detail.session.className} · {detail.session.teacherName}</p>
           </div>
           <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusColor[detail.session.status]}`}>{detail.session.status}</span>
         </div>
@@ -151,14 +151,14 @@ export function SessionRoom({ id }: { id: string }) {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="m-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-500/30 bg-gradient-to-r from-violet-500/15 to-blue-500/10 px-4 py-3"
+              className="m-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-secondary px-4 py-3"
             >
-              <p className="text-sm text-white">
+              <p className="text-sm text-foreground">
                 Your teacher pushed: <span className="font-semibold">{detail.pushedExercise.title}</span>
               </p>
               <button
                 onClick={() => router.push(`/student/exercises/${detail.pushedExercise!.id}`)}
-                className="shrink-0 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-white"
+                className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-foreground"
               >
                 Start Exercise
               </button>
@@ -167,13 +167,13 @@ export function SessionRoom({ id }: { id: string }) {
         </AnimatePresence>
 
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-          {messages.length === 0 && <p className="text-center text-sm text-white/25">No messages yet — say hello!</p>}
+          {messages.length === 0 && <p className="text-center text-sm text-muted-foreground">No messages yet — say hello!</p>}
           {messages
             .filter((m) => m.type !== "EXERCISE")
             .map((m) => {
               if (m.type === "SYSTEM") {
                 return (
-                  <p key={m.id} className="text-center text-xs italic text-white/25">
+                  <p key={m.id} className="text-center text-xs italic text-muted-foreground">
                     {m.content}
                   </p>
                 );
@@ -181,11 +181,11 @@ export function SessionRoom({ id }: { id: string }) {
               const isMe = m.user.id === meId;
               return (
                 <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                  {!isMe && <span className="mb-1 text-[11px] text-white/30">{m.user.name}</span>}
+                  {!isMe && <span className="mb-1 text-[11px] text-muted-foreground">{m.user.name}</span>}
                   <div
                     dir="auto"
                     className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
-                      isMe ? "bg-gradient-to-r from-violet-600 to-blue-500 text-white" : "border border-white/10 bg-white/[0.03] text-white/80"
+                      isMe ? "bg-primary text-foreground" : "border border-border bg-card text-foreground"
                     }`}
                   >
                     {m.content}
@@ -195,7 +195,7 @@ export function SessionRoom({ id }: { id: string }) {
             })}
         </div>
 
-        <form onSubmit={sendMessage} className="flex items-center gap-2 border-t border-white/5 p-3">
+        <form onSubmit={sendMessage} className="flex items-center gap-2 border-t border-border p-3">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -204,39 +204,39 @@ export function SessionRoom({ id }: { id: string }) {
             aria-label="Message"
             dir="auto"
             maxLength={1000}
-            className="h-11 flex-1 rounded-xl border border-white/10 bg-white/[0.02] px-4 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none disabled:opacity-40"
+            className="h-11 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none disabled:opacity-40"
           />
           <button
             type="submit"
             disabled={sending || isEnded || !input.trim()}
-            className="h-11 shrink-0 rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-5 text-sm font-medium text-white transition disabled:opacity-40"
+            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-foreground transition disabled:opacity-40"
           >
             Send
           </button>
         </form>
       </div>
 
-      <div className="w-full shrink-0 rounded-2xl border border-white/5 bg-white/[0.02] p-5 lg:w-72">
-        <h3 className="mb-4 text-xs uppercase tracking-wider text-white/30">Participants ({roster.length})</h3>
+      <div className="w-full shrink-0 rounded-2xl border border-border bg-card p-5 lg:w-72">
+        <h3 className="mb-4 text-xs uppercase tracking-wider text-muted-foreground">Participants ({roster.length})</h3>
         <ul className="space-y-2">
           {roster.map((p) => (
-            <li key={p.id} className="flex items-center gap-2.5 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-600/40 to-blue-500/40 text-xs font-semibold text-white">
+            <li key={p.id} className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
                 {p.name.charAt(0).toUpperCase()}
               </div>
-              <span className="truncate text-sm text-white/70">{p.name}</span>
-              {p.isTeacher && <span className="ml-auto text-[10px] uppercase tracking-wider text-violet-300">Teacher</span>}
+              <span className="truncate text-sm text-foreground">{p.name}</span>
+              {p.isTeacher && <span className="ml-auto text-[10px] uppercase tracking-wider text-primary">Teacher</span>}
             </li>
           ))}
         </ul>
       </div>
 
       {isEnded && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/70 backdrop-blur-sm">
-          <div className="rounded-2xl border border-white/10 bg-[#14111f] p-8 text-center">
-            <p className="text-lg font-semibold text-white">Session ended</p>
-            <p className="mt-2 text-sm text-white/40">Thanks for participating!</p>
-            <Link href="/student/sessions" className="mt-4 inline-block rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-2 text-sm text-white">
+        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/70">
+          <div className="rounded-2xl border border-border bg-[#14111f] p-8 text-center">
+            <p className="text-lg font-semibold text-foreground">Session ended</p>
+            <p className="mt-2 text-sm text-muted-foreground">Thanks for participating!</p>
+            <Link href="/student/sessions" className="mt-4 inline-block rounded-full bg-primary px-6 py-2 text-sm text-foreground">
               Back to Sessions
             </Link>
           </div>
@@ -249,8 +249,8 @@ export function SessionRoom({ id }: { id: string }) {
 function RoomSkeleton() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col gap-4 lg:flex-row">
-      <div className="flex-1 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
-      <div className="h-40 w-full shrink-0 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02] lg:h-full lg:w-72" />
+      <div className="flex-1 animate-pulse rounded-2xl border border-border bg-card" />
+      <div className="h-40 w-full shrink-0 animate-pulse rounded-2xl border border-border bg-card lg:h-full lg:w-72" />
     </div>
   );
 }

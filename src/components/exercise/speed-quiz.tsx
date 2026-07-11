@@ -81,19 +81,19 @@ export function SpeedQuiz({ data, onSubmit, submitting, registerForceSubmit }: P
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between text-xs text-white/30">
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>Question {index + 1} of {items.length}</span>
-        <span className="flex items-center gap-1 text-amber-300">🔥 {streak} streak (best {bestStreak})</span>
+        <span className="flex items-center gap-1 text-sun-deep">🔥 {streak} streak (best {bestStreak})</span>
       </div>
 
-      <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className={`h-full rounded-full transition-[width] duration-100 ease-linear ${pct < 25 ? "bg-red-500" : "bg-gradient-to-r from-violet-500 to-cyan-500"}`}
+          className={`h-full rounded-full transition-[width] duration-100 ease-linear ${pct < 25 ? "bg-destructive" : "bg-primary"}`}
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <p className="text-xl font-medium tracking-tight text-white">{item.question}</p>
+      <p className="text-xl font-medium tracking-tight text-foreground">{item.question}</p>
 
       <div className="space-y-3">
         {item.options.map((opt) => (
@@ -109,8 +109,8 @@ export function SpeedQuiz({ data, onSubmit, submitting, registerForceSubmit }: P
         ))}
       </div>
 
-      {revealed && !selected && <p className="text-center text-sm text-red-300">Time&apos;s up! The answer was &quot;{item.answer}&quot;.</p>}
-      {submitting && isLast && <p className="text-center text-xs text-white/30">Submitting…</p>}
+      {revealed && !selected && <p className="text-center text-sm text-destructive">Time&apos;s up! The answer was &quot;{item.answer}&quot;.</p>}
+      {submitting && isLast && <p className="text-center text-xs text-muted-foreground">Submitting…</p>}
     </div>
   );
 }

@@ -62,10 +62,10 @@ export function StoryPlayer({ exercise, data, onSubmit, submitting, registerForc
   }
 
   return (
-    <div className="flex h-full min-h-[520px] flex-col rounded-2xl border border-white/5 bg-white/[0.02]">
-      <div className="border-b border-white/5 p-5">
-        <h2 className="text-lg font-semibold tracking-tight text-white">{story.title}</h2>
-        <p className="text-xs uppercase tracking-wider text-white/40">{story.genre} · {userTurns}/{story.minTurns} turns</p>
+    <div className="flex h-full min-h-[520px] flex-col rounded-2xl border border-border bg-card">
+      <div className="border-b border-border p-5">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">{story.title}</h2>
+        <p className="text-xs uppercase tracking-wider text-muted-foreground">{story.genre} · {userTurns}/{story.minTurns} turns</p>
       </div>
 
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-5">
@@ -74,7 +74,7 @@ export function StoryPlayer({ exercise, data, onSubmit, submitting, registerForc
             <div
               dir="auto"
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                t.role === "user" ? "bg-gradient-to-r from-violet-600 to-blue-500 text-white" : "border border-white/10 bg-white/[0.03] text-white/80"
+                t.role === "user" ? "bg-primary text-foreground" : "border border-border bg-card text-foreground"
               }`}
             >
               {t.content}
@@ -82,11 +82,11 @@ export function StoryPlayer({ exercise, data, onSubmit, submitting, registerForc
           </div>
         ))}
         {sending && (
-          <div className="flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 w-fit">
+          <div className="flex items-center gap-1.5 rounded-2xl border border-border bg-card px-4 py-3 w-fit">
             {[0, 1, 2].map((i) => (
               <motion.span
                 key={i}
-                className="h-1.5 w-1.5 rounded-full bg-white/40"
+                className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40"
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
               />
@@ -95,7 +95,7 @@ export function StoryPlayer({ exercise, data, onSubmit, submitting, registerForc
         )}
       </div>
 
-      <div className="space-y-3 border-t border-white/5 p-4">
+      <div className="space-y-3 border-t border-border p-4">
         <div className="flex items-center gap-2">
           <textarea
             value={input}
@@ -105,13 +105,13 @@ export function StoryPlayer({ exercise, data, onSubmit, submitting, registerForc
             rows={2}
             dir="auto"
             maxLength={MAX_TURN_LENGTH}
-            className="h-16 flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.02] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-violet-500/40 focus:outline-none"
+            className="h-16 flex-1 resize-none rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none"
           />
           <button
             type="button"
             onClick={send}
             disabled={sending || !input.trim()}
-            className="h-16 shrink-0 rounded-xl bg-gradient-to-r from-violet-600 to-blue-500 px-5 text-sm font-medium text-white transition disabled:opacity-40"
+            className="h-16 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-foreground transition disabled:opacity-40"
           >
             Send
           </button>
@@ -121,7 +121,7 @@ export function StoryPlayer({ exercise, data, onSubmit, submitting, registerForc
             type="button"
             onClick={() => onSubmit({ turns: turns.map(({ role, content }) => ({ role, content })) })}
             disabled={submitting}
-            className="w-full rounded-full border border-white/15 px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-white/80 transition hover:border-white/30 disabled:opacity-50"
+            className="w-full rounded-full border border-border px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-foreground transition hover:border-line-strong disabled:opacity-50"
           >
             {submitting ? "Scoring…" : "Finish story & Get Score"}
           </button>

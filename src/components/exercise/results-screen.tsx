@@ -38,7 +38,7 @@ export function ResultsScreen({
       className="mx-auto max-w-2xl space-y-6"
     >
       {title && (
-        <motion.p variants={itemVariants} className="text-center text-sm uppercase tracking-widest text-white/40">
+        <motion.p variants={itemVariants} className="text-center text-sm uppercase tracking-widest text-muted-foreground">
           {title}
         </motion.p>
       )}
@@ -46,10 +46,10 @@ export function ResultsScreen({
       <motion.div variants={itemVariants} className="flex flex-col items-center gap-4">
         <ScoreRing score={result.score} label="score" size={compact ? 128 : 160} />
         <div className="flex items-center gap-4 text-sm">
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-semibold text-amber-300">
+          <span className="rounded-full border border-sun-deep/30 bg-sun-soft px-3 py-1 font-semibold text-sun-deep">
             +<CountUp end={result.xpEarned} duration={1} /> XP
           </span>
-          <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 font-semibold text-orange-300">
+          <span className="rounded-full border border-sun-deep/30 bg-sun-soft px-3 py-1 font-semibold text-sun-deep">
             🔥 {result.gamification.streak} day streak
           </span>
         </div>
@@ -57,19 +57,19 @@ export function ResultsScreen({
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="rounded-full border border-violet-500/40 bg-gradient-to-r from-violet-500/20 to-blue-500/20 px-4 py-1.5 text-sm font-semibold text-white"
+            className="rounded-full border border-primary/40 bg-secondary px-4 py-1.5 text-sm font-semibold text-primary"
           >
             Level up! You&apos;re now {result.gamification.level}
           </motion.div>
         )}
       </motion.div>
 
-      <motion.div variants={itemVariants} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 text-center text-sm text-white/70">
+      <motion.div variants={itemVariants} className="rounded-2xl border border-border bg-card p-5 text-center text-sm text-foreground">
         {result.feedback.overall}
       </motion.div>
 
       {result.aiAvailable === false && (
-        <motion.p variants={itemVariants} className="text-center text-xs text-white/30">
+        <motion.p variants={itemVariants} className="text-center text-xs text-muted-foreground">
           AI offline — basic scoring used.
         </motion.p>
       )}
@@ -77,24 +77,24 @@ export function ResultsScreen({
       {(result.feedback.strengths?.length || result.feedback.improvements?.length) && (
         <motion.div variants={itemVariants} className="grid gap-4 sm:grid-cols-2">
           {!!result.feedback.strengths?.length && (
-            <div className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-5">
-              <h3 className="mb-3 text-xs uppercase tracking-wider text-emerald-300/70">Strengths</h3>
-              <ul className="space-y-1.5 text-sm text-white/70">
+            <div className="rounded-2xl border border-leaf/20 bg-leaf-soft p-5">
+              <h3 className="mb-3 text-xs uppercase tracking-wider text-leaf-text/70">Strengths</h3>
+              <ul className="space-y-1.5 text-sm text-foreground">
                 {result.feedback.strengths.map((s, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="text-emerald-400">✓</span> {s}
+                    <span className="text-leaf-text">✓</span> {s}
                   </li>
                 ))}
               </ul>
             </div>
           )}
           {!!result.feedback.improvements?.length && (
-            <div className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-5">
-              <h3 className="mb-3 text-xs uppercase tracking-wider text-amber-300/70">Improve</h3>
-              <ul className="space-y-1.5 text-sm text-white/70">
+            <div className="rounded-2xl border border-sun-deep/20 bg-sun-soft p-5">
+              <h3 className="mb-3 text-xs uppercase tracking-wider text-sun-deep/70">Improve</h3>
+              <ul className="space-y-1.5 text-sm text-foreground">
                 {result.feedback.improvements.map((s, i) => (
                   <li key={i} className="flex gap-2">
-                    <span className="text-amber-400">→</span> {s}
+                    <span className="text-sun-deep">→</span> {s}
                   </li>
                 ))}
               </ul>
@@ -104,16 +104,16 @@ export function ResultsScreen({
       )}
 
       {!compact && perItem.length > 0 && (
-        <motion.div variants={itemVariants} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5">
-          <h3 className="mb-3 text-xs uppercase tracking-wider text-white/40">Item by item</h3>
+        <motion.div variants={itemVariants} className="rounded-2xl border border-border bg-card p-5">
+          <h3 className="mb-3 text-xs uppercase tracking-wider text-muted-foreground">Item by item</h3>
           <ul className="space-y-2">
             {perItem.map(([id, fb], i) => (
-              <li key={id} className={`rounded-xl border px-4 py-2.5 text-sm ${fb.correct ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-200" : "border-red-500/20 bg-red-500/5 text-red-200"}`}>
+              <li key={id} className={`rounded-xl border px-4 py-2.5 text-sm ${fb.correct ? "border-leaf bg-leaf-soft text-leaf-text" : "border-destructive bg-coral-soft text-destructive"}`}>
                 <span className="font-medium">
                   {fb.correct ? "✓" : "✗"} Question {i + 1}
                 </span>
-                {fb.expected && <span className="ml-2 text-white/40">expected: {fb.expected}</span>}
-                {fb.note && <p className="mt-1 text-white/50">{fb.note}</p>}
+                {fb.expected && <span className="ml-2 text-muted-foreground">expected: {fb.expected}</span>}
+                {fb.note && <p className="mt-1 text-muted-foreground">{fb.note}</p>}
               </li>
             ))}
           </ul>

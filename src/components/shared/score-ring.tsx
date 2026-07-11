@@ -28,7 +28,7 @@ export function ScoreRing({
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-white/5" />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="currentColor" strokeWidth={strokeWidth} className="text-border" />
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -43,8 +43,8 @@ export function ScoreRing({
         />
         <defs>
           <linearGradient id="score-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#7C3AED" />
-            <stop offset="100%" stopColor="#22D3EE" />
+            <stop offset="0%" stopColor="var(--primary)" />
+            <stop offset="100%" stopColor="var(--sun)" />
           </linearGradient>
         </defs>
       </svg>
@@ -52,7 +52,7 @@ export function ScoreRing({
         <span className="text-3xl font-bold tracking-tight">
           <CountUp end={score} />
         </span>
-        {label && <span className="mt-1 text-[10px] uppercase tracking-widest text-white/40">{label}</span>}
+        {label && <span className="mt-1 text-[10px] uppercase tracking-widest text-muted-foreground">{label}</span>}
       </div>
     </div>
   );
