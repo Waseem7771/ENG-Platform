@@ -168,6 +168,14 @@ function validateExerciseData(type: ExerciseType, data: unknown): void {
   }
 }
 
+export function studentExerciseWhere(params: { type?: string | null; difficulty?: string | null; userLevel?: string | null }) {
+  const where: { type?: string; difficulty?: string } = {};
+  if (params.type) where.type = params.type;
+  if (params.difficulty && params.difficulty !== "ALL") where.difficulty = params.difficulty;
+  else if (!params.difficulty && params.userLevel) where.difficulty = params.userLevel;
+  return where;
+}
+
 export async function GET(request: Request) {
   try {
     const user = await requireUser();
@@ -178,15 +186,14 @@ export async function GET(request: Request) {
     if (type && !EXERCISE_TYPES.includes(type as ExerciseType)) {
       throw new ApiError(400, "Invalid type filter");
     }
-    if (difficulty && !LEVELS.includes(difficulty as Level)) {
+    if (difficulty && difficulty !== "ALL" && !LEVELS.includes(difficulty as Level)) {
       throw new ApiError(400, "Invalid difficulty filter");
     }
 
-    const where: Record<string, unknown> = {};
-    if (type) where.type = type;
-    if (difficulty) where.difficulty = difficulty;
-
     if (user.role === "TEACHER") {
+      const where: Record<string, unknown> = {};
+      if (type) where.type = type;
+      if (difficulty && difficulty !== "ALL") where.difficulty = difficulty;
       where.createdById = user.id;
       const exercises = await db.exercise.findMany({
         where,
@@ -210,6 +217,7 @@ export async function GET(request: Request) {
       );
     }
 
+    const where = studentExerciseWhere({ type, difficulty, userLevel: user.level });
     const exercises = await db.exercise.findMany({ where, orderBy: { createdAt: "desc" } });
     const results = await db.exerciseResult.findMany({
       where: { studentId: user.id, exerciseId: { in: exercises.map((e) => e.id) } },
