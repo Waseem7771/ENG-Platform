@@ -93,7 +93,7 @@ export function PushExerciseDialog({
             <DialogDescription className="text-muted-foreground">All students in this session will see it instantly.</DialogDescription>
           </DialogHeader>
           <div className="relative mt-3">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}

@@ -49,7 +49,7 @@ export default function TeacherStudentsPage() {
 
       {!loading && !error && students && students.length > 0 && (
         <div className="relative mb-6 max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}

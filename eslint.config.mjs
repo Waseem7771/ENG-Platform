@@ -32,7 +32,7 @@ const eslintConfig = defineConfig([
           message: "Use logical spacing (ps-/pe-/ms-/me-) for RTL support.",
         },
         {
-          selector: "Literal[value=/\\bborder-(l|r)(-|\\s|\")/]",
+          selector: "Literal[value=/\\bborder-(l|r)($|-|\\s)/]",
           message: "Use border-s / border-e for RTL support.",
         },
       ],
