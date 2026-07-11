@@ -42,5 +42,7 @@
   "auth.emailPlaceholder": "you@example.com",
   "auth.passwordPlaceholder": "At least 8 characters",
   "auth.resetLinkInvalid": "This reset link is invalid or has expired.",
-  "auth.requestNewLink": "Request a new link"
+  "auth.requestNewLink": "Request a new link",
+  "results.nextLesson": "Next: {title}",
+  "results.nextPractice": "Next up: {title}"
 }

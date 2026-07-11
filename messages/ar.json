@@ -42,5 +42,7 @@
   "auth.emailPlaceholder": "you@example.com",
   "auth.passwordPlaceholder": "8 أحرف على الأقل",
   "auth.resetLinkInvalid": "رابط إعادة التعيين غير صالح أو انتهت صلاحيته.",
-  "auth.requestNewLink": "اطلب رابطًا جديدًا"
+  "auth.requestNewLink": "اطلب رابطًا جديدًا",
+  "results.nextLesson": "التالي: {title}",
+  "results.nextPractice": "التالي: {title}"
 }

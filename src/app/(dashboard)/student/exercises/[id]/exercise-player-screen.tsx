@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { api, ApiClientError } from "@/lib/api";
+import { useT } from "@/components/providers/locale-provider";
 import { ResultsScreen } from "@/components/exercise/results-screen";
 import { GrammarPlayer } from "@/components/exercise/grammar-player";
 import { VocabMatch } from "@/components/exercise/vocab-match";
@@ -17,6 +18,8 @@ import { ConversationChat } from "@/components/exercise/conversation-chat";
 import { PicturePlayer } from "@/components/exercise/picture-player";
 import { StoryPlayer } from "@/components/exercise/story-player";
 import type { ExerciseFull } from "../../_types";
+import type { PathResponse } from "@/lib/path";
+import type { Recommendation } from "@/lib/recommend";
 import type {
   ConversationData,
   GrammarData,
@@ -37,9 +40,11 @@ const difficultyColor: Record<string, string> = {
 
 export function ExercisePlayerScreen({ id }: { id: string }) {
   const router = useRouter();
+  const t = useT();
   const { data: exercise, loading, error, refetch } = useApi<ExerciseFull>(() => api<ExerciseFull>(`/api/exercises/${id}`), [id]);
   const [phase, setPhase] = useState<"playing" | "results">("playing");
   const [result, setResult] = useState<SubmitResponse | null>(null);
+  const [next, setNext] = useState<{ label: string; href: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitFailed, setSubmitFailed] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -47,6 +52,34 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
   const forceSubmitRef = useRef<(() => void) | null>(null);
   const timedOutRef = useRef(false);
   const lastPayloadRef = useRef<unknown>(null);
+
+  const fetchNext = useCallback(async () => {
+    try {
+      if (exercise?.lessonId) {
+        const path = await api<PathResponse>("/api/path");
+        if (path.continue) {
+          setNext({
+            label: t("results.nextLesson", { title: path.continue.exerciseTitle }),
+            href: `/student/exercises/${path.continue.exerciseId}`,
+          });
+          return;
+        }
+        setNext(null);
+        return;
+      }
+      const { recommendation } = await api<{ recommendation: Recommendation | null }>(`/api/exercises/recommend?exclude=${id}`);
+      if (recommendation) {
+        setNext({
+          label: t("results.nextPractice", { title: recommendation.title }),
+          href: `/student/exercises/${recommendation.id}`,
+        });
+        return;
+      }
+      setNext(null);
+    } catch {
+      setNext(null);
+    }
+  }, [exercise?.lessonId, id, t]);
 
   const registerForceSubmit = useCallback((fn: () => void) => {
     forceSubmitRef.current = fn;
@@ -57,9 +90,9 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
     timedOutRef.current = false;
     setTimeLeft(exercise.timeLimit);
     const interval = setInterval(() => {
-      setTimeLeft((t) => {
-        if (t === null) return t;
-        if (t <= 1) {
+      setTimeLeft((prev) => {
+        if (prev === null) return prev;
+        if (prev <= 1) {
           if (!timedOutRef.current) {
             timedOutRef.current = true;
             toast.info("Time's up — submitting your answers.");
@@ -67,7 +100,7 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
           }
           return 0;
         }
-        return t - 1;
+        return prev - 1;
       });
     }, 1000);
     return () => clearInterval(interval);
@@ -85,7 +118,10 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
       });
       setResult(res);
       setPhase("results");
+      setNext(null);
       toast.success(`Scored ${res.score}% · +${res.xpEarned} XP`);
+      // Fetch the follow-up CTA after showing results — must not block the results screen.
+      fetchNext();
     } catch (err) {
       toast.error(err instanceof ApiClientError ? err.message : "Couldn't submit your answers. Try again.");
       setSubmitFailed(true);
@@ -121,9 +157,11 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
         <ResultsScreen
           result={result}
           title={exercise.title}
+          next={next}
           onRetry={() => {
             setPhase("playing");
             setResult(null);
+            setNext(null);
             setRetryKey((k) => k + 1);
           }}
           onBack={() => router.push("/student/exercises")}

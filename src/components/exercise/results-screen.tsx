@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { ScoreRing } from "@/components/shared/score-ring";
 import { CountUp } from "@/components/shared/count-up";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ const itemVariants = {
 export function ResultsScreen({
   result,
   title,
+  next,
   onRetry,
   onBack,
   retryLabel = "Try Again",
@@ -22,6 +24,7 @@ export function ResultsScreen({
 }: {
   result: SubmitResponse;
   title?: string;
+  next?: { label: string; href: string } | null;
   onRetry?: () => void;
   onBack?: () => void;
   retryLabel?: string;
@@ -117,6 +120,14 @@ export function ResultsScreen({
               </li>
             ))}
           </ul>
+        </motion.div>
+      )}
+
+      {next && (
+        <motion.div variants={itemVariants} className="flex justify-center">
+          <Button nativeButton={false} render={<Link href={next.href} />} role="link" className="w-full sm:w-auto">
+            {next.label}
+          </Button>
         </motion.div>
       )}
 

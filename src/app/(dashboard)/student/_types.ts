@@ -35,6 +35,7 @@ export interface ExerciseFull {
   difficulty: Level;
   points: number;
   timeLimit: number | null;
+  lessonId: string | null;
   data: ExerciseData;
 }
 
