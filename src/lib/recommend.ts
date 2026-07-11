@@ -9,6 +9,27 @@ export interface Recommendation {
   difficulty: string;
 }
 
+/**
+ * Pure core: find the weakest skill category from a list of progress rows.
+ * Excludes OVERALL, returns the lowest-scoring category, with ties broken
+ * alphabetically. Returns null if no non-OVERALL rows or empty list.
+ */
+export function weakestSkillCategory(
+  rows: Array<{ category: string; score: number }>
+): string | null {
+  const filtered = rows.filter((r) => r.category !== "OVERALL");
+  if (filtered.length === 0) return null;
+
+  // Sort by score ascending, then category ascending for deterministic tie-break
+  const sorted = [...filtered].sort((a, b) => {
+    const scoreCompare = a.score - b.score;
+    if (scoreCompare !== 0) return scoreCompare;
+    return a.category.localeCompare(b.category);
+  });
+
+  return sorted[0].category;
+}
+
 interface Candidate {
   id: string;
   title: string;
@@ -93,12 +114,11 @@ export async function recommendForStudent(
     .filter((ex) => !passedIds.has(ex.id) && ex.id !== excludeId)
     .map((ex) => ({ id: ex.id, title: ex.title, type: ex.type, difficulty: ex.difficulty }));
 
-  const progress = await db.progress.findMany({ where: { studentId } });
-  const skillRows = progress.filter((p) => p.category !== "OVERALL");
-  let weakestCategory: string | null = null;
-  if (skillRows.length > 0) {
-    weakestCategory = skillRows.reduce((min, row) => (row.score < min.score ? row : min)).category;
-  }
+  const progress = await db.progress.findMany({
+    where: { studentId },
+    orderBy: { category: "asc" },
+  });
+  const weakestCategory = weakestSkillCategory(progress);
 
   const lastResult = await db.exerciseResult.findFirst({
     where: { studentId },

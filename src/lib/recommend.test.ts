@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pickNextExercise } from "@/lib/recommend";
+import { pickNextExercise, weakestSkillCategory } from "@/lib/recommend";
 
 const c = (id: string, type: string) => ({ id, title: id, type, difficulty: "BEGINNER" });
 
@@ -31,5 +31,29 @@ describe("pickNextExercise", () => {
   it("any candidate as last resort; null when none", () => {
     expect(pickNextExercise({ candidates: [c("x", "PICTURE")], lastType: null, weakestCategory: null })?.id).toBe("x");
     expect(pickNextExercise({ candidates: [], lastType: "QUIZ", weakestCategory: "GRAMMAR" })).toBeNull();
+  });
+});
+
+describe("weakestSkillCategory", () => {
+  it("returns the lowest-scoring skill", () => {
+    expect(
+      weakestSkillCategory([
+        { category: "GRAMMAR", score: 80 },
+        { category: "LISTENING", score: 20 },
+      ])
+    ).toBe("LISTENING");
+  });
+  it("breaks ties alphabetically and ignores OVERALL", () => {
+    expect(
+      weakestSkillCategory([
+        { category: "VOCABULARY", score: 50 },
+        { category: "GRAMMAR", score: 50 },
+        { category: "OVERALL", score: 10 },
+      ])
+    ).toBe("GRAMMAR");
+  });
+  it("returns null with no skill rows", () => {
+    expect(weakestSkillCategory([{ category: "OVERALL", score: 10 }])).toBeNull();
+    expect(weakestSkillCategory([])).toBeNull();
   });
 });
