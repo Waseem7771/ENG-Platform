@@ -93,7 +93,7 @@ function TypeCard({ label, icon, description, count, active }: { label: string; 
   return (
     <div
       className={`h-full rounded-2xl border p-6 transition-all duration-300 ${
-        active ? "border-primary bg-secondary" : "border-border bg-card hover:border-border hover:bg-card"
+        active ? "border-primary bg-secondary" : "border-border bg-card hover:border-line-strong hover:bg-muted"
       }`}
     >
       <div className="mb-3 text-3xl">{icon}</div>
@@ -107,7 +107,7 @@ function TypeCard({ label, icon, description, count, active }: { label: string; 
 function ExerciseCard({ exercise }: { exercise: ExerciseListItem }) {
   return (
     <Link href={`/student/exercises/${exercise.id}`}>
-      <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-border hover:bg-card">
+      <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-line-strong hover:bg-muted">
         <div className="min-w-0">
           <p className="truncate font-medium text-foreground">{exercise.title}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">

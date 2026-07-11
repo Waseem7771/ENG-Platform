@@ -119,7 +119,7 @@ export function ListeningPlayer({ data, onSubmit, submitting, registerForceSubmi
             type="button"
             onClick={next}
             disabled={submitting}
-            className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground disabled:opacity-50"
+            className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-primary-foreground disabled:opacity-50"
           >
             {isLast ? (submitting ? "Submitting…" : "Finish") : "Next"}
           </button>

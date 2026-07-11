@@ -138,7 +138,9 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
             <div
               dir="auto"
               className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
-                m.role === "user" ? "bg-primary text-foreground" : "border border-border bg-card text-foreground"
+                m.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-card text-foreground"
               }`}
             >
               {m.content}
@@ -193,7 +195,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
               onClick={toggleMic}
               aria-label={listening ? "Stop dictation" : "Start dictation"}
               className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-lg transition ${
-                listening ? "border-destructive/40 bg-coral-soft text-destructive" : "border-border bg-card text-muted-foreground hover:border-border"
+                listening ? "border-destructive/40 bg-coral-soft text-destructive" : "border-border bg-card text-muted-foreground hover:border-line-strong"
               }`}
             >
               🎤
@@ -203,7 +205,7 @@ export function ConversationChat({ exercise, data, onSubmit, submitting, registe
             type="button"
             onClick={send}
             disabled={sending || !input.trim()}
-            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-foreground transition disabled:opacity-40"
+            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition disabled:opacity-40"
           >
             Send
           </button>

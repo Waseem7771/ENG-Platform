@@ -107,7 +107,7 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
           <button onClick={() => refetch()} className="rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong">
             Retry
           </button>
-          <Link href="/student/exercises" className="rounded-full bg-primary px-5 py-2 text-sm text-foreground">
+          <Link href="/student/exercises" className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">
             Back to Exercises
           </Link>
         </div>
@@ -136,7 +136,7 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
     <div className="mx-auto max-w-3xl space-y-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/student/exercises" className="text-xs text-muted-foreground hover:text-muted-foreground">
+          <Link href="/student/exercises" className="text-xs text-muted-foreground hover:text-foreground">
             ← Back to Exercises
           </Link>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground">{exercise.title}</h1>

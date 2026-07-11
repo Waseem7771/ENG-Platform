@@ -79,7 +79,7 @@ export function GrammarPlayer({ data, onSubmit, submitting, registerForceSubmit 
                   type="button"
                   disabled={revealed}
                   onClick={() => setPickedWords((p) => [...p, token])}
-                  className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground hover:border-border"
+                  className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-foreground hover:border-line-strong"
                 >
                   {w}
                 </button>
@@ -91,7 +91,7 @@ export function GrammarPlayer({ data, onSubmit, submitting, registerForceSubmit 
               type="button"
               disabled={pickedWords.length !== shuffledWords.length}
               onClick={() => reveal(pickedWords.map((t) => t.split(":").slice(1).join(":")).join(" "))}
-              className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-foreground disabled:opacity-30"
+              className="rounded-full bg-primary px-6 py-2.5 text-sm font-medium uppercase tracking-wider text-primary-foreground disabled:opacity-30"
             >
               Check
             </button>
@@ -120,7 +120,7 @@ export function GrammarPlayer({ data, onSubmit, submitting, registerForceSubmit 
             type="button"
             onClick={next}
             disabled={submitting}
-            className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground transition disabled:opacity-50"
+            className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-primary-foreground transition disabled:opacity-50"
           >
             {isLast ? (submitting ? "Submitting…" : "Finish") : "Next"}
           </button>

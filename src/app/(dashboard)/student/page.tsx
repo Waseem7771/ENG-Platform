@@ -224,7 +224,7 @@ function QuickAction({ label, href, icon, color }: { label: string; href: string
   return (
     <Link href={href}>
       <motion.div
-        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors duration-300 hover:border-border hover:bg-card"
+        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors duration-300 hover:border-line-strong hover:bg-muted"
         whileHover={{ x: 4 }}
         transition={{ duration: 0.2 }}
       >

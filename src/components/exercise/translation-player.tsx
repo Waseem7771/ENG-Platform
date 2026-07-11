@@ -77,7 +77,7 @@ export function TranslationPlayer({ data, onSubmit, submitting, registerForceSub
         type="button"
         onClick={next}
         disabled={submitting || !answers[item.id]?.trim()}
-        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground transition disabled:opacity-30"
+        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-primary-foreground transition disabled:opacity-30"
       >
         {isLast ? (submitting ? "Submitting…" : "Finish") : "Next"}
       </button>

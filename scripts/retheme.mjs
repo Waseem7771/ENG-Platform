@@ -4,6 +4,11 @@ import { readFileSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { join, extname } from "node:path";
 
 const REPLACEMENTS = [
+  // Hover-specific rules MUST precede their generic counterparts below — otherwise
+  // the generic regex (no hover: awareness) matches first and clobbers the class,
+  // leaving the dedicated hover:* rule with nothing left to match (dead hover state).
+  [/hover:bg-white\/(?:5|10)\b/g, "hover:bg-muted"],
+  [/hover:border-white\/(?:10|15|20|30)\b/g, "hover:border-line-strong"],
   // text: 3-token system
   [/text-white\/(?:90|80|70)\b/g, "text-foreground"],
   [/text-white\/(?:60|50|40|30|25|20|15|10)\b/g, "text-muted-foreground"],
@@ -11,9 +16,7 @@ const REPLACEMENTS = [
   // surfaces
   [/bg-white\/\[0\.0[2-9]\]/g, "bg-card"],
   [/bg-white\/(?:5|10)\b/g, "bg-muted"],
-  [/hover:bg-white\/(?:5|10)\b/g, "hover:bg-muted"],
   [/border-white\/(?:5|10|15|20)\b/g, "border-border"],
-  [/hover:border-white\/(?:10|15|20|30)\b/g, "hover:border-line-strong"],
   [/divide-white\/(?:5|10)\b/g, "divide-border"],
   [/placeholder:text-white\/(?:20|25|30|40)\b/g, "placeholder:text-muted-foreground/70"],
   // glass + glow leftovers

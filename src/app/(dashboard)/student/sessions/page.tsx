@@ -131,7 +131,7 @@ function SessionSection({
                 <button
                   onClick={() => onJoin(s.id)}
                   disabled={joiningId === s.id}
-                  className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
+                  className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-50"
                 >
                   {joiningId === s.id ? "Joining…" : "Join"}
                 </button>

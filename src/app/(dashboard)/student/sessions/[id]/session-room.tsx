@@ -123,7 +123,7 @@ export function SessionRoom({ id }: { id: string }) {
           >
             Retry
           </button>
-          <Link href="/student/sessions" className="rounded-full bg-primary px-5 py-2 text-sm text-foreground">
+          <Link href="/student/sessions" className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">
             Back to Sessions
           </Link>
         </div>
@@ -158,7 +158,7 @@ export function SessionRoom({ id }: { id: string }) {
               </p>
               <button
                 onClick={() => router.push(`/student/exercises/${detail.pushedExercise!.id}`)}
-                className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-foreground"
+                className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-primary-foreground"
               >
                 Start Exercise
               </button>
@@ -185,7 +185,9 @@ export function SessionRoom({ id }: { id: string }) {
                   <div
                     dir="auto"
                     className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
-                      isMe ? "bg-primary text-foreground" : "border border-border bg-card text-foreground"
+                      isMe
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border bg-card text-foreground"
                     }`}
                   >
                     {m.content}
@@ -209,7 +211,7 @@ export function SessionRoom({ id }: { id: string }) {
           <button
             type="submit"
             disabled={sending || isEnded || !input.trim()}
-            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-foreground transition disabled:opacity-40"
+            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition disabled:opacity-40"
           >
             Send
           </button>
@@ -234,9 +236,9 @@ export function SessionRoom({ id }: { id: string }) {
       {isEnded && (
         <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/70">
           <div className="rounded-2xl border border-border bg-[#14111f] p-8 text-center">
-            <p className="text-lg font-semibold text-foreground">Session ended</p>
-            <p className="mt-2 text-sm text-muted-foreground">Thanks for participating!</p>
-            <Link href="/student/sessions" className="mt-4 inline-block rounded-full bg-primary px-6 py-2 text-sm text-foreground">
+            <p className="text-lg font-semibold text-background">Session ended</p>
+            <p className="mt-2 text-sm text-background/70">Thanks for participating!</p>
+            <Link href="/student/sessions" className="mt-4 inline-block rounded-full bg-primary px-6 py-2 text-sm text-primary-foreground">
               Back to Sessions
             </Link>
           </div>

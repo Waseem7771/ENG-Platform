@@ -60,7 +60,7 @@ export function PicturePlayer({ data, onSubmit, submitting, registerForceSubmit 
         type="button"
         onClick={finish}
         disabled={!canSubmit || submitting}
-        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground transition disabled:opacity-30"
+        className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-primary-foreground transition disabled:opacity-30"
       >
         {submitting ? "Submitting…" : "Submit"}
       </button>

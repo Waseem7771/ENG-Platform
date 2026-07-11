@@ -131,7 +131,7 @@ export default function PlacementExamPage() {
               type="button"
               onClick={() => setAnswers((a) => ({ ...a, [question.id]: opt }))}
               className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all duration-200 ${
-                answers[question.id] === opt ? "border-primary/50 bg-secondary text-foreground" : "border-border bg-card text-foreground hover:border-border"
+                answers[question.id] === opt ? "border-primary/50 bg-secondary text-foreground" : "border-border bg-card text-foreground hover:border-line-strong"
               }`}
             >
               {opt}
@@ -152,7 +152,7 @@ export default function PlacementExamPage() {
             type="button"
             disabled={!answered || submitting}
             onClick={() => (isLast ? submitExam() : setQIndex((i) => i + 1))}
-            className="rounded-full bg-primary px-8 py-2.5 text-sm font-medium uppercase tracking-wider text-foreground disabled:opacity-30"
+            className="rounded-full bg-primary px-8 py-2.5 text-sm font-medium uppercase tracking-wider text-primary-foreground disabled:opacity-30"
           >
             {isLast ? (submitting ? "Submitting…" : "Submit") : "Next"}
           </button>

@@ -101,7 +101,7 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
     if (isMatched) return "border-leaf bg-leaf-soft text-leaf-text cursor-default";
     if (isSelected && wrongFlash) return "border-destructive bg-coral-soft text-destructive";
     if (isSelected) return "border-primary bg-secondary text-foreground";
-    return "border-border bg-card text-foreground hover:border-border hover:bg-card";
+    return "border-border bg-card text-foreground hover:border-line-strong hover:bg-muted";
   }
 
   return (
@@ -153,7 +153,7 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
           type="button"
           onClick={finish}
           disabled={submitting}
-          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-foreground disabled:opacity-50"
+          className="w-full rounded-full bg-primary px-6 py-3 text-sm font-medium uppercase tracking-wider text-primary-foreground disabled:opacity-50"
         >
           {submitting ? "Submitting…" : "See Results"}
         </button>

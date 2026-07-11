@@ -59,7 +59,7 @@ export default function AiChatPage() {
     if (result) {
       return (
         <div className="mx-auto max-w-3xl space-y-6 py-4">
-          <button onClick={backToGrid} className="text-xs text-muted-foreground hover:text-muted-foreground">
+          <button onClick={backToGrid} className="text-xs text-muted-foreground hover:text-foreground">
             ← Back to scenarios
           </button>
           <ResultsScreen
@@ -79,7 +79,7 @@ export default function AiChatPage() {
 
     return (
       <div className="flex h-[calc(100vh-6rem)] flex-col gap-3">
-        <button onClick={backToGrid} className="w-fit text-xs text-muted-foreground hover:text-muted-foreground">
+        <button onClick={backToGrid} className="w-fit text-xs text-muted-foreground hover:text-foreground">
           ← Back to scenarios
         </button>
         <div className="min-h-0 flex-1">
@@ -131,7 +131,7 @@ export default function AiChatPage() {
             const scenario = (ex.data as ConversationData).scenario;
             return (
               <motion.button key={ex.id} variants={item} type="button" onClick={() => setSelected(ex)} className="text-left">
-                <div className="h-full rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-border hover:bg-card">
+                <div className="h-full rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-line-strong hover:bg-muted">
                   <div className="mb-2 text-3xl">{scenario.emoji}</div>
                   <h3 className="font-semibold tracking-tight text-foreground">{scenario.title}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{scenario.description}</p>
