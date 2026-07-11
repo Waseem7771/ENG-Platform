@@ -154,7 +154,14 @@ export function ConversationScreen({ id }: { id: string }) {
   if (phase === "results" && result) {
     return (
       <div className="mx-auto max-w-3xl py-6">
-        <ResultsScreen result={result} title={exercise.title} next={next} compact onBack={() => router.push(BACK_HREF)} />
+        <ResultsScreen
+          result={result}
+          title={exercise.title}
+          next={next}
+          compact
+          onBack={() => router.push(BACK_HREF)}
+          backLabel={t("conversation.back")}
+        />
       </div>
     );
   }
