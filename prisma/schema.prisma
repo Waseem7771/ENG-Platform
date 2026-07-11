@@ -164,7 +164,7 @@ model SessionMessage {
 
 model Lesson {
   id          String   @id @default(cuid())
-  classId     String
+  classId     String?
   createdById String
   title       String
   description String?
@@ -172,10 +172,11 @@ model Lesson {
   order       Int      @default(0)
   level       String   // BEGINNER | INTERMEDIATE | ADVANCED
   unit        Int      @default(1) // Unit number (1-6)
+  isCheckpoint Boolean @default(false) // unit checkpoint quiz — passing unlocks the next unit
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  class     Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  class     Class?     @relation(fields: [classId], references: [id], onDelete: Cascade)
   createdBy User       @relation("CreatedLessons", fields: [createdById], references: [id])
   exercises Exercise[]
 }
