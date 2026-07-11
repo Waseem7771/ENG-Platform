@@ -82,5 +82,13 @@
   "classes.joined": "You joined {name}!",
   "classes.empty": "No classes yet. Ask your teacher for a join code.",
   "classes.teacherLabel": "Teacher: {name}",
-  "classes.viewSessions": "Live sessions"
+  "classes.viewSessions": "Live sessions",
+  "practice.title": "Practice",
+  "practice.subtitle": "Pick any exercise — your level is selected for you.",
+  "practice.all": "All",
+  "practice.myLevel": "My level",
+  "practice.allLevels": "All levels",
+  "practice.completed": "Completed",
+  "practice.best": "Best {score}%",
+  "practice.empty": "No exercises match these filters."
 }

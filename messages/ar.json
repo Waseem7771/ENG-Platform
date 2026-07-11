@@ -82,5 +82,13 @@
   "classes.joined": "انضممت إلى {name}!",
   "classes.empty": "لا صفوف بعد. اطلب رمز الانضمام من معلمك.",
   "classes.teacherLabel": "المعلم: {name}",
-  "classes.viewSessions": "الجلسات المباشرة"
+  "classes.viewSessions": "الجلسات المباشرة",
+  "practice.title": "تدرّب",
+  "practice.subtitle": "اختر أي تمرين — مستواك محدد تلقائيًا.",
+  "practice.all": "الكل",
+  "practice.myLevel": "مستواي",
+  "practice.allLevels": "كل المستويات",
+  "practice.completed": "مكتمل",
+  "practice.best": "أفضل نتيجة {score}%",
+  "practice.empty": "لا تمارين تطابق هذه التصفية."
 }
