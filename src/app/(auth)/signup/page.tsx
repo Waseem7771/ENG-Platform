@@ -42,7 +42,7 @@ function SignupForm() {
       if (result.error) {
         setError(result.error.message ?? t("common.error"));
       } else {
-        router.push(role === "TEACHER" ? "/teacher" : "/student");
+        router.push(role === "TEACHER" ? "/teacher" : "/student/onboarding");
         router.refresh();
       }
     } catch {

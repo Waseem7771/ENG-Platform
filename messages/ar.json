@@ -44,5 +44,17 @@
   "auth.resetLinkInvalid": "رابط إعادة التعيين غير صالح أو انتهت صلاحيته.",
   "auth.requestNewLink": "اطلب رابطًا جديدًا",
   "results.nextLesson": "التالي: {title}",
-  "results.nextPractice": "التالي: {title}"
+  "results.nextPractice": "التالي: {title}",
+  "common.retry": "إعادة المحاولة",
+  "common.next": "التالي",
+  "common.submit": "إرسال",
+  "onboarding.title": "لنحدد مستواك",
+  "onboarding.subtitle": "أجب عن 5 أسئلة سريعة ليناسبك مسارك. يستغرق الأمر نحو دقيقة.",
+  "onboarding.start": "ابدأ",
+  "onboarding.skip": "تخطَّ الآن",
+  "onboarding.doneTitle": "أنت جاهز!",
+  "onboarding.yourLevel": "مستواك",
+  "onboarding.firstLesson": "ابدأ درسك الأول",
+  "onboarding.goToPath": "اذهب إلى مساري",
+  "onboarding.question": "سؤال {n} من {total}"
 }
