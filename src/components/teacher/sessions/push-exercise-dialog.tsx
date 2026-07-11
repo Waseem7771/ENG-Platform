@@ -124,7 +124,7 @@ export function PushExerciseDialog({
                 key={ex.id}
                 onClick={() => handlePush(ex)}
                 disabled={pushingId !== null}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 text-left transition-colors hover:border-primary/30 hover:bg-secondary disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 text-start transition-colors hover:border-primary/30 hover:bg-secondary disabled:pointer-events-none disabled:opacity-50"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{ex.title}</p>

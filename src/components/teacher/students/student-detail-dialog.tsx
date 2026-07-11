@@ -141,7 +141,7 @@ export function StudentDetailDialog({ studentId, onOpenChange }: { studentId: st
                           <LevelBadge level={r.exercise.difficulty} />
                         </div>
                       </div>
-                      <div className="shrink-0 text-right">
+                      <div className="shrink-0 text-end">
                         <p className="font-semibold text-foreground">{r.score}%</p>
                         <p className="text-[11px] text-muted-foreground">{new Date(r.completedAt).toLocaleDateString()}</p>
                       </div>

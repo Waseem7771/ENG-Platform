@@ -44,7 +44,7 @@ export default function LoginPage() {
     try {
       const result = await signIn.email({ email, password });
       if (result.error) {
-        setError(result.error.message || "Invalid email or password");
+        setError(result.error.message || t("common.error"));
       } else {
         const { data } = await authClient.getSession();
         const role = (data?.user as { role?: string } | undefined)?.role;
@@ -55,7 +55,7 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -79,9 +79,9 @@ export default function LoginPage() {
                 Speak<span className="text-primary">Path</span>
               </span>
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{t("auth.welcomeBack")}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Sign in to continue learning
+              {t("auth.signInSubtitle")}
             </p>
           </div>
 
@@ -98,12 +98,12 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground">
-                Email
+                {t("auth.email")}
               </Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-12 rounded-xl"
@@ -113,18 +113,18 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground">
-                Password
+                {t("auth.password")}
               </Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12 rounded-xl"
                 required
               />
-              <div className="text-right">
+              <div className="text-end">
                 <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                   {t("auth.forgotPassword")}
                 </Link>
@@ -132,17 +132,17 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? t("common.loading") : t("auth.signIn")}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
+            {t("auth.noAccount")}{" "}
             <Link
               href="/signup"
               className="font-medium text-primary transition-colors hover:text-primary"
             >
-              Sign up
+              {t("auth.signUp")}
             </Link>
           </p>
         </div>

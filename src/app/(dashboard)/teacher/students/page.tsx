@@ -98,7 +98,7 @@ export default function TeacherStudentsPage() {
 function StudentRow({ student, onOpen }: { student: TeacherStudentListItem; onOpen: () => void }) {
   return (
     <div className="rounded-card border-2 border-border bg-card shadow-sticker p-0">
-      <button type="button" onClick={onOpen} className="w-full p-5 text-left">
+      <button type="button" onClick={onOpen} className="w-full p-5 text-start">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-semibold text-primary">

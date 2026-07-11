@@ -191,11 +191,11 @@ function RosterTable({ students }: { students: TeacherClassDetail["students"] })
     <div className="overflow-x-auto">
       <table className="w-full min-w-[560px] text-sm">
         <thead>
-          <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
+          <tr className="border-b border-border text-start text-xs uppercase tracking-wider text-muted-foreground">
             <th className="pb-3 font-medium">Name</th>
             <th className="pb-3 font-medium">Level</th>
             <th className="pb-3 font-medium">Overall score</th>
-            <th className="pb-3 pe-0 text-right font-medium">XP</th>
+            <th className="pb-3 pe-0 text-end font-medium">XP</th>
           </tr>
         </thead>
         <tbody>
@@ -214,7 +214,7 @@ function RosterTable({ students }: { students: TeacherClassDetail["students"] })
                   <span className="text-xs text-muted-foreground">{s.overallScore}%</span>
                 </div>
               </td>
-              <td className="py-3.5 text-right font-medium text-sun-deep/90">{s.xp}</td>
+              <td className="py-3.5 text-end font-medium text-sun-deep/90">{s.xp}</td>
             </tr>
           ))}
         </tbody>

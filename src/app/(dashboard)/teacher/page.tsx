@@ -182,7 +182,7 @@ function QuickAction({ label, href, icon, color }: { label: string; href: string
       >
         <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${bgColors[color]}`}>{icon}</div>
         <span className="text-sm font-medium text-foreground">{label}</span>
-        <Plus className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
+        <Plus className="ms-auto h-3.5 w-3.5 text-muted-foreground" />
       </motion.div>
     </Link>
   );

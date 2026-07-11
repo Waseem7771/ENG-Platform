@@ -39,7 +39,7 @@ export function OptionButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`w-full rounded-btn border-2 px-4 py-3 text-left text-sm font-medium transition-all duration-200 disabled:cursor-default ${styles[state]}`}
+      className={`w-full rounded-btn border-2 px-4 py-3 text-start text-sm font-medium transition-all duration-200 disabled:cursor-default ${styles[state]}`}
     >
       {label}
     </button>

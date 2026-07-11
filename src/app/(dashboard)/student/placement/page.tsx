@@ -130,7 +130,7 @@ export default function PlacementExamPage() {
               key={opt}
               type="button"
               onClick={() => setAnswers((a) => ({ ...a, [question.id]: opt }))}
-              className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all duration-200 ${
+              className={`w-full rounded-xl border px-4 py-3 text-start text-sm font-medium transition-all duration-200 ${
                 answers[question.id] === opt ? "border-primary/50 bg-secondary text-foreground" : "border-border bg-card text-foreground hover:border-line-strong"
               }`}
             >
@@ -201,7 +201,7 @@ function InfoRow({ icon, title, subtitle }: { icon: string; title: string; subti
 
 function BreakdownBar({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 text-left">
+    <div className="rounded-xl border border-border bg-card p-4 text-start">
       <div className="mb-2 flex justify-between text-sm">
         <span className="text-muted-foreground">{label}</span>
         <span className="text-muted-foreground">{value}%</span>

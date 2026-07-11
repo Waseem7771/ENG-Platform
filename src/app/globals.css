@@ -141,6 +141,8 @@
 
   :lang(ar) {
     line-height: 1.7;
-    letter-spacing: 0;
   }
 }
+
+/* Arabic must never letter-space (breaks cursive joining) — beats tracking-* utilities. */
+:lang(ar), :lang(ar) * { letter-spacing: 0 !important; }

@@ -52,4 +52,50 @@ describe("atomic signup role", () => {
     const u = await db.user.findUnique({ where: { email: "evil@test.local" } });
     expect(u?.role).toBe("STUDENT");
   });
+
+  it("updateUser cannot escalate role or set level (input:false enforced server-side)", async () => {
+    const email = "immutable@test.local";
+    const { headers } = await auth.api.signUpEmail({
+      body: { email, password: "password-123", name: "Original Name" },
+      returnHeaders: true,
+    });
+
+    // signUpEmail auto-signs-in and sets the session cookie; forward it as a
+    // Cookie header so the follow-up calls are authenticated as this user.
+    const cookie = headers
+      .getSetCookie()
+      .map((c) => c.split(";")[0])
+      .join("; ");
+    const authHeaders = new Headers({ cookie });
+
+    // Smuggling role/level alongside a legitimate field doesn't get them
+    // silently stripped on update (unlike signup) — better-auth's
+    // parseInputData throws for input:false fields on the "update" action
+    // (node_modules/better-auth/dist/db/schema.mjs), failing the whole call
+    // closed. Confirm neither the privileged fields NOR the co-submitted
+    // name change take effect.
+    await expect(
+      auth.api.updateUser({
+        body: { name: "Renamed", role: "TEACHER", level: "ADVANCED" } as never,
+        headers: authHeaders,
+      })
+    ).rejects.toThrow();
+
+    let u = await db.user.findUnique({ where: { email } });
+    expect(u?.name).toBe("Original Name");
+    expect(u?.role).toBe("STUDENT");
+    expect(u?.level).toBeNull();
+
+    // A legitimate update (name only, no privileged fields) still succeeds —
+    // proves the endpoint works and the block above is targeted, not broken.
+    await auth.api.updateUser({
+      body: { name: "Renamed" },
+      headers: authHeaders,
+    });
+
+    u = await db.user.findUnique({ where: { email } });
+    expect(u?.name).toBe("Renamed");
+    expect(u?.role).toBe("STUDENT");
+    expect(u?.level).toBeNull();
+  });
 });

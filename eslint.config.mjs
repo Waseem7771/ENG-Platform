@@ -28,12 +28,20 @@ const eslintConfig = defineConfig([
           message: "No raw hex in className — add a token to globals.css.",
         },
         {
-          selector: "Literal[value=/\\b(pl|pr|ml|mr)-\\d/]",
+          selector: "Literal[value=/\\b(pl|pr|ml|mr)-(\\d|auto)/]",
           message: "Use logical spacing (ps-/pe-/ms-/me-) for RTL support.",
         },
         {
           selector: "Literal[value=/\\bborder-(l|r)($|-|\\s)/]",
           message: "Use border-s / border-e for RTL support.",
+        },
+        {
+          selector: "Literal[value=/\\btext-(left|right)\\b/]",
+          message: "Use text-start / text-end for RTL support.",
+        },
+        {
+          selector: "Literal[value=/(?<!from-)\\b(left|right)-\\d+(?!\\/)/]",
+          message: "Use start- / end- logical insets for RTL support.",
         },
       ],
     },

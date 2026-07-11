@@ -1,8 +1,10 @@
 "use client";
 
+import { useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import {
   LayoutDashboard,
   BookOpen,
@@ -55,6 +57,18 @@ export function Sidebar({
   const t = useT();
   const locale = useLocale();
   const navItems = role === "TEACHER" ? teacherNav : studentNav;
+  const [isPending, startTransition] = useTransition();
+
+  function toggleLocale() {
+    startTransition(async () => {
+      try {
+        await setLocale(locale === "en" ? "ar" : "en");
+        router.refresh();
+      } catch {
+        toast.error(t("common.error"));
+      }
+    });
+  }
 
   return (
     <aside className="flex h-screen w-64 flex-col border-e-2 border-sidebar-border bg-sidebar">
@@ -89,8 +103,6 @@ export function Sidebar({
                     ? "border-2 border-primary/25 bg-secondary text-secondary-foreground"
                     : "text-muted-foreground hover:bg-muted"
                 }`}
-                whileHover={{ x: 2 }}
-                transition={{ duration: 0.2 }}
               >
                 {isActive && (
                   <motion.div
@@ -116,10 +128,8 @@ export function Sidebar({
           variant="ghost"
           size="sm"
           className="w-full justify-start gap-2"
-          onClick={async () => {
-            await setLocale(locale === "en" ? "ar" : "en");
-            router.refresh();
-          }}
+          onClick={toggleLocale}
+          disabled={isPending}
         >
           <Languages className="size-4" />
           {t("common.language")}

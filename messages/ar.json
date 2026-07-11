@@ -31,5 +31,16 @@
   "auth.sendResetLink": "إرسال رابط إعادة التعيين",
   "auth.resetLinkSent": "إذا كان البريد موجودًا، فسيصلك رابط إعادة التعيين.",
   "auth.passwordUpdated": "تم تحديث كلمة المرور. سجّل الدخول بكلمتك الجديدة.",
-  "auth.signupRoleQuestion": "أنضم بصفتي"
+  "auth.signupRoleQuestion": "أنضم بصفتي",
+  "auth.welcomeBack": "أهلاً بعودتك",
+  "auth.signInSubtitle": "سجّل الدخول لمواصلة التعلم",
+  "auth.createAccount": "أنشئ حسابك",
+  "auth.signUpSubtitle": "ابدأ رحلتك في تعلم الإنجليزية",
+  "auth.roleLearn": "أريد أن أتعلم",
+  "auth.roleTeach": "أريد أن أعلّم",
+  "auth.namePlaceholder": "اسمك",
+  "auth.emailPlaceholder": "you@example.com",
+  "auth.passwordPlaceholder": "8 أحرف على الأقل",
+  "auth.resetLinkInvalid": "رابط إعادة التعيين غير صالح أو انتهت صلاحيته.",
+  "auth.requestNewLink": "اطلب رابطًا جديدًا"
 }

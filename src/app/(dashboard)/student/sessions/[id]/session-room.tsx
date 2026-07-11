@@ -227,7 +227,7 @@ export function SessionRoom({ id }: { id: string }) {
                 {p.name.charAt(0).toUpperCase()}
               </div>
               <span className="truncate text-sm text-foreground">{p.name}</span>
-              {p.isTeacher && <span className="ml-auto text-[10px] uppercase tracking-wider text-primary">Teacher</span>}
+              {p.isTeacher && <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">Teacher</span>}
             </li>
           ))}
         </ul>

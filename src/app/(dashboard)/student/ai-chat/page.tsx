@@ -130,7 +130,7 @@ export default function AiChatPage() {
           {scenarios.map((ex) => {
             const scenario = (ex.data as ConversationData).scenario;
             return (
-              <motion.button key={ex.id} variants={item} type="button" onClick={() => setSelected(ex)} className="text-left">
+              <motion.button key={ex.id} variants={item} type="button" onClick={() => setSelected(ex)} className="text-start">
                 <div className="h-full rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-line-strong hover:bg-muted">
                   <div className="mb-2 text-3xl">{scenario.emoji}</div>
                   <h3 className="font-semibold tracking-tight text-foreground">{scenario.title}</h3>

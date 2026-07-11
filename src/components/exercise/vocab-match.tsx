@@ -122,7 +122,7 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
                 type="button"
                 disabled={isMatched}
                 onClick={() => selectWord(tile.pairIdx)}
-                className={`w-full rounded-xl border px-3 py-3 text-left text-sm font-medium transition-all duration-200 ${cellClass(selectedWordIdx === tile.pairIdx, isMatched)}`}
+                className={`w-full rounded-xl border px-3 py-3 text-start text-sm font-medium transition-all duration-200 ${cellClass(selectedWordIdx === tile.pairIdx, isMatched)}`}
               >
                 {tile.text}
               </button>
@@ -139,7 +139,7 @@ export function VocabMatch({ data, onSubmit, submitting, registerForceSubmit }: 
                 type="button"
                 disabled={isMatched}
                 onClick={() => selectMeaning(tile.pairIdx)}
-                className={`w-full rounded-xl border px-3 py-3 text-left text-sm font-medium transition-all duration-200 ${cellClass(selectedMeaningIdx === tile.pairIdx, isMatched)}`}
+                className={`w-full rounded-xl border px-3 py-3 text-start text-sm font-medium transition-all duration-200 ${cellClass(selectedMeaningIdx === tile.pairIdx, isMatched)}`}
               >
                 {tile.text}
               </button>

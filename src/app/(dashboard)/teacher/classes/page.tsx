@@ -80,7 +80,7 @@ export default function TeacherClassesPage() {
 
 function ClassCard({ classItem }: { classItem: TeacherClassListItem }) {
   return (
-    <div className="rounded-card border-2 border-border bg-card shadow-sticker h-full p-0">
+    <div className="rounded-card border-2 border-border bg-card shadow-sticker h-full overflow-hidden p-0">
       <Link href={`/teacher/classes/${classItem.id}`} className="block p-6">
         <div className="mb-3 flex items-start justify-between gap-2">
           <h3 className="text-lg font-semibold tracking-tight text-foreground">{classItem.name}</h3>

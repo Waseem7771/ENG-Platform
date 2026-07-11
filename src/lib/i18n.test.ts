@@ -19,6 +19,12 @@ describe("pickLocale", () => {
   it("defaults to en with no signals", () => {
     expect(pickLocale(undefined, null)).toBe("en");
   });
+  it("honors q-values: a higher-q en beats a lower-q ar", () => {
+    expect(pickLocale(undefined, "en-US,en;q=0.9,ar;q=0.1")).toBe("en");
+  });
+  it("drops q=0 entries entirely", () => {
+    expect(pickLocale(undefined, "en,ar;q=0")).toBe("en");
+  });
 });
 
 describe("dirFor", () => {

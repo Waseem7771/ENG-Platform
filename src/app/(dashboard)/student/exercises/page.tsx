@@ -57,11 +57,11 @@ export default function StudentExercisesPage() {
       {!loading && !error && (
         <>
           <motion.div initial="hidden" animate="visible" variants={container} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <motion.button variants={item} type="button" onClick={() => setSelectedType("ALL")} className="text-left">
+            <motion.button variants={item} type="button" onClick={() => setSelectedType("ALL")} className="text-start">
               <TypeCard label="All Exercises" icon="✨" description="Everything in one place" count={exercises?.length ?? 0} active={selectedType === "ALL"} />
             </motion.button>
             {EXERCISE_TYPE_META.map((t) => (
-              <motion.button key={t.type} variants={item} type="button" onClick={() => setSelectedType(t.type)} className="text-left">
+              <motion.button key={t.type} variants={item} type="button" onClick={() => setSelectedType(t.type)} className="text-start">
                 <TypeCard label={t.label} icon={t.icon} description={t.description} count={counts[t.type] ?? 0} active={selectedType === t.type} />
               </motion.button>
             ))}

@@ -70,8 +70,8 @@ function SignupForm() {
                 Speak<span className="text-primary">Path</span>
               </span>
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Start your English learning journey</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t("auth.createAccount")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("auth.signUpSubtitle")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -104,7 +104,7 @@ function SignupForm() {
                 >
                   <GraduationCap className="mx-auto mb-1.5 h-6 w-6" />
                   <div className="text-sm font-semibold">{t("auth.iAmStudent")}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">I want to learn</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{t("auth.roleLearn")}</div>
                 </motion.button>
 
                 <motion.button
@@ -120,7 +120,7 @@ function SignupForm() {
                 >
                   <Presentation className="mx-auto mb-1.5 h-6 w-6" />
                   <div className="text-sm font-semibold">{t("auth.iAmTeacher")}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">I want to teach</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{t("auth.roleTeach")}</div>
                 </motion.button>
               </div>
             </div>
@@ -132,7 +132,7 @@ function SignupForm() {
               <Input
                 id="name"
                 type="text"
-                placeholder="Your name"
+                placeholder={t("auth.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="h-12 rounded-xl"
@@ -147,7 +147,7 @@ function SignupForm() {
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("auth.emailPlaceholder")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-12 rounded-xl"
@@ -162,7 +162,7 @@ function SignupForm() {
               <Input
                 id="password"
                 type="password"
-                placeholder="At least 8 characters"
+                placeholder={t("auth.passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-12 rounded-xl"

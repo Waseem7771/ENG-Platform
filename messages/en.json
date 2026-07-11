@@ -31,5 +31,16 @@
   "auth.sendResetLink": "Send reset link",
   "auth.resetLinkSent": "If that email exists, a reset link is on its way.",
   "auth.passwordUpdated": "Password updated. Sign in with your new password.",
-  "auth.signupRoleQuestion": "I'm joining as a"
+  "auth.signupRoleQuestion": "I'm joining as a",
+  "auth.welcomeBack": "Welcome back",
+  "auth.signInSubtitle": "Sign in to continue learning",
+  "auth.createAccount": "Create your account",
+  "auth.signUpSubtitle": "Start your English learning journey",
+  "auth.roleLearn": "I want to learn",
+  "auth.roleTeach": "I want to teach",
+  "auth.namePlaceholder": "Your name",
+  "auth.emailPlaceholder": "you@example.com",
+  "auth.passwordPlaceholder": "At least 8 characters",
+  "auth.resetLinkInvalid": "This reset link is invalid or has expired.",
+  "auth.requestNewLink": "Request a new link"
 }

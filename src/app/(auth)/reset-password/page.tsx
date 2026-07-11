@@ -18,6 +18,8 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const t = useT();
   const token = searchParams.get("token") ?? "";
+  const linkError = searchParams.get("error");
+  const isInvalidLink = Boolean(linkError) || !token;
   const [newPassword, setNewPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,37 +65,52 @@ function ResetPasswordForm() {
             <h1 className="text-2xl font-bold tracking-tight">{t("auth.resetPassword")}</h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+          {isInvalidLink ? (
+            <>
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-center text-sm text-destructive">
+                {t("auth.resetLinkInvalid")}
+              </div>
+              <Button
+                render={<Link href="/forgot-password" />}
+                nativeButton={false}
+                className="mt-5 w-full"
               >
-                {error}
-              </motion.div>
-            )}
+                {t("auth.requestNewLink")}
+              </Button>
+            </>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+                >
+                  {error}
+                </motion.div>
+              )}
 
-            <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-xs uppercase tracking-wider text-muted-foreground">
-                {t("auth.newPassword")}
-              </Label>
-              <Input
-                id="newPassword"
-                type="password"
-                placeholder="At least 8 characters"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="h-12 rounded-xl"
-                minLength={8}
-                required
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="newPassword" className="text-xs uppercase tracking-wider text-muted-foreground">
+                  {t("auth.newPassword")}
+                </Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  placeholder={t("auth.passwordPlaceholder")}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="h-12 rounded-xl"
+                  minLength={8}
+                  required
+                />
+              </div>
 
-            <Button type="submit" className="w-full" disabled={loading || !token}>
-              {loading ? t("common.loading") : t("auth.resetPassword")}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full" disabled={loading || !token}>
+                {loading ? t("common.loading") : t("auth.resetPassword")}
+              </Button>
+            </form>
+          )}
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <Link href="/login" className="font-medium text-primary transition-colors hover:text-primary">
