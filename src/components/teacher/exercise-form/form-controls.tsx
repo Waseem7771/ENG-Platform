@@ -4,7 +4,7 @@ import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const inputClass =
-  "h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-foreground placeholder:text-white/20 outline-none transition-colors focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20";
+  "h-10 w-full rounded-lg border border-border bg-muted px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20";
 
 export function Field({
   label,
@@ -22,11 +22,11 @@ export function Field({
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex items-baseline justify-between">
-        <label className="text-xs uppercase tracking-wider text-white/50">{label}</label>
-        {hint && <span className="text-[11px] normal-case text-white/25">{hint}</span>}
+        <label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</label>
+        {hint && <span className="text-[11px] normal-case text-muted-foreground">{hint}</span>}
       </div>
       {children}
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -43,14 +43,14 @@ export function ItemCard({
   canRemove?: boolean;
 }) {
   return (
-    <div className="relative space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+    <div className="relative space-y-3 rounded-xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wider text-white/30">Item {index + 1}</span>
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Item {index + 1}</span>
         {canRemove && (
           <button
             type="button"
             onClick={onRemove}
-            className="rounded-md p-1 text-white/30 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
             aria-label={`Remove item ${index + 1}`}
           >
             <X className="h-3.5 w-3.5" />
@@ -67,7 +67,7 @@ export function AddRowButton({ label, onClick }: { label: string; onClick: () =>
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/15 py-2.5 text-sm font-medium text-white/50 transition-colors hover:border-violet-500/30 hover:text-violet-300"
+      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary"
     >
       <Plus className="h-3.5 w-3.5" />
       {label}
@@ -110,7 +110,7 @@ export function OptionsEditor({
               type="radio"
               checked={answer !== "" && answer === opt}
               onChange={() => onAnswerChange(opt)}
-              className="h-4 w-4 shrink-0 accent-violet-500"
+              className="h-4 w-4 shrink-0 accent-primary"
               aria-label={`Mark option ${i + 1} as correct`}
             />
             <input
@@ -123,7 +123,7 @@ export function OptionsEditor({
               <button
                 type="button"
                 onClick={() => removeOption(i)}
-                className="shrink-0 rounded-md p-1.5 text-white/30 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                 aria-label={`Remove option ${i + 1}`}
               >
                 <X className="h-3.5 w-3.5" />
@@ -135,7 +135,7 @@ export function OptionsEditor({
           <button
             type="button"
             onClick={() => onChange([...options, ""])}
-            className="text-xs font-medium text-violet-300/80 transition-colors hover:text-violet-300"
+            className="text-xs font-medium text-primary/80 transition-colors hover:text-primary"
           >
             + Add option
           </button>

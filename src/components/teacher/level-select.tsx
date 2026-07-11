@@ -10,9 +10,9 @@ const LEVELS: { value: Level; label: string }[] = [
 ];
 
 const ACTIVE_STYLES: Record<Level, string> = {
-  BEGINNER: "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
-  INTERMEDIATE: "border-amber-500/40 bg-amber-500/15 text-amber-300",
-  ADVANCED: "border-violet-500/40 bg-violet-500/15 text-violet-300",
+  BEGINNER: "border-leaf bg-leaf-soft text-leaf-text",
+  INTERMEDIATE: "border-sun-deep/30 bg-sun-soft text-sun-deep",
+  ADVANCED: "border-primary/40 bg-secondary text-primary",
 };
 
 export function LevelSelect({
@@ -35,7 +35,7 @@ export function LevelSelect({
             "rounded-xl border px-3 py-2 text-sm font-medium transition-colors",
             value === l.value
               ? ACTIVE_STYLES[l.value]
-              : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
+              : "border-border bg-muted text-muted-foreground hover:border-line-strong hover:text-foreground"
           )}
         >
           {l.label}

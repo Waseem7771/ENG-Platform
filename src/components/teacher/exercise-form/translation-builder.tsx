@@ -36,8 +36,8 @@ export function TranslationBuilder({
                   className={cn(
                     "rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
                     it.direction === d.value
-                      ? "border-cyan-500/40 bg-cyan-500/15 text-cyan-300"
-                      : "border-white/10 bg-white/5 text-white/50 hover:border-white/20"
+                      ? "border-primary/40 bg-secondary text-primary"
+                      : "border-border bg-muted text-muted-foreground hover:border-line-strong"
                   )}
                 >
                   {d.label}
@@ -52,7 +52,7 @@ export function TranslationBuilder({
             <input value={it.reference} onChange={(e) => update(i, { reference: e.target.value })} className={inputClass} dir="auto" />
           </Field>
           {itemErrors?.[i]?.length ? (
-            <ul className="list-inside list-disc text-xs text-red-400">
+            <ul className="list-inside list-disc text-xs text-destructive">
               {itemErrors[i].map((e, idx) => (
                 <li key={idx}>{e}</li>
               ))}

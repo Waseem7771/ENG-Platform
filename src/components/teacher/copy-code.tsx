@@ -62,16 +62,16 @@ export function CopyCode({ code, className }: { code: string; className?: string
     <button
       onClick={handleCopy}
       className={cn(
-        "group inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-sm tracking-[0.2em] text-violet-300 transition-colors hover:border-violet-500/30 hover:bg-violet-500/10",
+        "group inline-flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-1.5 font-mono text-sm tracking-[0.2em] text-primary transition-colors hover:border-primary/30 hover:bg-secondary",
         className
       )}
       title="Copy join code"
     >
       {code}
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-emerald-400" />
+        <Check className="h-3.5 w-3.5 text-leaf-text" />
       ) : (
-        <Copy className="h-3.5 w-3.5 text-white/30 group-hover:text-white/60" />
+        <Copy className="h-3.5 w-3.5 text-muted-foreground/60 group-hover:text-muted-foreground" />
       )}
     </button>
   );

@@ -17,7 +17,7 @@ import { api, ApiClientError } from "@/lib/api";
 import type { Level } from "@/types";
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-foreground placeholder:text-white/20 outline-none transition-colors focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20";
+  "h-11 w-full rounded-xl border border-border bg-muted px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20";
 
 interface CreatedClass {
   id: string;
@@ -82,27 +82,27 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
     >
       <DialogTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <button className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
             <Plus className="h-4 w-4" />
             Create Class
           </button>
         }
       />
-      <DialogContent className="border border-white/10 bg-[#15121f] text-white sm:max-w-md">
+      <DialogContent className="border border-border bg-popover text-foreground sm:max-w-md">
         {step === "form" ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-white">Create a class</DialogTitle>
-              <DialogDescription className="text-white/50">
+              <DialogTitle className="text-foreground">Create a class</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
                 Students will join using an auto-generated code.
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400">{error}</div>
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
               )}
               <div className="space-y-1.5">
-                <Label htmlFor="class-name" className="text-xs uppercase tracking-wider text-white/50">
+                <Label htmlFor="class-name" className="text-xs uppercase tracking-wider text-muted-foreground">
                   Class name
                 </Label>
                 <input
@@ -115,8 +115,8 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="class-description" className="text-xs uppercase tracking-wider text-white/50">
-                  Description <span className="normal-case text-white/25">(optional)</span>
+                <Label htmlFor="class-description" className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Description <span className="normal-case text-muted-foreground">(optional)</span>
                 </Label>
                 <textarea
                   id="class-description"
@@ -128,13 +128,13 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-wider text-white/50">Level</Label>
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
                 <LevelSelect value={level} onChange={setLevel} />
               </div>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
               >
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
                 Create class
@@ -145,21 +145,21 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
           created && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-white">
-                  <PartyPopper className="h-5 w-5 text-amber-400" />
+                <DialogTitle className="flex items-center gap-2 text-foreground">
+                  <PartyPopper className="h-5 w-5 text-sun-deep" />
                   {created.name} is ready
                 </DialogTitle>
-                <DialogDescription className="text-white/50">
+                <DialogDescription className="text-muted-foreground">
                   Share this join code with your students.
                 </DialogDescription>
               </DialogHeader>
-              <div className="flex flex-col items-center gap-3 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
-                <span className="text-xs uppercase tracking-widest text-white/40">Join code</span>
+              <div className="flex flex-col items-center gap-3 rounded-2xl border border-primary/25 bg-secondary p-6">
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Join code</span>
                 <CopyCode code={created.code} className="px-4 py-2 text-lg" />
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="w-full rounded-full border border-white/15 px-5 py-2.5 text-sm font-medium text-white/80 transition-colors hover:border-white/30 hover:text-white"
+                className="w-full rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-line-strong"
               >
                 Done
               </button>

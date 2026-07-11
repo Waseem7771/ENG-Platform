@@ -43,7 +43,7 @@ export function QuizBuilder({
             onAnswerChange={(answer) => update(i, { answer })}
           />
           {itemErrors?.[i]?.length ? (
-            <ul className="list-inside list-disc text-xs text-red-400">
+            <ul className="list-inside list-disc text-xs text-destructive">
               {itemErrors[i].map((e, idx) => (
                 <li key={idx}>{e}</li>
               ))}

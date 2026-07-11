@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Radio, PenSquare, Plus, Video, Users } from "lucide-react";
-import { FloatingParticles } from "@/components/shared/floating-particles";
 import { CountUp } from "@/components/shared/count-up";
 import { ErrorState } from "@/components/teacher/state-views";
 import { SessionStatusBadge } from "@/components/teacher/badges";
@@ -62,15 +61,12 @@ export default function TeacherDashboard() {
 
   return (
     <div className="relative min-h-screen">
-      <FloatingParticles count={12} />
-
       <motion.div initial="hidden" animate="visible" variants={container} className="space-y-8">
         <motion.div variants={item}>
-          <h1 className="text-4xl font-bold tracking-tight">
-            Teacher
-            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"> Command Center</span>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+            Teacher Command Center
           </h1>
-          <p className="mt-2 text-white/40">Inspire your students and track their progress.</p>
+          <p className="mt-2 text-muted-foreground">Inspire your students and track their progress.</p>
         </motion.div>
 
         {error && !loading && (
@@ -83,36 +79,36 @@ export default function TeacherDashboard() {
           <>
             <motion.div variants={container} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <motion.div variants={item}>
-                <StatCard title="Total Students" value={data?.students.length ?? 0} loading={loading} color="emerald" />
+                <StatCard title="Total Students" value={data?.students.length ?? 0} loading={loading} />
               </motion.div>
               <motion.div variants={item}>
-                <StatCard title="Active Classes" value={data?.classes.length ?? 0} loading={loading} color="teal" />
+                <StatCard title="Active Classes" value={data?.classes.length ?? 0} loading={loading} />
               </motion.div>
               <motion.div variants={item}>
-                <StatCard title="Live Sessions" value={liveSessionsCount} loading={loading} color="cyan" />
+                <StatCard title="Live Sessions" value={liveSessionsCount} loading={loading} />
               </motion.div>
               <motion.div variants={item}>
-                <StatCard title="Exercises Created" value={data?.exercises.length ?? 0} loading={loading} color="blue" />
+                <StatCard title="Exercises Created" value={data?.exercises.length ?? 0} loading={loading} />
               </motion.div>
             </motion.div>
 
             <motion.div variants={container} className="grid gap-6 lg:grid-cols-3">
               <motion.div variants={item} className="lg:col-span-2">
-                <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-7">
+                <div className="rounded-2xl border border-border bg-card p-7">
                   <h2 className="mb-6 text-lg font-semibold tracking-tight">Recent Activity</h2>
                   {loading ? (
                     <div className="space-y-3">
                       {Array.from({ length: 3 }, (_, i) => (
-                        <div key={i} className="h-16 animate-pulse rounded-xl border border-white/5 bg-white/[0.02]" />
+                        <div key={i} className="h-16 animate-pulse rounded-xl border border-border bg-card" />
                       ))}
                     </div>
                   ) : recentSessions.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-xl border border-white/5 bg-white/[0.01] p-12 text-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400">
+                    <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-card p-12 text-center">
+                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary">
                         <Radio className="h-6 w-6" />
                       </div>
-                      <p className="font-medium text-white/60">No activity yet</p>
-                      <p className="mt-1 text-sm text-white/25">Create a class and invite students to get started.</p>
+                      <p className="font-medium text-muted-foreground">No activity yet</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Create a class and invite students to get started.</p>
                     </div>
                   ) : (
                     <ul className="space-y-2">
@@ -120,11 +116,11 @@ export default function TeacherDashboard() {
                         <li key={s.id}>
                           <Link
                             href={`/teacher/sessions/${s.id}`}
-                            className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.015] p-3.5 transition-colors hover:border-white/10 hover:bg-white/[0.04]"
+                            className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 transition-colors hover:border-line-strong hover:bg-muted"
                           >
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-white/80">{s.title}</p>
-                              <p className="truncate text-xs text-white/30">{s.className}</p>
+                              <p className="truncate text-sm font-medium text-foreground">{s.title}</p>
+                              <p className="truncate text-xs text-muted-foreground">{s.className}</p>
                             </div>
                             <SessionStatusBadge status={s.status} className="shrink-0" />
                           </Link>
@@ -136,12 +132,12 @@ export default function TeacherDashboard() {
               </motion.div>
 
               <motion.div variants={item}>
-                <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-7">
+                <div className="rounded-2xl border border-border bg-card p-7">
                   <h2 className="mb-6 text-lg font-semibold tracking-tight">Quick Actions</h2>
                   <div className="space-y-3">
-                    <QuickAction label="Create a Class" href="/teacher/classes" icon={<Users className="h-4 w-4" />} color="emerald" />
-                    <QuickAction label="Start a Session" href="/teacher/sessions" icon={<Video className="h-4 w-4" />} color="cyan" />
-                    <QuickAction label="Create an Exercise" href="/teacher/exercises" icon={<PenSquare className="h-4 w-4" />} color="blue" />
+                    <QuickAction label="Create a Class" href="/teacher/classes" icon={<Users className="h-4 w-4" />} color="leaf" />
+                    <QuickAction label="Start a Session" href="/teacher/sessions" icon={<Video className="h-4 w-4" />} color="violet" />
+                    <QuickAction label="Create an Exercise" href="/teacher/exercises" icon={<PenSquare className="h-4 w-4" />} color="sun" />
                   </div>
                 </div>
               </motion.div>
@@ -153,30 +149,16 @@ export default function TeacherDashboard() {
   );
 }
 
-function StatCard({ title, value, loading, color }: { title: string; value: number; loading: boolean; color: string }) {
-  const colors: Record<string, string> = {
-    emerald: "from-emerald-500/20 to-emerald-500/5 border-emerald-500/10",
-    teal: "from-teal-500/20 to-teal-500/5 border-teal-500/10",
-    cyan: "from-cyan-500/20 to-cyan-500/5 border-cyan-500/10",
-    blue: "from-blue-500/20 to-blue-500/5 border-blue-500/10",
-  };
-  const dotColors: Record<string, string> = {
-    emerald: "bg-emerald-400",
-    teal: "bg-teal-400",
-    cyan: "bg-cyan-400",
-    blue: "bg-blue-400",
-  };
-
+function StatCard({ title, value, loading }: { title: string; value: number; loading: boolean }) {
   return (
-    <div className={`rounded-card border-2 border-border bg-card shadow-sticker p-6 bg-gradient-to-b ${colors[color]}`}>
+    <div className="rounded-card border-2 border-border bg-card shadow-sticker p-6">
       <div className="mb-3 flex items-center gap-2">
-        <div className={`h-2 w-2 rounded-full ${dotColors[color]}`} />
-        <span className="text-xs uppercase tracking-wider text-white/40">{title}</span>
+        <span className="text-xs uppercase tracking-wider text-muted-foreground">{title}</span>
       </div>
       {loading ? (
-        <div className="h-8 w-16 animate-pulse rounded bg-white/10" />
+        <div className="h-8 w-16 animate-pulse rounded bg-muted" />
       ) : (
-        <p className="text-3xl font-bold tracking-tight">
+        <p className="text-3xl font-bold tracking-tight text-primary">
           <CountUp end={value} duration={1.2} />
         </p>
       )}
@@ -186,21 +168,21 @@ function StatCard({ title, value, loading, color }: { title: string; value: numb
 
 function QuickAction({ label, href, icon, color }: { label: string; href: string; icon: React.ReactNode; color: string }) {
   const bgColors: Record<string, string> = {
-    emerald: "bg-emerald-500/10 text-emerald-400",
-    cyan: "bg-cyan-500/10 text-cyan-400",
-    blue: "bg-blue-500/10 text-blue-400",
+    leaf: "bg-leaf-soft text-leaf-text",
+    violet: "bg-secondary text-primary",
+    sun: "bg-sun-soft text-sun-deep",
   };
 
   return (
     <Link href={href}>
       <motion.div
-        className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 transition-colors duration-300 hover:border-white/10 hover:bg-white/[0.04]"
+        className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition-colors duration-300 hover:border-line-strong hover:bg-muted"
         whileHover={{ x: 4 }}
         transition={{ duration: 0.2 }}
       >
         <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${bgColors[color]}`}>{icon}</div>
-        <span className="text-sm font-medium text-white/70">{label}</span>
-        <Plus className="ml-auto h-3.5 w-3.5 text-white/20" />
+        <span className="text-sm font-medium text-foreground">{label}</span>
+        <Plus className="ml-auto h-3.5 w-3.5 text-muted-foreground" />
       </motion.div>
     </Link>
   );

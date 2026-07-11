@@ -43,8 +43,8 @@ export function GrammarBuilder({
                   className={cn(
                     "rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
                     it.kind === k.value
-                      ? "border-violet-500/40 bg-violet-500/15 text-violet-300"
-                      : "border-white/10 bg-white/5 text-white/50 hover:border-white/20"
+                      ? "border-primary/40 bg-secondary text-primary"
+                      : "border-border bg-muted text-muted-foreground hover:border-line-strong"
                   )}
                 >
                   {k.label}
@@ -95,7 +95,7 @@ export function GrammarBuilder({
           </Field>
 
           {itemErrors?.[i]?.length ? (
-            <ul className="list-inside list-disc text-xs text-red-400">
+            <ul className="list-inside list-disc text-xs text-destructive">
               {itemErrors[i].map((e, idx) => (
                 <li key={idx}>{e}</li>
               ))}

@@ -235,9 +235,9 @@ export function SessionRoom({ id }: { id: string }) {
 
       {isEnded && (
         <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/70">
-          <div className="rounded-2xl border border-border bg-[#14111f] p-8 text-center">
-            <p className="text-lg font-semibold text-background">Session ended</p>
-            <p className="mt-2 text-sm text-background/70">Thanks for participating!</p>
+          <div className="rounded-2xl border border-border bg-background p-8 text-center">
+            <p className="text-lg font-semibold text-foreground">Session ended</p>
+            <p className="mt-2 text-sm text-muted-foreground">Thanks for participating!</p>
             <Link href="/student/sessions" className="mt-4 inline-block rounded-full bg-primary px-6 py-2 text-sm text-primary-foreground">
               Back to Sessions
             </Link>

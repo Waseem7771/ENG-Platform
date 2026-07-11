@@ -79,26 +79,26 @@ export function PushExerciseDialog({
         render={
           <button
             disabled={disabled}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40"
           >
             <Radio className="h-3.5 w-3.5" />
             Push Exercise
           </button>
         }
       />
-      <DialogContent className="max-h-[80vh] overflow-hidden border border-white/10 bg-[#15121f] p-0 text-white sm:max-w-lg">
+      <DialogContent className="max-h-[80vh] overflow-hidden border border-border bg-popover p-0 text-foreground sm:max-w-lg">
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle className="text-white">Push an exercise</DialogTitle>
-            <DialogDescription className="text-white/50">All students in this session will see it instantly.</DialogDescription>
+            <DialogTitle className="text-foreground">Push an exercise</DialogTitle>
+            <DialogDescription className="text-muted-foreground">All students in this session will see it instantly.</DialogDescription>
           </DialogHeader>
           <div className="relative mt-3">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search exercises..."
-              className="h-10 w-full rounded-lg border border-white/10 bg-white/5 pl-9 pr-3 text-sm text-foreground placeholder:text-white/20 outline-none focus:border-violet-500/50"
+              className="h-10 w-full rounded-lg border border-border bg-muted pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50"
             />
           </div>
         </div>
@@ -106,16 +106,16 @@ export function PushExerciseDialog({
           {loading && (
             <div className="space-y-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="h-14 animate-pulse rounded-xl border border-white/5 bg-white/[0.02]" />
+                <div key={i} className="h-14 animate-pulse rounded-xl border border-border bg-card" />
               ))}
             </div>
           )}
           {!loading && error && <ErrorState message={error} onRetry={loadExercises} />}
           {!loading && !error && exercises !== null && exercises.length === 0 && (
-            <p className="py-8 text-center text-sm text-white/30">You haven&apos;t created any exercises yet.</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">You haven&apos;t created any exercises yet.</p>
           )}
           {!loading && !error && exercises !== null && exercises.length > 0 && filtered.length === 0 && (
-            <p className="py-8 text-center text-sm text-white/30">No exercises match your search.</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">No exercises match your search.</p>
           )}
           {!loading &&
             !error &&
@@ -124,15 +124,15 @@ export function PushExerciseDialog({
                 key={ex.id}
                 onClick={() => handlePush(ex)}
                 disabled={pushingId !== null}
-                className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5 text-left transition-colors hover:border-violet-500/30 hover:bg-violet-500/5 disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-3.5 text-left transition-colors hover:border-primary/30 hover:bg-secondary disabled:pointer-events-none disabled:opacity-50"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-white/85">{ex.title}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{ex.title}</p>
                   <div className="mt-1 flex items-center gap-2">
                     <ExerciseTypeBadge type={ex.type} />
                   </div>
                 </div>
-                {pushingId === ex.id && <Loader2 className="h-4 w-4 shrink-0 animate-spin text-violet-300" />}
+                {pushingId === ex.id && <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />}
               </button>
             ))}
         </div>

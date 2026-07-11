@@ -19,7 +19,7 @@ import { api, ApiClientError } from "@/lib/api";
 import type { TeacherClassListItem } from "@/components/teacher/types";
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-white/10 bg-white/5 px-3 text-sm text-foreground placeholder:text-white/20 outline-none transition-colors focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20";
+  "h-11 w-full rounded-xl border border-border bg-muted px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20";
 
 export function StartSessionDialog() {
   const router = useRouter();
@@ -92,40 +92,40 @@ export function StartSessionDialog() {
     >
       <DialogTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <button className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
             <Plus className="h-4 w-4" />
             Start Session
           </button>
         }
       />
-      <DialogContent className="border border-white/10 bg-[#15121f] text-white sm:max-w-md">
+      <DialogContent className="border border-border bg-popover text-foreground sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
-            <Radio className="h-4 w-4 text-cyan-400" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Radio className="h-4 w-4 text-primary" />
             Start a live session
           </DialogTitle>
-          <DialogDescription className="text-white/50">Students in the class will be able to join instantly.</DialogDescription>
+          <DialogDescription className="text-muted-foreground">Students in the class will be able to join instantly.</DialogDescription>
         </DialogHeader>
 
         {loadingClasses ? (
-          <div className="h-24 animate-pulse rounded-xl border border-white/5 bg-white/[0.02]" />
+          <div className="h-24 animate-pulse rounded-xl border border-border bg-card" />
         ) : classesError ? (
           <ErrorState message={classesError} onRetry={loadClasses} />
         ) : classes && classes.length === 0 ? (
-          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 text-center">
-            <p className="text-sm text-white/60">You need a class before you can start a session.</p>
+          <div className="rounded-xl border border-border bg-card p-5 text-center">
+            <p className="text-sm text-muted-foreground">You need a class before you can start a session.</p>
             <Link
               href="/teacher/classes"
-              className="mt-3 inline-block rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-4 py-2 text-sm font-medium text-white"
+              className="mt-3 inline-block rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             >
               Create a class
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400">{error}</div>}
+            {error && <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
             <div className="space-y-1.5">
-              <Label className="text-xs uppercase tracking-wider text-white/50">Class</Label>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Class</Label>
               <select value={classId} onChange={(e) => setClassId(e.target.value)} className={inputClass}>
                 {classes?.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -135,7 +135,7 @@ export function StartSessionDialog() {
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="session-title" className="text-xs uppercase tracking-wider text-white/50">
+              <Label htmlFor="session-title" className="text-xs uppercase tracking-wider text-muted-foreground">
                 Session title
               </Label>
               <input
@@ -149,7 +149,7 @@ export function StartSessionDialog() {
             <button
               type="submit"
               disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Go live

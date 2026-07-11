@@ -221,20 +221,20 @@ export function ExerciseFormDialog({ onCreated }: { onCreated: () => void }) {
     >
       <DialogTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <button className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
             <Plus className="h-4 w-4" />
             Create Exercise
           </button>
         }
       />
-      <DialogContent className="max-h-[85vh] overflow-y-auto border border-white/10 bg-[#15121f] text-white sm:max-w-2xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto border border-border bg-popover text-foreground sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-white">Create exercise</DialogTitle>
-          <DialogDescription className="text-white/50">Build content students will practice with.</DialogDescription>
+          <DialogTitle className="text-foreground">Create exercise</DialogTitle>
+          <DialogDescription className="text-muted-foreground">Build content students will practice with.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {formError && <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-3 text-sm text-red-400">{formError}</div>}
+          {formError && <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{formError}</div>}
 
           <Field label="Title">
             <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Present Simple Practice" className={inputClass} />
@@ -252,10 +252,10 @@ export function ExerciseFormDialog({ onCreated }: { onCreated: () => void }) {
                     onClick={() => setType(t)}
                     className={cn(
                       "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-xs font-medium transition-colors",
-                      type === t ? "border-violet-500/40 bg-violet-500/15 text-violet-200" : "border-white/10 bg-white/5 text-white/50 hover:border-white/20"
+                      type === t ? "border-primary/40 bg-secondary text-primary" : "border-border bg-muted text-muted-foreground hover:border-line-strong"
                     )}
                   >
-                    <Icon className={cn("h-4 w-4", type === t ? "text-violet-300" : meta.color)} />
+                    <Icon className={cn("h-4 w-4", type === t ? "text-primary" : meta.color)} />
                     {meta.label}
                   </button>
                 );
@@ -292,7 +292,7 @@ export function ExerciseFormDialog({ onCreated }: { onCreated: () => void }) {
             />
           </Field>
 
-          <div className="border-t border-white/5 pt-4">
+          <div className="border-t border-border pt-4">
             {type === "GRAMMAR" && <GrammarBuilder value={grammarItems} onChange={setGrammarItems} itemErrors={itemErrors} />}
             {type === "VOCABULARY" && <VocabularyBuilder value={vocabPairs} onChange={setVocabPairs} itemErrors={itemErrors} />}
             {type === "TRANSLATION" && <TranslationBuilder value={translationItems} onChange={setTranslationItems} itemErrors={itemErrors} />}
@@ -314,7 +314,7 @@ export function ExerciseFormDialog({ onCreated }: { onCreated: () => void }) {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-5 py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             Save exercise

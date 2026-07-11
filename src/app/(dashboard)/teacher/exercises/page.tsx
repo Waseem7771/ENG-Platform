@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Clock, PenSquare, Trash2, Users } from "lucide-react";
-import { FloatingParticles } from "@/components/shared/floating-particles";
 import { ErrorState, EmptyState, ListSkeleton } from "@/components/teacher/state-views";
 import { LevelBadge, ExerciseTypeBadge, EXERCISE_TYPE_META } from "@/components/teacher/badges";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
@@ -59,12 +58,10 @@ export default function TeacherExercisesPage() {
 
   return (
     <div className="relative min-h-screen">
-      <FloatingParticles count={10} />
-
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Exercises</h1>
-          <p className="mt-1 text-white/40">Build content your students will practice with.</p>
+          <p className="mt-1 text-muted-foreground">Build content your students will practice with.</p>
         </div>
         <ExerciseFormDialog onCreated={load} />
       </div>
@@ -75,11 +72,11 @@ export default function TeacherExercisesPage() {
           {EXERCISE_TYPES.map((t) => (
             <FilterChip key={t} active={typeFilter === t} onClick={() => setTypeFilter(t)} label={EXERCISE_TYPE_META[t].label} />
           ))}
-          <div className="mx-1 h-5 w-px bg-white/10" />
+          <div className="mx-1 h-5 w-px bg-muted" />
           <select
             value={difficultyFilter}
             onChange={(e) => setDifficultyFilter(e.target.value as Level | "ALL")}
-            className="h-8 rounded-full border border-white/10 bg-white/5 px-3 text-xs font-medium text-white/60 outline-none focus:border-violet-500/50"
+            className="h-8 rounded-full border border-border bg-muted px-3 text-xs font-medium text-muted-foreground outline-none focus:border-primary/50"
           >
             <option value="ALL">All levels</option>
             {DIFFICULTIES.map((d) => (
@@ -131,7 +128,7 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
       onClick={onClick}
       className={cn(
         "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
-        active ? "border-violet-500/40 bg-violet-500/15 text-violet-200" : "border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white/70"
+        active ? "border-primary/40 bg-secondary text-primary" : "border-border bg-muted text-muted-foreground hover:border-line-strong hover:text-foreground"
       )}
     >
       {label}
@@ -145,11 +142,11 @@ function ExerciseRow({ exercise, onDelete }: { exercise: TeacherExerciseListItem
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <h3 className="truncate font-semibold text-white/90">{exercise.title}</h3>
+            <h3 className="truncate font-semibold text-foreground">{exercise.title}</h3>
             <ExerciseTypeBadge type={exercise.type} />
             <LevelBadge level={exercise.difficulty} />
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-xs text-white/40">
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
               {exercise.resultsCount} attempt{exercise.resultsCount === 1 ? "" : "s"}
@@ -165,7 +162,7 @@ function ExerciseRow({ exercise, onDelete }: { exercise: TeacherExerciseListItem
         </div>
         <ConfirmDialog
           trigger={
-            <button className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs font-medium text-white/50 transition-colors hover:border-red-500/30 hover:text-red-400">
+            <button className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive/30 hover:text-destructive">
               <Trash2 className="h-3.5 w-3.5" />
               Delete
             </button>

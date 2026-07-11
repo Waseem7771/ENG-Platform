@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, Clock, MessageSquare, Play, Square, Users } from "lucide-react";
-import { FloatingParticles } from "@/components/shared/floating-particles";
 import { ErrorState } from "@/components/teacher/state-views";
 import { SessionStatusBadge, ExerciseTypeBadge } from "@/components/teacher/badges";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
@@ -151,8 +150,8 @@ export default function TeacherSessionRoomPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-20 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
-        <div className="h-[60vh] animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+        <div className="h-20 animate-pulse rounded-2xl border border-border bg-card" />
+        <div className="h-[60vh] animate-pulse rounded-2xl border border-border bg-card" />
       </div>
     );
   }
@@ -167,11 +166,9 @@ export default function TeacherSessionRoomPage() {
 
   return (
     <div className="relative flex h-[calc(100vh-4rem)] flex-col">
-      <FloatingParticles count={8} />
-
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-5">
         <div className="min-w-0">
-          <Link href="/teacher/sessions" className="mb-1.5 inline-flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-white/70">
+          <Link href="/teacher/sessions" className="mb-1.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-3 w-3" />
             All sessions
           </Link>
@@ -179,12 +176,12 @@ export default function TeacherSessionRoomPage() {
             <h1 className="truncate text-xl font-bold tracking-tight">{session.title}</h1>
             <SessionStatusBadge status={session.status} />
           </div>
-          <p className="mt-0.5 text-sm text-white/40">{session.className}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{session.className}</p>
         </div>
 
         <div className="flex items-center gap-3">
           {session.status === "ACTIVE" && (
-            <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium tabular-nums text-white/70">
+            <span className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-3 py-1.5 text-sm font-medium tabular-nums text-foreground">
               <Clock className="h-3.5 w-3.5" />
               {elapsed}
             </span>
@@ -193,7 +190,7 @@ export default function TeacherSessionRoomPage() {
             <button
               onClick={handleStart}
               disabled={busy}
-              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-emerald-500/20 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+              className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
             >
               <Play className="h-3.5 w-3.5" />
               Start Session
@@ -202,7 +199,7 @@ export default function TeacherSessionRoomPage() {
           {session.status === "ACTIVE" && (
             <ConfirmDialog
               trigger={
-                <button className="flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-5 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20">
+                <button className="flex items-center gap-2 rounded-full border border-destructive/25 bg-destructive/10 px-5 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20">
                   <Square className="h-3.5 w-3.5" />
                   End Session
                 </button>
@@ -226,15 +223,15 @@ export default function TeacherSessionRoomPage() {
       )}
 
       {pushedExercise && (
-        <div className="mb-4 flex items-center gap-3 rounded-xl border border-violet-500/20 bg-violet-500/5 px-4 py-3">
-          <span className="text-xs uppercase tracking-widest text-violet-300/70">Pinned</span>
-          <span className="text-sm font-medium text-white/85">{pushedExercise.title}</span>
+        <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/25 bg-secondary px-4 py-3">
+          <span className="text-xs uppercase tracking-widest text-primary/70">Pinned</span>
+          <span className="text-sm font-medium text-foreground">{pushedExercise.title}</span>
           <ExerciseTypeBadge type={pushedExercise.type} />
         </div>
       )}
 
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1fr_280px]">
-        <div className="min-h-0 rounded-2xl border border-white/5 bg-white/[0.02]">
+        <div className="min-h-0 rounded-2xl border border-border bg-card">
           <SessionChat
             messages={messages}
             exerciseCache={exerciseCache}
@@ -245,7 +242,7 @@ export default function TeacherSessionRoomPage() {
           />
         </div>
 
-        <div className="space-y-4 overflow-y-auto rounded-2xl border border-white/5 bg-white/[0.02] p-4">
+        <div className="space-y-4 overflow-y-auto rounded-2xl border border-border bg-card p-4">
           <PushExerciseDialog
             sessionId={sessionId}
             disabled={session.status !== "ACTIVE"}
@@ -263,11 +260,11 @@ export default function TeacherSessionRoomPage() {
 
 function SummaryStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-4">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10 text-violet-300">{icon}</div>
+    <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-primary">{icon}</div>
       <div>
-        <p className="text-[11px] uppercase tracking-widest text-white/30">{label}</p>
-        <p className="text-lg font-semibold text-white/85">{value}</p>
+        <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
+        <p className="text-lg font-semibold text-foreground">{value}</p>
       </div>
     </div>
   );

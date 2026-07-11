@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 
 export function CardSkeleton({ className }: { className?: string }) {
   return (
-    <div className={cn("animate-pulse rounded-2xl border border-white/5 bg-white/[0.02] p-6", className)}>
-      <div className="mb-3 h-4 w-1/3 rounded bg-white/10" />
-      <div className="mb-2 h-3 w-2/3 rounded bg-white/5" />
-      <div className="h-3 w-1/2 rounded bg-white/5" />
+    <div className={cn("animate-pulse rounded-2xl border border-border bg-card p-6", className)}>
+      <div className="mb-3 h-4 w-1/3 rounded bg-muted" />
+      <div className="mb-2 h-3 w-2/3 rounded bg-muted" />
+      <div className="h-3 w-1/2 rounded bg-muted" />
     </div>
   );
 }
@@ -28,7 +28,7 @@ export function ListSkeleton({ count = 5, className }: { count?: number; classNa
   return (
     <div className={cn("space-y-3", className)}>
       {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="h-16 animate-pulse rounded-xl border border-white/5 bg-white/[0.02]" />
+        <div key={i} className="h-16 animate-pulse rounded-xl border border-border bg-card" />
       ))}
     </div>
   );
@@ -42,14 +42,14 @@ export function ErrorState({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-red-500/10 bg-red-500/[0.03] p-12 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 text-red-400">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-destructive/20 bg-coral-soft p-12 text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
         <AlertTriangle className="h-6 w-6" />
       </div>
-      <p className="font-medium text-white/70">{message}</p>
+      <p className="font-medium text-foreground">{message}</p>
       <button
         onClick={onRetry}
-        className="mt-4 rounded-full border border-white/15 px-5 py-2 text-sm font-medium text-white/70 transition-colors hover:border-white/30 hover:text-white"
+        className="mt-4 rounded-full border border-border px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-line-strong"
       >
         Try again
       </button>
@@ -69,14 +69,14 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-white/[0.02] p-12 text-center">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-12 text-center">
       {icon && (
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-400">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary">
           {icon}
         </div>
       )}
-      <p className="font-medium text-white/60">{title}</p>
-      {description && <p className="mt-1 max-w-sm text-sm text-white/25">{description}</p>}
+      <p className="font-medium text-muted-foreground">{title}</p>
+      {description && <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );

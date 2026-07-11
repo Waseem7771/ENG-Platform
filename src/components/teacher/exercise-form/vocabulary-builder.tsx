@@ -19,8 +19,8 @@ export function VocabularyBuilder({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-white/30">Add at least 4 word / meaning pairs students will match.</p>
-      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 px-1 text-xs uppercase tracking-wider text-white/30">
+      <p className="text-xs text-muted-foreground">Add at least 4 word / meaning pairs students will match.</p>
+      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 px-1 text-xs uppercase tracking-wider text-muted-foreground">
         <span>Word</span>
         <span>Meaning</span>
         <span />
@@ -44,13 +44,13 @@ export function VocabularyBuilder({
               type="button"
               onClick={() => onChange(value.filter((_, idx) => idx !== i))}
               disabled={value.length <= 4}
-              className="shrink-0 rounded-md p-2 text-white/30 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:pointer-events-none disabled:opacity-30"
+              className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
               aria-label={`Remove pair ${i + 1}`}
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
-          {itemErrors?.[i]?.length ? <p className="mt-1 text-xs text-red-400">{itemErrors[i].join(" ")}</p> : null}
+          {itemErrors?.[i]?.length ? <p className="mt-1 text-xs text-destructive">{itemErrors[i].join(" ")}</p> : null}
         </div>
       ))}
       <AddRowButton label="Add pair" onClick={() => onChange([...value, newVocabularyPair()])} />

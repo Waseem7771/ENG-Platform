@@ -44,7 +44,7 @@ export function StoryBuilder({
         />
       </Field>
       {errors?.length ? (
-        <ul className="list-inside list-disc text-xs text-red-400">
+        <ul className="list-inside list-disc text-xs text-destructive">
           {errors.map((e, i) => (
             <li key={i}>{e}</li>
           ))}

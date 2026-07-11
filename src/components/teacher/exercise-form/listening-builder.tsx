@@ -18,7 +18,7 @@ export function ListeningBuilder({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-white/30">The transcript is read aloud to the student via text-to-speech before they answer.</p>
+      <p className="text-xs text-muted-foreground">The transcript is read aloud to the student via text-to-speech before they answer.</p>
       {value.map((it, i) => (
         <ItemCard key={it._cid} index={i} onRemove={() => onChange(value.filter((_, idx) => idx !== i))} canRemove={value.length > 1}>
           <Field label="Transcript" hint="what the student hears">
@@ -39,7 +39,7 @@ export function ListeningBuilder({
             onAnswerChange={(answer) => update(i, { answer })}
           />
           {itemErrors?.[i]?.length ? (
-            <ul className="list-inside list-disc text-xs text-red-400">
+            <ul className="list-inside list-disc text-xs text-destructive">
               {itemErrors[i].map((e, idx) => (
                 <li key={idx}>{e}</li>
               ))}

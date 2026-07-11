@@ -44,15 +44,15 @@ export function ConfirmDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent className="border border-white/10 bg-[#15121f] text-white sm:max-w-sm">
+      <DialogContent className="border border-border bg-popover text-foreground sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-white">{title}</DialogTitle>
-          <DialogDescription className="text-white/50">{description}</DialogDescription>
+          <DialogTitle className="text-foreground">{title}</DialogTitle>
+          <DialogDescription className="text-muted-foreground">{description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className="-mx-4 -mb-4 border-white/5 bg-transparent p-4">
+        <DialogFooter className="-mx-4 -mb-4 border-border bg-transparent p-4">
           <button
             onClick={() => setOpen(false)}
-            className="rounded-full border border-white/15 px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:border-white/30 hover:text-white"
+            className="rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-line-strong"
           >
             Cancel
           </button>
@@ -62,8 +62,8 @@ export function ConfirmDialog({
             className={cn(
               "flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors disabled:opacity-60",
               destructive
-                ? "bg-red-500/15 text-red-400 hover:bg-red-500/25"
-                : "bg-gradient-to-r from-violet-600 to-blue-500 text-white hover:brightness-110"
+                ? "bg-destructive/15 text-destructive hover:bg-destructive/25"
+                : "bg-primary text-primary-foreground hover:brightness-110"
             )}
           >
             {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
