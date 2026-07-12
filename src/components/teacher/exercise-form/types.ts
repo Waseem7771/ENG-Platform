@@ -1,5 +1,7 @@
 import type {
   ConversationData,
+  ExerciseData,
+  ExerciseType,
   GrammarData,
   GrammarItem,
   ListeningData,
@@ -89,6 +91,24 @@ export function grammarToPayload(items: GrammarItemDraft[]): GrammarData {
   };
 }
 
+/**
+ * Inverse of {@link grammarToPayload} — rehydrates draft rows from stored/AI-generated
+ * `data` (e.g. for editing an existing exercise or applying an AI draft). `answer` is
+ * always the correct-sentence/correct-option text regardless of `kind` (grammarToPayload
+ * writes it unconditionally), so no un-shuffling of `words` is needed for reorder items.
+ */
+export function grammarDataToDraft(data: GrammarData): GrammarItemDraft[] {
+  return data.items.map((it) => ({
+    _cid: clientId(),
+    kind: it.kind,
+    prompt: it.prompt,
+    text: it.text ?? "",
+    options: it.kind === "reorder" ? [] : (it.options ?? []),
+    answer: it.answer,
+    explanation: it.explanation,
+  }));
+}
+
 // ==================== VOCABULARY ====================
 
 export interface VocabularyPairDraft {
@@ -114,6 +134,11 @@ export function validateVocabulary(pairs: VocabularyPairDraft[]): ValidationResu
 
 export function vocabularyToPayload(pairs: VocabularyPairDraft[]): VocabularyData {
   return { pairs: pairs.map((p) => ({ word: p.word.trim(), meaning: p.meaning.trim() })) };
+}
+
+/** Inverse of {@link vocabularyToPayload}. */
+export function vocabularyDataToDraft(data: VocabularyData): VocabularyPairDraft[] {
+  return data.pairs.map((p) => ({ _cid: clientId(), word: p.word, meaning: p.meaning }));
 }
 
 // ==================== TRANSLATION ====================
@@ -150,6 +175,16 @@ export function translationToPayload(items: TranslationItemDraft[]): Translation
       reference: it.reference.trim(),
     })),
   };
+}
+
+/** Inverse of {@link translationToPayload}. */
+export function translationDataToDraft(data: TranslationData): TranslationItemDraft[] {
+  return data.items.map((it) => ({
+    _cid: clientId(),
+    direction: it.direction,
+    source: it.source,
+    reference: it.reference,
+  }));
 }
 
 // ==================== LISTENING ====================
@@ -194,6 +229,17 @@ export function listeningToPayload(items: ListeningItemDraft[]): ListeningData {
   };
 }
 
+/** Inverse of {@link listeningToPayload}. */
+export function listeningDataToDraft(data: ListeningData): ListeningItemDraft[] {
+  return data.items.map((it) => ({
+    _cid: clientId(),
+    transcript: it.transcript,
+    question: it.question,
+    options: it.options,
+    answer: it.answer,
+  }));
+}
+
 // ==================== QUIZ ====================
 
 export interface QuizItemDraft {
@@ -234,6 +280,19 @@ export function quizToPayload(items: QuizItemDraft[], timePerQuestion: number): 
       options: it.options.map((o) => o.trim()).filter(Boolean),
       answer: it.answer.trim(),
     })),
+  };
+}
+
+/** Inverse of {@link quizToPayload}. */
+export function quizDataToDraft(data: QuizData): { items: QuizItemDraft[]; timePerQuestion: number } {
+  return {
+    items: data.items.map((it) => ({
+      _cid: clientId(),
+      question: it.question,
+      options: it.options,
+      answer: it.answer,
+    })),
+    timePerQuestion: data.timePerQuestion,
   };
 }
 
@@ -294,6 +353,21 @@ export function conversationToPayload(d: ConversationDraft): ConversationData {
   };
 }
 
+/** Inverse of {@link conversationToPayload}. */
+export function conversationDataToDraft(data: ConversationData): ConversationDraft {
+  const s = data.scenario;
+  return {
+    title: s.title,
+    emoji: s.emoji,
+    description: s.description,
+    aiRole: s.aiRole,
+    userRole: s.userRole,
+    opening: s.opening,
+    objectives: s.objectives.join("\n"),
+    fallbackReplies: (s.fallbackReplies ?? []).join("\n"),
+  };
+}
+
 // ==================== PICTURE ====================
 
 export interface PictureDraft {
@@ -330,6 +404,18 @@ export function pictureToPayload(d: PictureDraft): PictureData {
   };
 }
 
+/** Inverse of {@link pictureToPayload}. Pads/truncates `hints` to the draft's fixed 3-slot tuple. */
+export function pictureDataToDraft(data: PictureData): PictureDraft {
+  const scene = data.scene;
+  return {
+    emojis: scene.emojis,
+    title: scene.title,
+    description: scene.description,
+    hints: [scene.hints[0] ?? "", scene.hints[1] ?? "", scene.hints[2] ?? ""],
+    minWords: scene.minWords,
+  };
+}
+
 // ==================== STORY ====================
 
 export interface StoryDraft {
@@ -361,4 +447,54 @@ export function storyToPayload(d: StoryDraft): StoryData {
       minTurns: d.minTurns,
     },
   };
+}
+
+/** Inverse of {@link storyToPayload}. */
+export function storyDataToDraft(data: StoryData): StoryDraft {
+  const story = data.story;
+  return { title: story.title, genre: story.genre, opening: story.opening, minTurns: story.minTurns };
+}
+
+// ==================== DATA -> DRAFT DISPATCH ====================
+
+/**
+ * Tagged union pairing an exercise type with its rehydrated draft shape.
+ * `type` narrows `value`'s type when switched on, so callers can dispatch to
+ * the right `set*` state setter with full type safety.
+ */
+export type ExerciseDraftForType =
+  | { type: "GRAMMAR"; value: GrammarItemDraft[] }
+  | { type: "VOCABULARY"; value: VocabularyPairDraft[] }
+  | { type: "TRANSLATION"; value: TranslationItemDraft[] }
+  | { type: "LISTENING"; value: ListeningItemDraft[] }
+  | { type: "QUIZ"; value: { items: QuizItemDraft[]; timePerQuestion: number } }
+  | { type: "CONVERSATION"; value: ConversationDraft }
+  | { type: "PICTURE"; value: PictureDraft }
+  | { type: "STORY"; value: StoryDraft };
+
+/**
+ * Inverse of the *ToPayload converters: turns a stored or AI-generated `data`
+ * blob back into the builder-draft state for its type. Used both to load an
+ * existing exercise for editing (`?edit=1`) and to apply an AI-generated draft
+ * without disturbing the other 7 builders' state.
+ */
+export function dataToDraft(type: ExerciseType, data: ExerciseData): ExerciseDraftForType {
+  switch (type) {
+    case "GRAMMAR":
+      return { type, value: grammarDataToDraft(data as GrammarData) };
+    case "VOCABULARY":
+      return { type, value: vocabularyDataToDraft(data as VocabularyData) };
+    case "TRANSLATION":
+      return { type, value: translationDataToDraft(data as TranslationData) };
+    case "LISTENING":
+      return { type, value: listeningDataToDraft(data as ListeningData) };
+    case "QUIZ":
+      return { type, value: quizDataToDraft(data as QuizData) };
+    case "CONVERSATION":
+      return { type, value: conversationDataToDraft(data as ConversationData) };
+    case "PICTURE":
+      return { type, value: pictureDataToDraft(data as PictureData) };
+    case "STORY":
+      return { type, value: storyDataToDraft(data as StoryData) };
+  }
 }
