@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
 import { auth } from "./auth";
+import { db } from "@/lib/db";
+import type { Exercise, Class } from "@/generated/prisma/client";
 import type { Level, UserRole } from "@/types";
 
 export interface SessionUser {
@@ -60,4 +62,32 @@ export async function requireStudent(): Promise<SessionUser> {
   const user = await requireUser();
   if (user.role !== "STUDENT") throw new ApiError(403, "Students only");
   return user;
+}
+
+/**
+ * Pure ownership check: throws ApiError(404) — not 403 — when the row is
+ * missing OR not owned by userId, so a non-owner can't distinguish
+ * "doesn't exist" from "exists but isn't yours" by probing the API.
+ * Kept side-effect-free (no headers()/DB access) so it can be unit-tested
+ * directly without a request context.
+ */
+export function assertOwned<T extends object>(row: T | null, ownerField: keyof T & string, userId: string): T {
+  if (!row || (row as Record<string, unknown>)[ownerField] !== userId) {
+    throw new ApiError(404, "Not found");
+  }
+  return row;
+}
+
+/** Load an Exercise by id and assert the current teacher owns it (404 if not). */
+export async function requireOwnedExercise(id: string): Promise<{ user: SessionUser; exercise: Exercise }> {
+  const user = await requireTeacher();
+  const exercise = assertOwned(await db.exercise.findUnique({ where: { id } }), "createdById", user.id);
+  return { user, exercise };
+}
+
+/** Load a Class by id and assert the current teacher owns it (404 if not). */
+export async function requireOwnedClass(id: string): Promise<{ user: SessionUser; klass: Class }> {
+  const user = await requireTeacher();
+  const klass = assertOwned(await db.class.findUnique({ where: { id } }), "teacherId", user.id);
+  return { user, klass };
 }
