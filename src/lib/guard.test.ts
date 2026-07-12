@@ -61,7 +61,7 @@ describe("assertOwned", () => {
   it("throws ApiError(404) when userId is undefined", () => {
     const rowWithUser = { id: "ex1", createdById: "teacher-1" };
     try {
-      assertOwned(rowWithUser, "createdById", undefined as any);
+      assertOwned(rowWithUser, "createdById", undefined as unknown as string);
       expect.unreachable("assertOwned should have thrown");
     } catch (err) {
       expect(err).toBeInstanceOf(ApiError);
