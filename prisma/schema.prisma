@@ -191,6 +191,7 @@ model Exercise {
   data        String   // JSON string containing exercise content
   timeLimit   Int?     // Time limit in seconds (for timed exercises)
   points      Int      @default(10)
+  status      String   @default("PUBLISHED") // DRAFT | PUBLISHED
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
