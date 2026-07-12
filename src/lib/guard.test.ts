@@ -46,4 +46,26 @@ describe("assertOwned", () => {
     expect(assertOwned(klass, "teacherId", "teacher-1")).toBe(klass);
     expect(() => assertOwned(klass, "teacherId", "teacher-2")).toThrow(ApiError);
   });
+
+  it("throws ApiError(404) when userId is empty string", () => {
+    const rowWithEmptyOwner = { id: "ex1", createdById: "" };
+    try {
+      assertOwned(rowWithEmptyOwner, "createdById", "");
+      expect.unreachable("assertOwned should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as ApiError).status).toBe(404);
+    }
+  });
+
+  it("throws ApiError(404) when userId is undefined", () => {
+    const rowWithUser = { id: "ex1", createdById: "teacher-1" };
+    try {
+      assertOwned(rowWithUser, "createdById", undefined as any);
+      expect.unreachable("assertOwned should have thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(ApiError);
+      expect((err as ApiError).status).toBe(404);
+    }
+  });
 });

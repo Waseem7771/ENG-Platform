@@ -72,6 +72,9 @@ export async function requireStudent(): Promise<SessionUser> {
  * directly without a request context.
  */
 export function assertOwned<T extends object>(row: T | null, ownerField: keyof T & string, userId: string): T {
+  if (!userId) {
+    throw new ApiError(404, "Not found");
+  }
   if (!row || (row as Record<string, unknown>)[ownerField] !== userId) {
     throw new ApiError(404, "Not found");
   }
