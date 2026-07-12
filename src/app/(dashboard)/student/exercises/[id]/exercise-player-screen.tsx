@@ -61,7 +61,7 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
         if (path.continue) {
           setNext({
             label: t("results.nextLesson", { title: path.continue.exerciseTitle }),
-            href: `/student/exercises/${path.continue.exerciseId}`,
+            href: exerciseHref(path.continue.exerciseId, path.continue.type),
           });
           return;
         }
