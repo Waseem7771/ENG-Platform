@@ -38,6 +38,28 @@ export interface TeacherClassDetail {
   sessions: TeacherClassSession[];
 }
 
+export interface TeacherLessonExercise {
+  id: string;
+  title: string;
+  type: ExerciseType;
+  difficulty: Level;
+}
+
+export interface TeacherLessonItem {
+  id: string;
+  classId: string | null;
+  title: string;
+  description: string | null;
+  level: Level;
+  unit: number;
+  order: number;
+  isCheckpoint: boolean;
+  createdAt: string;
+  updatedAt: string;
+  exercises: TeacherLessonExercise[];
+  exerciseCount: number;
+}
+
 export interface TeacherExerciseListItem {
   id: string;
   title: string;

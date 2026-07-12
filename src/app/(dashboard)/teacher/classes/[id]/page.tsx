@@ -22,6 +22,7 @@ import { CopyCode } from "@/components/teacher/copy-code";
 import { EmptyState, ErrorState } from "@/components/teacher/state-views";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
 import { ClassSettings, type ClassSettingsValue } from "@/components/teacher/classes/class-settings";
+import { LessonsTab } from "@/components/teacher/classes/lessons-tab";
 import { api, ApiClientError } from "@/lib/api";
 import { useT } from "@/components/providers/locale-provider";
 import type { TeacherClassDetail } from "@/components/teacher/types";
@@ -177,11 +178,7 @@ export default function ClassDetailPage() {
               </TabsContent>
 
               <TabsContent value="lessons">
-                <EmptyState
-                  icon={<BookOpen className="h-6 w-6" />}
-                  title={t("teacher.tabLessons")}
-                  description={t("teacher.lessonsComingSoon")}
-                />
+                <LessonsTab classId={detail.id} classLevel={detail.level} />
               </TabsContent>
 
               <TabsContent value="sessions">
