@@ -1,5 +1,8 @@
-import { ApiError, errorResponse, requireTeacher, requireUser } from "@/lib/guard";
+import { ApiError, errorResponse, requireOwnedClass, requireTeacher, requireUser } from "@/lib/guard";
 import { db } from "@/lib/db";
+import { LEVELS } from "@/app/api/exercises/route";
+import type { Class } from "@/generated/prisma/client";
+import type { Level } from "@/types";
 
 export async function GET(
   _request: Request,
@@ -58,6 +61,70 @@ export async function GET(
         createdAt: s.createdAt,
       })),
     });
+  } catch (error) {
+    return errorResponse(error);
+  }
+}
+
+/** The subset of class fields a PATCH may touch. */
+export interface ClassPatchFields {
+  name?: string;
+  description?: string | null;
+  level?: Level;
+}
+
+/**
+ * Validate a partial class-PATCH body and build the Prisma-ready fields.
+ * Pure/side-effect-free (no DB access) so it can be unit-tested directly:
+ * throws ApiError(400, ...) on any invalid field. `existing` isn't needed by
+ * any current validation (class fields don't cross-depend on one another the
+ * way an exercise's `data` depends on its stored `type`), but the parameter
+ * is kept for signature symmetry with `buildExercisePatch`/`buildLessonPatch`.
+ */
+export function buildClassPatch(existing: Class, body: unknown): ClassPatchFields {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    throw new ApiError(400, "Invalid request body");
+  }
+  const b = body as Record<string, unknown>;
+  const patch: ClassPatchFields = {};
+
+  if ("name" in b) {
+    if (typeof b.name !== "string" || !b.name.trim()) {
+      throw new ApiError(400, "name must be a non-empty string");
+    }
+    patch.name = b.name.trim();
+  }
+
+  if ("description" in b) {
+    if (b.description !== null && typeof b.description !== "string") {
+      throw new ApiError(400, "description must be a string or null");
+    }
+    patch.description = typeof b.description === "string" && b.description.trim() ? b.description.trim() : null;
+  }
+
+  if ("level" in b) {
+    if (typeof b.level !== "string" || !LEVELS.includes(b.level as Level)) {
+      throw new ApiError(400, "Invalid level");
+    }
+    patch.level = b.level as Level;
+  }
+
+  return patch;
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { klass } = await requireOwnedClass(id);
+
+    const body = await request.json().catch(() => null);
+    const patch = buildClassPatch(klass, body);
+
+    const updated = await db.class.update({ where: { id: klass.id }, data: patch });
+    return Response.json(updated);
   } catch (error) {
     return errorResponse(error);
   }
