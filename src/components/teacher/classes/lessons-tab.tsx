@@ -74,7 +74,10 @@ export function LessonsTab({ classId, classLevel }: { classId: string; classLeve
     error,
     refetch,
   } = useApi(() => api<TeacherLessonItem[]>(`/api/lessons?classId=${classId}`), [classId]);
-  const { data: exercisePool } = useApi(() => api<TeacherExerciseListItem[]>("/api/exercises"), []);
+  const { data: exercisesData } = useApi(() => api<TeacherExerciseListItem[]>("/api/exercises"), []);
+
+  // Filter to PUBLISHED exercises only for the assignment checklist
+  const exercisePool = useMemo(() => (exercisesData ?? []).filter((e) => e.status === "PUBLISHED"), [exercisesData]);
 
   const grouped = useMemo(() => groupByUnit(lessons ?? []), [lessons]);
 
@@ -250,6 +253,14 @@ function LessonFormDialog({
   const [saving, setSaving] = useState(false);
   const [value, setValue] = useState<LessonFormValue>(() => initialValue(lesson, classLevel));
 
+  // Union the published pool with any currently-assigned exercises that aren't in the pool
+  // (handles edge case of a lesson with a DRAFT exercise already assigned)
+  const displayPool = useMemo(() => {
+    const poolIds = new Set(exercisePool.map((ex) => ex.id));
+    const assignedNotInPool = lesson?.exercises.filter((ex) => !poolIds.has(ex.id)) ?? [];
+    return [...exercisePool, ...assignedNotInPool];
+  }, [exercisePool, lesson]);
+
   // Reset to fresh values every time the dialog opens, so a canceled edit
   // (or a previous "New lesson" entry) never leaks into the next open.
   function handleOpenChange(next: boolean) {
@@ -392,11 +403,11 @@ function LessonFormDialog({
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">
               {t("teacher.assignExercises")}
             </Label>
-            {exercisePool.length === 0 ? (
+            {displayPool.length === 0 ? (
               <p className="text-xs text-muted-foreground">{t("teacher.noExercisesToAssign")}</p>
             ) : (
               <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-border p-2" dir="ltr">
-                {exercisePool.map((ex) => {
+                {displayPool.map((ex) => {
                   const meta = EXERCISE_TYPE_META[ex.type];
                   const Icon = meta.icon;
                   const checked = value.exerciseIds.includes(ex.id);
