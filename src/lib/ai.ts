@@ -1,12 +1,22 @@
 import OpenAI from "openai";
+import { validateExerciseData } from "@/app/api/exercises/route";
 import type {
   ChatFeedback,
   ChatMessage,
+  ConversationData,
   ConversationScenario,
+  ExerciseData,
+  ExerciseType,
+  GrammarData,
   Level,
+  ListeningData,
+  PictureData,
   PictureScene,
+  QuizData,
   StoryData,
+  TranslationData,
   TranslationItem,
+  VocabularyData,
 } from "@/types";
 
 /**
@@ -351,4 +361,263 @@ Return JSON {"score": n, "overall": "2 sentences", "strengths": ["..."], "improv
       tokens(text).length < scene.minWords ? [`Aim for at least ${scene.minWords} words`] : [],
     aiAvailable: false,
   };
+}
+
+// ==================== EXERCISE DRAFT GENERATION ====================
+
+export interface DraftResult {
+  data: ExerciseData;
+  aiAvailable: boolean;
+}
+
+/** Describes the exact JSON shape expected for each exercise type's `data` field, for the draft prompt. */
+const DRAFT_SHAPE: Record<ExerciseType, string> = {
+  GRAMMAR:
+    '{"items": [{"id": "g1", "kind": "fill-blank"|"reorder"|"error-correction", "prompt": "...", ' +
+    '"text": "sentence with a ___ blank (fill-blank/error-correction only)", ' +
+    '"options": ["...", "..."] (fill-blank/error-correction only, must include answer), ' +
+    '"words": ["...", "..."] (reorder only), "answer": "...", "explanation": "..."}]} — include 3-5 items.',
+  VOCABULARY: '{"pairs": [{"word": "...", "meaning": "..."}]} — include 6-8 pairs.',
+  TRANSLATION:
+    '{"items": [{"id": "t1", "direction": "ar-en"|"en-ar", "source": "...", "reference": "..."}]} ' +
+    "— include 4-6 items, mixing both directions.",
+  LISTENING:
+    '{"items": [{"id": "l1", "transcript": "a short spoken passage", "question": "...", ' +
+    '"options": ["...", "..."], "answer": "must equal one of options"}]} — include 3-4 items.',
+  QUIZ:
+    '{"timePerQuestion": 20, "items": [{"id": "q1", "question": "...", "options": ["...", "..."], ' +
+    '"answer": "must equal one of options"}]} — include 5-8 items.',
+  CONVERSATION:
+    '{"scenario": {"key": "...", "title": "...", "emoji": "...", "description": "...", ' +
+    '"aiRole": "...", "userRole": "...", "opening": "...", "objectives": ["...", "..."], ' +
+    '"fallbackReplies": ["...", "...", "..."]}}.',
+  PICTURE:
+    '{"scene": {"emojis": "...", "title": "...", ' +
+    '"description": "a detailed ground-truth description, never shown to the student", ' +
+    '"hints": ["...", "..."], "minWords": 40}}.',
+  STORY: '{"story": {"title": "...", "genre": "...", "opening": "2-3 sentences", "minTurns": 4}}.',
+};
+
+function draftSystemPrompt(type: ExerciseType, difficulty: Level): string {
+  return `${TUTOR_CONTEXT}
+${levelGuidance(difficulty)}
+You are drafting a ${type} exercise for a teacher, who will review and edit it before publishing to students.
+Return a single JSON object for the exercise's "data" field ONLY (no wrapper, no commentary), matching this exact shape:
+${DRAFT_SHAPE[type]}
+Every id must be unique within the object. Keep the language and content appropriate for the student's level and
+directly related to the given topic.`;
+}
+
+/** Ensures a usable, non-empty topic string even if the caller passed blank input. */
+function safeTopic(topic: string): string {
+  const trimmed = topic.trim();
+  return trimmed.length > 0 ? trimmed : "everyday life";
+}
+
+function slugify(text: string): string {
+  const slug = text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-+|-+$)/g, "");
+  return slug.length > 0 ? slug : "topic";
+}
+
+function fallbackGrammar(topic: string): GrammarData {
+  return {
+    items: [
+      {
+        id: "g1",
+        kind: "fill-blank",
+        prompt: `Choose the word that correctly completes the sentence about ${topic}.`,
+        text: `I ___ interested in ${topic}.`,
+        options: ["am", "is", "be"],
+        answer: "am",
+        explanation: 'Use "am" with the subject "I".',
+      },
+      {
+        id: "g2",
+        kind: "fill-blank",
+        prompt: `Choose the word that correctly completes the sentence about ${topic}.`,
+        text: `She ___ about ${topic} every week.`,
+        options: ["talks", "talk", "talking"],
+        answer: "talks",
+        explanation: "Add -s to the verb for he/she/it in the present simple.",
+      },
+      {
+        id: "g3",
+        kind: "fill-blank",
+        prompt: `Choose the word that correctly completes the sentence about ${topic}.`,
+        text: `They ___ learning about ${topic} last night.`,
+        options: ["were", "was", "are"],
+        answer: "were",
+        explanation: 'Use "were" with plural subjects in the past simple.',
+      },
+    ],
+  };
+}
+
+function fallbackVocabulary(topic: string): VocabularyData {
+  return {
+    pairs: [
+      { word: `${topic} — key term 1`, meaning: `A word closely related to ${topic}.` },
+      { word: `${topic} — key term 2`, meaning: `Another word closely related to ${topic}.` },
+      { word: `${topic} — key term 3`, meaning: `A useful word when discussing ${topic}.` },
+      { word: `${topic} — key term 4`, meaning: `A common expression about ${topic}.` },
+    ],
+  };
+}
+
+function fallbackTranslation(topic: string): TranslationData {
+  return {
+    items: [
+      { id: "t1", direction: "en-ar", source: `I enjoy learning about ${topic}.`, reference: `أستمتع بتعلم ${topic}.` },
+      { id: "t2", direction: "ar-en", source: `أنا أحب ${topic} كثيرًا.`, reference: `I like ${topic} a lot.` },
+      { id: "t3", direction: "en-ar", source: `Let's talk about ${topic} today.`, reference: `دعنا نتحدث عن ${topic} اليوم.` },
+    ],
+  };
+}
+
+function fallbackListening(topic: string): ListeningData {
+  return {
+    items: [
+      {
+        id: "l1",
+        transcript: `Today's lesson is about ${topic}. It is an important subject for beginners.`,
+        question: "What is today's lesson about?",
+        options: [topic, "The weather", "Sports"],
+        answer: topic,
+      },
+      {
+        id: "l2",
+        transcript: `Many students find ${topic} easier once they practice a little every day.`,
+        question: "How do students find it easier?",
+        options: ["By practicing every day", "By avoiding it", "By memorizing randomly"],
+        answer: "By practicing every day",
+      },
+      {
+        id: "l3",
+        transcript: `Our teacher explained ${topic} using simple examples and pictures.`,
+        question: "How did the teacher explain the topic?",
+        options: ["Using simple examples and pictures", "Using a long lecture only", "Using a surprise test"],
+        answer: "Using simple examples and pictures",
+      },
+    ],
+  };
+}
+
+function fallbackQuiz(topic: string): QuizData {
+  return {
+    timePerQuestion: 20,
+    items: [
+      {
+        id: "q1",
+        question: `Which sentence about ${topic} is grammatically correct?`,
+        options: [`I like ${topic}.`, `I likes ${topic}.`, `I liking ${topic}.`],
+        answer: `I like ${topic}.`,
+      },
+      {
+        id: "q2",
+        question: 'Choose the correct word: "She is interested ___ this topic."',
+        options: ["in", "on", "at"],
+        answer: "in",
+      },
+      {
+        id: "q3",
+        question: `Which word best describes someone who enjoys ${topic}?`,
+        options: ["enthusiastic", "furniture", "purple"],
+        answer: "enthusiastic",
+      },
+    ],
+  };
+}
+
+function fallbackConversation(topic: string): ConversationData {
+  return {
+    scenario: {
+      key: `draft-${slugify(topic)}`,
+      title: `Talking About ${topic}`,
+      emoji: "💬",
+      description: `Practice a short conversation about ${topic}.`,
+      aiRole: "Curious conversation partner",
+      userRole: "Student sharing their views",
+      opening: `Hi! I'd love to hear what you think about ${topic}. Can you tell me more?`,
+      objectives: [`Describe your opinion about ${topic}`, "Answer a follow-up question"],
+      fallbackReplies: [
+        "That's interesting — can you tell me more?",
+        "Why do you think that is?",
+        "What else comes to mind when you think about that?",
+      ],
+    },
+  };
+}
+
+function fallbackPicture(topic: string): PictureData {
+  return {
+    scene: {
+      emojis: "🖼️",
+      title: `A Scene About ${topic}`,
+      description: `A scene that relates to ${topic}, with people, objects, and actions the student should notice and describe.`,
+      hints: [`Mention ${topic}`, "Describe who or what you see", "Use complete sentences"],
+      minWords: 30,
+    },
+  };
+}
+
+function fallbackStory(topic: string): StoryData {
+  return {
+    story: {
+      title: `A Story About ${topic}`,
+      genre: "adventure",
+      opening: `Once upon a time, there was a story that began with ${topic}...`,
+      minTurns: 3,
+    },
+  };
+}
+
+function fallbackDraft(type: ExerciseType, rawTopic: string): ExerciseData {
+  const topic = safeTopic(rawTopic);
+  switch (type) {
+    case "GRAMMAR":
+      return fallbackGrammar(topic);
+    case "VOCABULARY":
+      return fallbackVocabulary(topic);
+    case "TRANSLATION":
+      return fallbackTranslation(topic);
+    case "LISTENING":
+      return fallbackListening(topic);
+    case "QUIZ":
+      return fallbackQuiz(topic);
+    case "CONVERSATION":
+      return fallbackConversation(topic);
+    case "PICTURE":
+      return fallbackPicture(topic);
+    case "STORY":
+      return fallbackStory(topic);
+  }
+}
+
+/**
+ * Draft an exercise's `data` for a teacher to review/edit. Mirrors the rest of
+ * this module's degrade-to-heuristic pattern: try the model in JSON mode and
+ * structurally validate the result with the SAME validator the API routes
+ * use, so a malformed or hallucinated shape never reaches the editor — on
+ * validation failure OR any throw, fall back to a deterministic, always-valid
+ * template for the type, incorporating `topic`.
+ */
+export async function generateExerciseDraft(
+  type: ExerciseType,
+  difficulty: Level,
+  topic: string
+): Promise<DraftResult> {
+  if (aiAvailable()) {
+    try {
+      const data = await completeJson<ExerciseData>(draftSystemPrompt(type, difficulty), `Topic: "${topic}"`);
+      validateExerciseData(type, data);
+      return { data, aiAvailable: true };
+    } catch (error) {
+      console.error("[ai.generateExerciseDraft]", error);
+    }
+  }
+  return { data: fallbackDraft(type, topic), aiAvailable: false };
 }
