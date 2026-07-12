@@ -227,6 +227,7 @@
   "teacher.inviteLink": "رابط الدعوة",
   "teacher.copyLink": "انسخ الرابط",
   "teacher.linkCopied": "تم نسخ رابط الدعوة",
+  "teacher.copyLinkFailed": "تعذّر نسخ الرابط — انسخه يدويًا.",
   "teacher.orCode": "أو شارك الرمز",
   "teacher.exercisesTitle": "التمارين",
   "teacher.exercisesSubtitle": "أنشئ محتوى ليتدرب عليه طلابك.",
@@ -272,7 +273,6 @@
   "teacher.removeStudent": "إزالة",
   "teacher.studentRemoved": "تمت إزالة الطالب",
   "teacher.backToClasses": "العودة إلى الصفوف",
-  "teacher.joinCode": "رمز الانضمام",
   "teacher.noDescriptionYet": "لا يوجد وصف بعد.",
   "teacher.deleteClassWarning": "حذف الصف يزيله عن جميع الطلاب المسجلين فيه. لا يمكن التراجع عن هذا الإجراء.",
   "teacher.deleteClassConfirmTitle": "حذف \"{name}\"؟",
@@ -291,5 +291,15 @@
   "teacher.removeStudentDescription": "لن يعد بإمكانه رؤية هذا الصف. يبقى حسابه وتقدّمه دون تأثير.",
   "teacher.removeStudentFailed": "تعذّرت إزالة هذا الطالب.",
   "teacher.classUpdateFailed": "تعذّر تحديث الصف.",
-  "nav.content": "المحتوى"
+  "nav.content": "المحتوى",
+  "join.title": "انضم إلى صف",
+  "join.subtitle": "لقد دُعيت للانضمام إلى صف على SpeakPath.",
+  "join.noCode": "هذا الرابط لا يتضمن رمز صف — أدخل رمزًا يدويًا بدلاً من ذلك.",
+  "join.enterCodeManually": "أدخل رمزًا يدويًا",
+  "join.signUpCta": "أنشئ حساب طالب",
+  "join.logInCta": "تسجيل الدخول",
+  "join.teacherNotice": "أنت مسجَّل الدخول كمعلم. سجّل الدخول كطالب للانضمام إلى هذا الصف.",
+  "join.joinNow": "انضم الآن",
+  "join.joined": "انضممت إلى {name}!",
+  "join.alreadyJoined": "أنت منضم بالفعل إلى {name}."
 }

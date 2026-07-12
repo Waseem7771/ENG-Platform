@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { LevelSelect } from "@/components/teacher/level-select";
-import { CopyCode } from "@/components/teacher/copy-code";
+import { Invite } from "@/components/shared/invite";
 import { api, ApiClientError } from "@/lib/api";
+import { useT } from "@/components/providers/locale-provider";
 import type { Level } from "@/types";
 
 const inputClass =
@@ -26,6 +27,7 @@ interface CreatedClass {
 }
 
 export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"form" | "success">("form");
   const [created, setCreated] = useState<CreatedClass | null>(null);
@@ -153,9 +155,9 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
                   Share this join code with your students.
                 </DialogDescription>
               </DialogHeader>
-              <div className="flex flex-col items-center gap-3 rounded-2xl border border-primary/25 bg-secondary p-6">
-                <span className="text-xs uppercase tracking-widest text-muted-foreground">Join code</span>
-                <CopyCode code={created.code} className="px-4 py-2 text-lg" />
+              <div className="rounded-2xl border border-primary/25 bg-secondary p-6">
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">{t("teacher.invite")}</span>
+                <Invite code={created.code} className="mt-3" />
               </div>
               <button
                 onClick={() => setOpen(false)}

@@ -227,6 +227,7 @@
   "teacher.inviteLink": "Invite link",
   "teacher.copyLink": "Copy link",
   "teacher.linkCopied": "Invite link copied",
+  "teacher.copyLinkFailed": "Couldn't copy the link — copy it manually.",
   "teacher.orCode": "or share the code",
   "teacher.exercisesTitle": "Exercises",
   "teacher.exercisesSubtitle": "Build content your students will practice with.",
@@ -272,7 +273,6 @@
   "teacher.removeStudent": "Remove",
   "teacher.studentRemoved": "Student removed",
   "teacher.backToClasses": "Back to classes",
-  "teacher.joinCode": "Join code",
   "teacher.noDescriptionYet": "No description yet.",
   "teacher.deleteClassWarning": "Deleting a class removes it for all enrolled students. This cannot be undone.",
   "teacher.deleteClassConfirmTitle": "Delete \"{name}\"?",
@@ -291,5 +291,15 @@
   "teacher.removeStudentDescription": "They'll no longer see this class. Their account and progress stay intact.",
   "teacher.removeStudentFailed": "Couldn't remove this student.",
   "teacher.classUpdateFailed": "Couldn't update the class.",
-  "nav.content": "Content"
+  "nav.content": "Content",
+  "join.title": "Join a class",
+  "join.subtitle": "You've been invited to join a class on SpeakPath.",
+  "join.noCode": "This link is missing a class code — enter one manually instead.",
+  "join.enterCodeManually": "Enter a code manually",
+  "join.signUpCta": "Sign up as a student",
+  "join.logInCta": "Log in",
+  "join.teacherNotice": "You're signed in as a teacher. Sign in as a student to join this class.",
+  "join.joinNow": "Join now",
+  "join.joined": "You joined {name}!",
+  "join.alreadyJoined": "You're already in {name}."
 }

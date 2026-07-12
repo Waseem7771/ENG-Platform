@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LevelBadge, SessionStatusBadge } from "@/components/teacher/badges";
-import { CopyCode } from "@/components/teacher/copy-code";
+import { Invite } from "@/components/shared/invite";
 import { EmptyState, ErrorState } from "@/components/teacher/state-views";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
 import { ClassSettings, type ClassSettingsValue } from "@/components/teacher/classes/class-settings";
@@ -159,9 +159,9 @@ export default function ClassDetailPage() {
                   <StatChip icon={<Users className="h-4 w-4" />} label={t("teacher.tabStudents")} value={String(detail.students.length)} />
                   <StatChip icon={<Video className="h-4 w-4" />} label={t("teacher.tabSessions")} value={String(detail.sessions.length)} />
                 </div>
-                <div className="mt-4 flex flex-col items-start gap-2 rounded-xl border border-border bg-muted p-5">
-                  <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{t("teacher.joinCode")}</span>
-                  <CopyCode code={detail.code} />
+                <div className="mt-4 rounded-xl border border-border bg-muted p-5">
+                  <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{t("teacher.invite")}</span>
+                  <Invite code={detail.code} className="mt-3" />
                 </div>
               </TabsContent>
 
