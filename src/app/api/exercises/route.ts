@@ -1,9 +1,9 @@
 import { ApiError, errorResponse, requireTeacher, requireUser } from "@/lib/guard";
 import { db } from "@/lib/db";
-import { EXERCISE_TYPES } from "@/types";
-import type { ExerciseType, Level, UserRole } from "@/types";
+import { EXERCISE_STATUSES, EXERCISE_TYPES } from "@/types";
+import type { ExerciseStatus, ExerciseType, Level, UserRole } from "@/types";
 
-const LEVELS: Level[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+export const LEVELS: Level[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
 const GRAMMAR_MC_KINDS = new Set(["fill-blank", "error-correction"]);
 
 function itemCountFor(type: string, data: unknown): number {
@@ -51,7 +51,7 @@ export function validateDifficultyParam(difficulty: string | null, role: UserRol
 }
 
 /** Structurally validate `data` against the contract for the given exercise type. Throws ApiError(400,...) on failure. */
-function validateExerciseData(type: ExerciseType, data: unknown): void {
+export function validateExerciseData(type: ExerciseType, data: unknown): void {
   if (!data || typeof data !== "object") throw new ApiError(400, "data is required");
   const d = data as Record<string, unknown>;
 
@@ -185,8 +185,9 @@ function validateExerciseData(type: ExerciseType, data: unknown): void {
   }
 }
 
+/** Students only ever see PUBLISHED exercises — DRAFT rows are the owning teacher's work-in-progress. */
 export function studentExerciseWhere(params: { type?: string | null; difficulty?: string | null; userLevel?: string | null }) {
-  const where: { type?: string; difficulty?: string } = {};
+  const where: { type?: string; difficulty?: string; status: "PUBLISHED" } = { status: "PUBLISHED" };
   if (params.type) where.type = params.type;
   if (params.difficulty && params.difficulty !== "ALL") where.difficulty = params.difficulty;
   else if (!params.difficulty && params.userLevel) where.difficulty = params.userLevel;
@@ -224,6 +225,7 @@ export async function GET(request: Request) {
           difficulty: ex.difficulty,
           points: ex.points,
           timeLimit: ex.timeLimit,
+          status: ex.status,
           itemCount: itemCountFor(ex.type, JSON.parse(ex.data)),
           completed: false,
           bestScore: null,
@@ -304,6 +306,14 @@ export async function POST(request: Request) {
       points = body.points;
     }
 
+    let status: ExerciseStatus = "PUBLISHED";
+    if (body.status !== undefined && body.status !== null) {
+      if (typeof body.status !== "string" || !EXERCISE_STATUSES.includes(body.status as ExerciseStatus)) {
+        throw new ApiError(400, "status must be DRAFT or PUBLISHED");
+      }
+      status = body.status as ExerciseStatus;
+    }
+
     const created = await db.exercise.create({
       data: {
         title,
@@ -312,6 +322,7 @@ export async function POST(request: Request) {
         data: JSON.stringify(body.data),
         timeLimit,
         points,
+        status,
         createdById: user.id,
       },
     });

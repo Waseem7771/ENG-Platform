@@ -23,6 +23,11 @@ export const EXERCISE_TYPES: ExerciseType[] = [
   "STORY",
 ];
 
+/** Draft exercises are only visible to their owning teacher; published ones are visible to everyone. */
+export type ExerciseStatus = "DRAFT" | "PUBLISHED";
+
+export const EXERCISE_STATUSES: ExerciseStatus[] = ["DRAFT", "PUBLISHED"];
+
 export type ProgressCategory =
   | "GRAMMAR"
   | "VOCABULARY"

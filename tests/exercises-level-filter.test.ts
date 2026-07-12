@@ -31,18 +31,21 @@ describe("validateDifficultyParam", () => {
 
 describe("studentExerciseWhere", () => {
   it("defaults to the user's level when no difficulty given", () => {
-    expect(studentExerciseWhere({ userLevel: "BEGINNER" })).toEqual({ difficulty: "BEGINNER" });
+    expect(studentExerciseWhere({ userLevel: "BEGINNER" })).toEqual({ difficulty: "BEGINNER", status: "PUBLISHED" });
   });
   it("ALL bypasses the default", () => {
-    expect(studentExerciseWhere({ difficulty: "ALL", userLevel: "BEGINNER" })).toEqual({});
+    expect(studentExerciseWhere({ difficulty: "ALL", userLevel: "BEGINNER" })).toEqual({ status: "PUBLISHED" });
   });
   it("explicit difficulty wins", () => {
-    expect(studentExerciseWhere({ difficulty: "ADVANCED", userLevel: "BEGINNER" })).toEqual({ difficulty: "ADVANCED" });
+    expect(studentExerciseWhere({ difficulty: "ADVANCED", userLevel: "BEGINNER" })).toEqual({ difficulty: "ADVANCED", status: "PUBLISHED" });
   });
   it("unplaced user gets everything", () => {
-    expect(studentExerciseWhere({})).toEqual({});
+    expect(studentExerciseWhere({})).toEqual({ status: "PUBLISHED" });
   });
   it("keeps the type filter", () => {
-    expect(studentExerciseWhere({ type: "QUIZ", userLevel: "ADVANCED" })).toEqual({ type: "QUIZ", difficulty: "ADVANCED" });
+    expect(studentExerciseWhere({ type: "QUIZ", userLevel: "ADVANCED" })).toEqual({ type: "QUIZ", difficulty: "ADVANCED", status: "PUBLISHED" });
+  });
+  it("always excludes drafts, regardless of other filters", () => {
+    expect(studentExerciseWhere({}).status).toBe("PUBLISHED");
   });
 });

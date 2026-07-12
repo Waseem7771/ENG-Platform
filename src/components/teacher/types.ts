@@ -1,4 +1,4 @@
-import type { ExerciseType, Level, ProgressCategory, SessionStatus } from "@/types";
+import type { ExerciseStatus, ExerciseType, Level, ProgressCategory, SessionStatus } from "@/types";
 
 export interface TeacherClassListItem {
   id: string;
@@ -45,6 +45,7 @@ export interface TeacherExerciseListItem {
   difficulty: Level;
   points: number;
   timeLimit: number | null;
+  status: ExerciseStatus;
   resultsCount: number;
   createdAt: string;
 }
