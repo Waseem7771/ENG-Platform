@@ -136,6 +136,18 @@ export function ExerciseForm({
   // populating form state. Cleared after that first pass so real edits autosave normally.
   const skipAutosaveRef = useRef(Boolean(exerciseId));
 
+  // Monotonic counter bumped at the start of every persist() call. Lets a save discard its
+  // own response if a *newer* save started (and possibly finished) while it was in flight —
+  // closes the race where a stale autosave PATCH resolves after an explicit Publish/Save-draft
+  // PATCH and would otherwise clobber the just-saved title/data/points/timeLimit with its
+  // older snapshot.
+  const saveSeqRef = useRef(0);
+  // The pending debounce timer for autosave, if one is currently scheduled. Exposed via ref
+  // (not just the effect-local variable) so persist() can cancel a queued-but-not-yet-fired
+  // autosave the instant an explicit save starts — otherwise it could fire moments after a
+  // Publish and re-open the same race.
+  const autosaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   useEffect(() => {
     if (!pointsTouched) setPoints(DEFAULT_POINTS[difficulty]);
   }, [difficulty, pointsTouched]);
@@ -255,8 +267,22 @@ export function ExerciseForm({
    * flips an already-PUBLISHED exercise back to DRAFT behind the teacher's back.
    * The very first successful save (POST) captures the new id and calls onSaved —
    * every later save (autosave or explicit) PATCHes that same id.
+   *
+   * Save-sequence guard: every call bumps `saveSeqRef` and cancels any pending (not yet
+   * fired) autosave timer before its own fetch goes out. After the await resolves, this
+   * call's `seq` is compared against `saveSeqRef.current` — if a newer persist() started
+   * in the meantime, this response is stale and is discarded (returns null) instead of
+   * applying its (possibly older) snapshot over whatever the newer save already wrote.
+   * In the normal, non-racing case `seq` always still matches, so behavior is unchanged:
+   * state updates + the POST branch's onSaved fire exactly once.
    */
-  async function persist(data: ExerciseData, explicitStatus?: ExerciseStatus): Promise<ExercisePersistResponse> {
+  async function persist(data: ExerciseData, explicitStatus?: ExerciseStatus): Promise<ExercisePersistResponse | null> {
+    if (autosaveTimeoutRef.current) {
+      clearTimeout(autosaveTimeoutRef.current);
+      autosaveTimeoutRef.current = null;
+    }
+    const seq = ++saveSeqRef.current;
+
     const body: Record<string, unknown> = {
       title: title.trim(),
       difficulty,
@@ -271,6 +297,7 @@ export function ExerciseForm({
         method: "PATCH",
         body: JSON.stringify(body),
       });
+      if (seq !== saveSeqRef.current) return null; // superseded — discard silently
       setStatus(updated.status);
       return updated;
     }
@@ -279,6 +306,7 @@ export function ExerciseForm({
       method: "POST",
       body: JSON.stringify({ ...body, type, status: explicitStatus ?? "DRAFT" }),
     });
+    if (seq !== saveSeqRef.current) return null; // superseded — discard silently
     savedIdRef.current = created.id;
     setStatus(created.status);
     onSaved?.(created.id);
@@ -295,19 +323,27 @@ export function ExerciseForm({
     }
     if (!title.trim()) return;
 
-    const timeout = setTimeout(() => {
+    autosaveTimeoutRef.current = setTimeout(() => {
+      autosaveTimeoutRef.current = null;
       const result = computeData();
       if (!result.data) return; // quietly wait for valid content — no error banner while typing
       setAutosaving(true);
       persist(result.data)
-        .then(() => setLastSavedAt(Date.now()))
+        .then((saved) => {
+          if (saved) setLastSavedAt(Date.now()); // stale (superseded) response — leave state as-is
+        })
         .catch(() => {
           /* silent — explicit Save draft/Publish surface errors; autosave just retries next change */
         })
         .finally(() => setAutosaving(false));
     }, AUTOSAVE_DELAY_MS);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      if (autosaveTimeoutRef.current) {
+        clearTimeout(autosaveTimeoutRef.current);
+        autosaveTimeoutRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     loading,
@@ -356,9 +392,11 @@ export function ExerciseForm({
 
     setSubmitting(true);
     try {
-      await persist(result.data, "DRAFT");
-      setLastSavedAt(Date.now());
-      toast.success(t("teacher.draftSaved"));
+      const saved = await persist(result.data, "DRAFT");
+      if (saved) {
+        setLastSavedAt(Date.now());
+        toast.success(t("teacher.draftSaved"));
+      } // else: superseded by a newer save started meanwhile — that save owns the toast/state
     } catch (e) {
       setFormError(e instanceof ApiClientError ? e.message : t("common.error"));
     } finally {
@@ -379,9 +417,11 @@ export function ExerciseForm({
     setSubmitting(true);
     try {
       const saved = await persist(result.data, "PUBLISHED");
-      setLastSavedAt(Date.now());
-      toast.success(t("teacher.published_toast"));
-      onSaved?.(saved.id);
+      if (saved) {
+        setLastSavedAt(Date.now());
+        toast.success(t("teacher.published_toast"));
+        onSaved?.(saved.id);
+      } // else: superseded by a newer save started meanwhile — that save owns the toast/state
     } catch (e) {
       setFormError(e instanceof ApiClientError ? e.message : t("common.error"));
     } finally {
