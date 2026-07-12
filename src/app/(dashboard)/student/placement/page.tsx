@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { api, ApiClientError } from "@/lib/api";
+import { parseDraft, reconcileDraft, type PlacementDraft } from "@/lib/placement-draft";
 import { useT } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { ScoreRing } from "@/components/shared/score-ring";
@@ -18,11 +19,6 @@ interface PlacementGetResponse {
   lastResult?: PlacementResult;
 }
 
-interface PlacementDraft {
-  answers: Record<string, string>;
-  qIndex: number;
-}
-
 const DRAFT_KEY = "sp-placement-draft";
 
 const levelColor: Record<string, string> = {
@@ -31,24 +27,12 @@ const levelColor: Record<string, string> = {
   ADVANCED: "border-primary/30 bg-secondary text-primary",
 };
 
-function readDraft(): PlacementDraft | null {
+function readStoredDraft(): PlacementDraft | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    if (
-      parsed &&
-      typeof parsed === "object" &&
-      "answers" in parsed &&
-      "qIndex" in parsed &&
-      typeof (parsed as PlacementDraft).qIndex === "number" &&
-      typeof (parsed as PlacementDraft).answers === "object"
-    ) {
-      return parsed as PlacementDraft;
-    }
-    return null;
+    return parseDraft(window.localStorage.getItem(DRAFT_KEY));
   } catch {
+    // localStorage may be unavailable (private mode / security) — non-fatal.
     return null;
   }
 }
@@ -76,19 +60,36 @@ export default function PlacementExamPage() {
   const t = useT();
   const { data, loading, error, refetch } = useApi<PlacementGetResponse>(() => api<PlacementGetResponse>("/api/placement"), []);
   const [phase, setPhase] = useState<"intro" | "exam" | "review" | "results">("intro");
-  const [qIndex, setQIndex] = useState(() => readDraft()?.qIndex ?? 0);
-  const [answers, setAnswers] = useState<Record<string, string>>(() => readDraft()?.answers ?? {});
-  const [hasDraft, setHasDraft] = useState(() => readDraft() !== null);
+  const [qIndex, setQIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [draft, setDraft] = useState<PlacementDraft | null>(() => readStoredDraft());
   const [reviewVisited, setReviewVisited] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<PlacementResult | null>(null);
 
-  // Mirror in-progress answers to localStorage while the exam or review stage is active.
+  // Reconcile any saved draft against the loaded question list: drop answers for
+  // unknown ids, clamp the index into range, and discard the draft entirely when
+  // nothing valid remains (stale or tampered storage must never crash the exam).
+  useEffect(() => {
+    if (!data) return;
+    const stored = readStoredDraft();
+    if (!stored) {
+      setDraft(null);
+      return;
+    }
+    const reconciled = reconcileDraft(stored, data.questions.map((q) => q.id));
+    if (!reconciled) clearDraft();
+    setDraft(reconciled);
+  }, [data]);
+
+  // Mirror in-progress answers (and the current stage) to localStorage while the
+  // exam or review stage is active, so resume can restore the exact position.
   useEffect(() => {
     if (phase !== "exam" && phase !== "review") return;
     if (Object.keys(answers).length === 0) return;
-    writeDraft({ answers, qIndex });
-    setHasDraft(true);
+    const next: PlacementDraft = { answers, qIndex, phase };
+    writeDraft(next);
+    setDraft(next);
   }, [answers, qIndex, phase]);
 
   // Warn before an accidental tab close / refresh while there's unsaved exam progress.
@@ -121,18 +122,23 @@ export default function PlacementExamPage() {
     setResult(null);
     setReviewVisited(false);
     clearDraft();
-    setHasDraft(false);
+    setDraft(null);
     setPhase("exam");
   }
 
   function resumeExam() {
-    const draft = readDraft();
-    if (draft) {
-      setAnswers(draft.answers);
-      setQIndex(draft.qIndex);
+    if (!draft || !data) return;
+    const reconciled = reconcileDraft(draft, data.questions.map((q) => q.id));
+    if (!reconciled) {
+      clearDraft();
+      setDraft(null);
+      return;
     }
-    setReviewVisited(false);
-    setPhase("exam");
+    setAnswers(reconciled.answers);
+    setQIndex(reconciled.qIndex);
+    const resumedPhase = reconciled.phase === "review" ? "review" : "exam";
+    setReviewVisited(resumedPhase === "review");
+    setPhase(resumedPhase);
   }
 
   function goToReview() {
@@ -151,7 +157,7 @@ export default function PlacementExamPage() {
     try {
       const res = await api<PlacementResult>("/api/placement", { method: "POST", body: JSON.stringify({ answers }) });
       clearDraft();
-      setHasDraft(false);
+      setDraft(null);
       setResult(res);
       setPhase("results");
     } catch (err) {
@@ -191,7 +197,7 @@ export default function PlacementExamPage() {
             {data.taken ? t("placement.retake") : t("placement.start")}
           </Button>
 
-          {hasDraft && (
+          {draft && (
             <Button variant="ghost" onClick={resumeExam} className="mt-3 w-full">
               {t("placement.resume")}
             </Button>
@@ -202,8 +208,12 @@ export default function PlacementExamPage() {
   }
 
   if (phase === "exam") {
-    const question = data.questions[qIndex];
-    const isLast = qIndex === data.questions.length - 1;
+    // qIndex is kept in-range by reconcileDraft and the bounded nav handlers,
+    // but clamp defensively so a bad index can never crash the render.
+    const qIdx = Math.min(Math.max(qIndex, 0), data.questions.length - 1);
+    const question = data.questions[qIdx];
+    if (!question) return null;
+    const isLast = qIdx === data.questions.length - 1;
     const answered = !!answers[question.id];
 
     return (
@@ -211,13 +221,13 @@ export default function PlacementExamPage() {
         <div className="mx-auto max-w-2xl space-y-6 px-4 py-10">
           <div>
             <div className="mb-2 flex justify-between text-xs text-muted-foreground">
-              <span>{t("placement.questionOf", { n: qIndex + 1, total: data.questions.length })}</span>
+              <span>{t("placement.questionOf", { n: qIdx + 1, total: data.questions.length })}</span>
               <span className="rounded-full border border-border px-2 py-0.5 uppercase tracking-wider">{question.category}</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <motion.div
                 className="h-full rounded-full bg-primary"
-                animate={{ width: `${((qIndex + 1) / data.questions.length) * 100}%` }}
+                animate={{ width: `${((qIdx + 1) / data.questions.length) * 100}%` }}
                 transition={{ duration: 0.4, ease: [0.35, 0.35, 0, 1] }}
               />
             </div>
@@ -249,8 +259,8 @@ export default function PlacementExamPage() {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              disabled={qIndex === 0}
-              onClick={() => setQIndex((i) => i - 1)}
+              disabled={qIdx === 0}
+              onClick={() => setQIndex(qIdx - 1)}
               className="rounded-full border border-border px-6 py-2.5 text-sm text-foreground disabled:opacity-30"
             >
               {t("common.back")}
@@ -267,7 +277,7 @@ export default function PlacementExamPage() {
             <button
               type="button"
               disabled={!answered}
-              onClick={() => (isLast ? goToReview() : setQIndex((i) => i + 1))}
+              onClick={() => (isLast ? goToReview() : setQIndex(qIdx + 1))}
               className="rounded-full bg-primary px-8 py-2.5 text-sm font-medium uppercase tracking-wider text-primary-foreground disabled:opacity-30"
             >
               {t("common.next")}
