@@ -1,16 +1,6 @@
-import type { ComponentType } from "react";
 import { cn } from "@/lib/utils";
 import type { ExerciseType, Level, SessionStatus } from "@/types";
-import {
-  BookOpen,
-  BookMarked,
-  Languages,
-  Headphones,
-  Zap,
-  MessageSquare,
-  Image as ImageIcon,
-  ScrollText,
-} from "lucide-react";
+import { EXERCISE_TYPE_META } from "@/lib/exercise-meta";
 
 const LEVEL_STYLES: Record<Level, string> = {
   BEGINNER: "border-leaf bg-leaf-soft text-leaf-text",
@@ -61,17 +51,6 @@ export function SessionStatusBadge({ status, className }: { status: SessionStatu
     </span>
   );
 }
-
-export const EXERCISE_TYPE_META: Record<ExerciseType, { label: string; icon: ComponentType<{ className?: string }>; color: string }> = {
-  GRAMMAR: { label: "Grammar", icon: BookOpen, color: "text-primary" },
-  VOCABULARY: { label: "Vocabulary", icon: BookMarked, color: "text-primary" },
-  TRANSLATION: { label: "Translation", icon: Languages, color: "text-leaf-text" },
-  LISTENING: { label: "Listening", icon: Headphones, color: "text-leaf-text" },
-  QUIZ: { label: "Speed Quiz", icon: Zap, color: "text-sun-deep" },
-  CONVERSATION: { label: "AI Conversation", icon: MessageSquare, color: "text-primary" },
-  PICTURE: { label: "Picture", icon: ImageIcon, color: "text-sun-deep" },
-  STORY: { label: "Story", icon: ScrollText, color: "text-leaf-text" },
-};
 
 export function ExerciseTypeBadge({ type, className }: { type: ExerciseType; className?: string }) {
   const meta = EXERCISE_TYPE_META[type];

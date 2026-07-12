@@ -5,12 +5,13 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Clock, PenSquare, Trash2, Users } from "lucide-react";
 import { ErrorState, EmptyState, ListSkeleton } from "@/components/teacher/state-views";
-import { LevelBadge, ExerciseTypeBadge, EXERCISE_TYPE_META } from "@/components/teacher/badges";
+import { LevelBadge, ExerciseTypeBadge } from "@/components/teacher/badges";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
 import { ExerciseFormDialog } from "@/components/teacher/exercise-form/exercise-form-dialog";
 import { api, ApiClientError } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { EXERCISE_TYPES, type ExerciseType, type Level } from "@/types";
+import { EXERCISE_TYPE_META, EXERCISE_TYPES } from "@/lib/exercise-meta";
+import { type ExerciseType, type Level } from "@/types";
 import type { TeacherExerciseListItem } from "@/components/teacher/types";
 
 const DIFFICULTIES: Level[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];

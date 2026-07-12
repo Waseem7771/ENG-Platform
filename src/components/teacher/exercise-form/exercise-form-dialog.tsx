@@ -13,8 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { api, ApiClientError } from "@/lib/api";
-import { EXERCISE_TYPES, type ExerciseData, type ExerciseType, type Level } from "@/types";
-import { EXERCISE_TYPE_META } from "@/components/teacher/badges";
+import { type ExerciseData, type ExerciseType, type Level } from "@/types";
+import { EXERCISE_TYPE_META, EXERCISE_TYPES } from "@/lib/exercise-meta";
 import { LevelSelect } from "@/components/teacher/level-select";
 import { Field, inputClass } from "./form-controls";
 import { DEFAULT_POINTS } from "./utils";
