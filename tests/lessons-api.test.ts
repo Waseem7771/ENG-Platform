@@ -315,6 +315,58 @@ describe("POST /api/lessons (integration)", () => {
     expect(res.status).toBe(400);
   });
 
+  it("accepts a list with duplicate owned exerciseIds and connects each distinct id once", async () => {
+    const { cookie, userId, klass } = await setupTeacherWithClass("lesson-dup1@test.local");
+    const ex1 = await createExercise(userId, "Ex1");
+
+    asUser(cookie);
+    const res = await createPOST(
+      req("http://localhost/api/lessons", {
+        method: "POST",
+        body: JSON.stringify({
+          classId: klass.id,
+          title: "Lesson with Duplicate",
+          level: "BEGINNER",
+          unit: 1,
+          order: 0,
+          exerciseIds: [ex1.id, ex1.id],
+        }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.exercises.map((e: { id: string }) => e.id)).toEqual([ex1.id]);
+
+    const row = await db.lesson.findUnique({ where: { id: body.id }, include: { exercises: true } });
+    expect(row?.exercises).toHaveLength(1);
+    expect(row?.exercises[0].id).toBe(ex1.id);
+  });
+
+  it("rejects a list with one owned + one foreign exerciseId with 400", async () => {
+    const { cookie, userId, klass } = await setupTeacherWithClass("lesson-mixed1@test.local");
+    const other = await signUp("lesson-mixed-other1@test.local", "TEACHER");
+    const ownEx = await createExercise(userId, "Own");
+    const foreignEx = await createExercise(other.userId, "Foreign");
+
+    asUser(cookie);
+    const res = await createPOST(
+      req("http://localhost/api/lessons", {
+        method: "POST",
+        body: JSON.stringify({
+          classId: klass.id,
+          title: "Lesson Mixed",
+          level: "BEGINNER",
+          unit: 1,
+          order: 0,
+          exerciseIds: [ownEx.id, foreignEx.id],
+        }),
+      })
+    );
+    expect(res.status).toBe(400);
+    expect(await db.lesson.findMany({ where: { classId: klass.id } })).toHaveLength(0);
+  });
+
   it("rejects classId: null with 400 (seeded curriculum is read-only via this API)", async () => {
     const { cookie } = await setupTeacherWithClass("lesson-owner3@test.local");
 
@@ -480,6 +532,30 @@ describe("PATCH /api/lessons/[id] (integration)", () => {
 
     const row = await db.lesson.findUnique({ where: { id: lesson.id } });
     expect(row?.title).toBe("Original");
+  });
+
+  it("accepts duplicate owned exerciseIds in PATCH and connects each distinct id once", async () => {
+    const { cookie, userId, klass } = await setupTeacherWithClass("lesson-patch-dup1@test.local");
+    const ex1 = await createExercise(userId, "Ex1");
+    const lesson = await db.lesson.create({
+      data: { classId: klass.id, createdById: userId, title: "L", level: "BEGINNER", unit: 1, order: 0 },
+    });
+
+    asUser(cookie);
+    const res = await PATCH(
+      req(`http://localhost/api/lessons/${lesson.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ exerciseIds: [ex1.id, ex1.id] }),
+      }),
+      { params: Promise.resolve({ id: lesson.id }) }
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.exercises.map((e: { id: string }) => e.id)).toEqual([ex1.id]);
+
+    const row = await db.lesson.findUnique({ where: { id: lesson.id }, include: { exercises: true } });
+    expect(row?.exercises).toHaveLength(1);
+    expect(row?.exercises[0].id).toBe(ex1.id);
   });
 
   it("400s on a classId:null (seeded curriculum) lesson, even when 'created by' the caller", async () => {

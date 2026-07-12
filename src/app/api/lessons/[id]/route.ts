@@ -110,7 +110,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         where: { id: { in: exerciseIds }, createdById: user.id },
         select: { id: true },
       });
-      if (owned.length !== exerciseIds.length) {
+      const ownedIds = new Set(owned.map((e) => e.id));
+      const allOwned = exerciseIds.every((id) => ownedIds.has(id));
+      if (!allOwned) {
         throw new ApiError(400, "One or more exerciseIds are invalid or not owned by you");
       }
     }
