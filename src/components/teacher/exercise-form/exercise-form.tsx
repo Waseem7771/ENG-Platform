@@ -11,6 +11,7 @@ import { EXERCISE_TYPE_META, EXERCISE_TYPES } from "@/lib/exercise-meta";
 import { LevelSelect } from "@/components/teacher/level-select";
 import { Field, inputClass } from "./form-controls";
 import { DEFAULT_POINTS } from "./utils";
+import { consumeFormBridge, writeFormBridge } from "./form-bridge";
 import {
   conversationToPayload,
   dataToDraft,
@@ -38,6 +39,7 @@ import {
   validateVocabulary,
   vocabularyToPayload,
   type ConversationDraft,
+  type ExerciseDraftForType,
   type GrammarItemDraft,
   type ListeningItemDraft,
   type PictureDraft,
@@ -161,14 +163,31 @@ export function ExerciseForm({
     api<ExerciseEditResponse>(`/api/exercises/${exerciseId}?edit=1`)
       .then((ex) => {
         if (cancelled) return;
-        setTitle(ex.title);
-        setType(ex.type);
-        setDifficulty(ex.difficulty);
-        setPoints(ex.points);
-        setPointsTouched(true);
-        setTimeLimit(ex.timeLimit ? String(ex.timeLimit) : "");
-        setStatus(ex.status);
-        applyDraft(ex.type, ex.data);
+        // A bridged draft (written by a previous mount of this form under the same id — most
+        // commonly the /new instance, right before onSaved's router.replace remounted us here)
+        // reflects the teacher's latest local typing, which is always fresher than this GET's
+        // snapshot — so it wins over the server response when present. Consumed exactly once:
+        // reading it also deletes the sessionStorage entry.
+        const bridged = consumeFormBridge(exerciseId);
+        if (bridged) {
+          setTitle(bridged.title);
+          setType(bridged.draft.type);
+          setDifficulty(bridged.difficulty);
+          setPoints(bridged.points);
+          setPointsTouched(true);
+          setTimeLimit(bridged.timeLimit);
+          setStatus(ex.status);
+          applyDraftUnion(bridged.draft);
+        } else {
+          setTitle(ex.title);
+          setType(ex.type);
+          setDifficulty(ex.difficulty);
+          setPoints(ex.points);
+          setPointsTouched(true);
+          setTimeLimit(ex.timeLimit ? String(ex.timeLimit) : "");
+          setStatus(ex.status);
+          applyDraft(ex.type, ex.data);
+        }
         savedIdRef.current = ex.id;
       })
       .catch((e) => {
@@ -183,9 +202,8 @@ export function ExerciseForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exerciseId]);
 
-  /** Applies a data blob (loaded or AI-generated) into the matching builder's state only. */
-  function applyDraft(draftType: ExerciseType, data: ExerciseData) {
-    const draft = dataToDraft(draftType, data);
+  /** Applies an already-tagged draft union into the matching builder's state only. */
+  function applyDraftUnion(draft: ExerciseDraftForType) {
     switch (draft.type) {
       case "GRAMMAR":
         setGrammarItems(draft.value);
@@ -212,6 +230,33 @@ export function ExerciseForm({
       case "STORY":
         setStory(draft.value);
         break;
+    }
+  }
+
+  /** Applies a data blob (loaded or AI-generated) into the matching builder's state only. */
+  function applyDraft(draftType: ExerciseType, data: ExerciseData) {
+    applyDraftUnion(dataToDraft(draftType, data));
+  }
+
+  /** Snapshots the active builder's live draft state — the inverse of applyDraftUnion — for mirroring to the sessionStorage bridge (see form-bridge.ts). */
+  function currentDraftForBridge(): ExerciseDraftForType {
+    switch (type) {
+      case "GRAMMAR":
+        return { type, value: grammarItems };
+      case "VOCABULARY":
+        return { type, value: vocabPairs };
+      case "TRANSLATION":
+        return { type, value: translationItems };
+      case "LISTENING":
+        return { type, value: listeningItems };
+      case "QUIZ":
+        return { type, value: { items: quizItems, timePerQuestion } };
+      case "CONVERSATION":
+        return { type, value: conversation };
+      case "PICTURE":
+        return { type, value: picture };
+      case "STORY":
+        return { type, value: story };
     }
   }
 
@@ -344,6 +389,43 @@ export function ExerciseForm({
         autosaveTimeoutRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    loading,
+    title,
+    type,
+    difficulty,
+    points,
+    timeLimit,
+    grammarItems,
+    vocabPairs,
+    translationItems,
+    listeningItems,
+    quizItems,
+    timePerQuestion,
+    conversation,
+    picture,
+    story,
+  ]);
+
+  // Mirrors the full editable draft to sessionStorage on every change, once a row exists to key
+  // it under — this is what lets a fresh ExerciseForm mount (e.g. the /edit instance after
+  // onSaved/router.replace remounts across the /new -> /edit route segment) recover typing the
+  // just-unmounted instance never got to autosave. Same field list as the autosave effect above;
+  // unlike autosave this write is synchronous (no debounce) and never touches the network — see
+  // form-bridge.ts. Skipped during the initial ?edit=1 load same as autosave, though for a
+  // different reason: `loading` only goes false once state already reflects the server (or a
+  // just-consumed bridge), so there is nothing new to mirror yet.
+  useEffect(() => {
+    if (loading) return;
+    if (!savedIdRef.current) return;
+    writeFormBridge(savedIdRef.current, {
+      title,
+      difficulty,
+      points,
+      timeLimit,
+      draft: currentDraftForBridge(),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     loading,
