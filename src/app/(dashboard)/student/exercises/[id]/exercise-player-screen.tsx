@@ -17,6 +17,7 @@ import { SpeedQuiz } from "@/components/exercise/speed-quiz";
 import { ConversationChat } from "@/components/exercise/conversation-chat";
 import { PicturePlayer } from "@/components/exercise/picture-player";
 import { StoryPlayer } from "@/components/exercise/story-player";
+import { exerciseHref } from "@/lib/exercise-href";
 import type { ExerciseFull } from "../../_types";
 import type { PathResponse } from "@/lib/path";
 import type { Recommendation } from "@/lib/recommend";
@@ -71,7 +72,7 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
       if (recommendation) {
         setNext({
           label: t("results.nextPractice", { title: recommendation.title }),
-          href: `/student/exercises/${recommendation.id}`,
+          href: exerciseHref(recommendation.id, recommendation.type),
         });
         return;
       }

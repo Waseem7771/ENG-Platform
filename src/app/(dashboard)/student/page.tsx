@@ -8,6 +8,7 @@ import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { exerciseHref } from "@/lib/exercise-href";
 import type { PathResponse, PathLesson, PathUnit } from "@/lib/path";
 import type { MeResponse } from "./_types";
 
@@ -93,7 +94,7 @@ export default function StudentPathPage() {
             <Button
               variant="sun"
               className="mt-6"
-              render={<Link href={`/student/exercises/${cont.exerciseId}`} />}
+              render={<Link href={exerciseHref(cont.exerciseId, cont.type)} />}
               nativeButton={false}
               role="link"
             >
@@ -207,7 +208,7 @@ function LessonRow({ lesson, isFirst, prevDone, t }: { lesson: PathLesson; isFir
               </>
             );
             return linkable ? (
-              <Link key={ex.id} href={`/student/exercises/${ex.id}`} className={chipClass}>
+              <Link key={ex.id} href={exerciseHref(ex.id, ex.type)} className={chipClass}>
                 {content}
               </Link>
             ) : (

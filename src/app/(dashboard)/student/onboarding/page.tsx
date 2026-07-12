@@ -9,6 +9,7 @@ import { api, ApiClientError } from "@/lib/api";
 import { useT } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
 import { OptionButton } from "@/components/exercise/option-button";
+import { exerciseHref } from "@/lib/exercise-href";
 import type { PlacementQuestionPublic } from "@/types";
 import type { PathResponse } from "@/lib/path";
 import type { MeResponse } from "../_types";
@@ -79,7 +80,7 @@ export default function OnboardingPage() {
       setResult(res);
       try {
         const path = await api<PathResponse>("/api/path");
-        setCtaHref(path.continue ? `/student/exercises/${path.continue.exerciseId}` : "/student");
+        setCtaHref(path.continue ? exerciseHref(path.continue.exerciseId, path.continue.type) : "/student");
       } catch {
         setCtaHref("/student");
       }

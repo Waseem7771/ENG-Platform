@@ -73,6 +73,7 @@ function ResetPasswordForm() {
               <Button
                 render={<Link href="/forgot-password" />}
                 nativeButton={false}
+                role="link"
                 className="mt-5 w-full"
               >
                 {t("auth.requestNewLink")}

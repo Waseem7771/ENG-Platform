@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useT } from "@/components/providers/locale-provider";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
+import { exerciseHref } from "@/lib/exercise-href";
 import { EXERCISE_TYPES, type ExerciseListItem, type ExerciseType, type Level } from "@/types";
 
 type T = ReturnType<typeof useT>;
@@ -29,12 +30,10 @@ const difficultyColor: Record<Level, string> = {
   ADVANCED: "border-destructive/30 bg-coral-soft text-destructive",
 };
 
+const LEVELS: Level[] = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
+
 const container = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { y: 16, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: [0.35, 0.35, 0, 1] as const } } };
-
-function exerciseHref(exercise: ExerciseListItem) {
-  return exercise.type === "CONVERSATION" ? `/student/practice/conversation/${exercise.id}` : `/student/exercises/${exercise.id}`;
-}
 
 function PracticeLibrary() {
   const t = useT();
@@ -43,7 +42,11 @@ function PracticeLibrary() {
 
   const rawType = searchParams.get("type");
   const type: ExerciseType | "ALL" = rawType && EXERCISE_TYPES.includes(rawType as ExerciseType) ? (rawType as ExerciseType) : "ALL";
-  const difficultyParam = searchParams.get("difficulty");
+  const rawDifficulty = searchParams.get("difficulty");
+  const difficultyParam: Level | "ALL" | null =
+    rawDifficulty === "ALL" || (rawDifficulty && LEVELS.includes(rawDifficulty as Level))
+      ? (rawDifficulty as Level | "ALL")
+      : null;
   const allLevels = difficultyParam === "ALL";
 
   const qs = useMemo(() => {
@@ -147,7 +150,7 @@ function FilterChip({ active, label, onClick }: { active: boolean; label: string
 function ExerciseCard({ exercise, t }: { exercise: ExerciseListItem; t: T }) {
   const meta = EXERCISE_TYPE_META.find((m) => m.type === exercise.type);
   return (
-    <Link href={exerciseHref(exercise)}>
+    <Link href={exerciseHref(exercise.id, exercise.type)}>
       <div className="flex items-center justify-between gap-4 rounded-card border-2 border-border bg-card p-5 shadow-sticker transition-all duration-300 hover:border-line-strong hover:bg-muted">
         <div className="min-w-0">
           <p className="truncate font-semibold tracking-tight text-foreground" dir="ltr">

@@ -10,6 +10,7 @@ import { api, ApiClientError } from "@/lib/api";
 import { useT } from "@/components/providers/locale-provider";
 import { ResultsScreen } from "@/components/exercise/results-screen";
 import { ConversationChat } from "@/components/exercise/conversation-chat";
+import { exerciseHref } from "@/lib/exercise-href";
 import type { ExerciseFull } from "../../../_types";
 import type { Recommendation } from "@/lib/recommend";
 import type { ConversationData, SubmitResponse } from "@/types";
@@ -44,11 +45,10 @@ export function ConversationScreen({ id }: { id: string }) {
       const { recommendation } = await api<{ recommendation: Recommendation | null }>(`/api/exercises/recommend?exclude=${id}`);
       if (recommendation) {
         // Route CONVERSATION recommendations back through this canonical page (not the generic player).
-        const href =
-          recommendation.type === "CONVERSATION"
-            ? `/student/practice/conversation/${recommendation.id}`
-            : `/student/exercises/${recommendation.id}`;
-        setNext({ label: t("results.nextPractice", { title: recommendation.title }), href });
+        setNext({
+          label: t("results.nextPractice", { title: recommendation.title }),
+          href: exerciseHref(recommendation.id, recommendation.type),
+        });
         return;
       }
       setNext(null);
@@ -71,7 +71,7 @@ export function ConversationScreen({ id }: { id: string }) {
         if (prev <= 1) {
           if (!timedOutRef.current) {
             timedOutRef.current = true;
-            toast.info("Time's up — submitting your answers.");
+            toast.info(t("exercise.timeUp"));
             forceSubmitRef.current?.();
           }
           return 0;
@@ -80,7 +80,7 @@ export function ConversationScreen({ id }: { id: string }) {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [exercise?.timeLimit, phase]);
+  }, [exercise?.timeLimit, phase, t]);
 
   async function handleSubmit(payload: unknown) {
     if (submitting) return;
@@ -108,7 +108,7 @@ export function ConversationScreen({ id }: { id: string }) {
       // Fetch the follow-up CTA after showing results — must not block the results screen.
       fetchNext();
     } catch (err) {
-      toast.error(err instanceof ApiClientError ? err.message : "Couldn't submit your answers. Try again.");
+      toast.error(err instanceof ApiClientError ? err.message : t("exercise.submitFailedHint"));
       setSubmitFailed(true);
     } finally {
       setSubmitting(false);
@@ -144,11 +144,11 @@ export function ConversationScreen({ id }: { id: string }) {
   if (loading) return <ConversationSkeleton />;
 
   if (error || !exercise) {
-    return <ErrorPanel message={error ?? "Exercise not found."} onRetry={refetch} t={t} />;
+    return <ErrorPanel message={error ?? t("exercise.notFound")} onRetry={refetch} t={t} />;
   }
 
   if (exercise.type !== "CONVERSATION") {
-    return <ErrorPanel message="This isn't a conversation exercise." onRetry={refetch} t={t} />;
+    return <ErrorPanel message={t("exercise.loadFailed")} onRetry={refetch} t={t} />;
   }
 
   if (phase === "results" && result) {
@@ -186,7 +186,7 @@ export function ConversationScreen({ id }: { id: string }) {
         </div>
         <div className="flex items-center gap-2">
           <span className={`rounded-full border px-3 py-1 text-xs font-medium ${difficultyColor[exercise.difficulty]}`}>{exercise.difficulty}</span>
-          <span className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">{exercise.points} pts</span>
+          <span className="rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground">{t("exercise.points", { n: exercise.points })}</span>
           {timeLeft !== null && (
             <span className={`rounded-full border px-3 py-1 text-xs font-mono ${timeLeft <= 10 ? "border-destructive bg-coral-soft text-destructive" : "border-border bg-card text-muted-foreground"}`}>
               {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
@@ -197,13 +197,13 @@ export function ConversationScreen({ id }: { id: string }) {
 
       {submitFailed && !submitting && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/20 bg-coral-soft px-4 py-3 text-sm text-destructive">
-          <span>Your last submission failed to save.</span>
+          <span>{t("exercise.submitFailed")}</span>
           <button
             type="button"
             onClick={retrySubmit}
             className="shrink-0 rounded-full border border-destructive/30 px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-destructive transition hover:border-destructive/50"
           >
-            Try again
+            {t("common.retry")}
           </button>
         </div>
       )}
@@ -228,7 +228,7 @@ function ErrorPanel({ message, onRetry, t }: { message: string; onRetry: () => v
       <p className="text-foreground">{message}</p>
       <div className="mt-4 flex justify-center gap-3">
         <button onClick={() => onRetry()} className="rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong">
-          Retry
+          {t("common.retry")}
         </button>
         <Link href={BACK_HREF} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">
           {t("conversation.back")}

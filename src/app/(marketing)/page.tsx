@@ -95,7 +95,7 @@ export default function LandingPage() {
             >
               Log in
             </Link>
-            <Button render={<Link href="/signup" />} nativeButton={false} size="sm">
+            <Button render={<Link href="/signup" />} nativeButton={false} role="link" size="sm">
               Get Started
             </Button>
           </nav>
@@ -149,10 +149,10 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5, ease }}
           >
-            <Button render={<Link href="/signup" />} nativeButton={false} size="lg">
+            <Button render={<Link href="/signup" />} nativeButton={false} role="link" size="lg">
               Start Learning Free →
             </Button>
-            <Button render={<Link href="/signup?role=teacher" />} nativeButton={false} variant="ghost" size="lg">
+            <Button render={<Link href="/signup?role=teacher" />} nativeButton={false} role="link" variant="ghost" size="lg">
               I&apos;m a Teacher
             </Button>
           </motion.div>
@@ -326,7 +326,7 @@ export default function LandingPage() {
               card, no commitment — just start learning.
             </p>
             <div className="mt-10">
-              <Button render={<Link href="/signup" />} nativeButton={false} size="lg">
+              <Button render={<Link href="/signup" />} nativeButton={false} role="link" size="lg">
                 Create Free Account →
               </Button>
             </div>
