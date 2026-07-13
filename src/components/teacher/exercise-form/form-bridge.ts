@@ -19,6 +19,12 @@ import type {
  * unmounts the /new ExerciseForm, then mounts a fresh one on /edit that re-fetches from the
  * server. Any typing done between the id-capture and the unmount only ever lived in the doomed
  * /new instance's React state — the bridge is the one place it can reach the new instance.
+ *
+ * Each entry is stamped with a write time and only ever consumed within FORM_BRIDGE_FRESHNESS_MS
+ * of that stamp (see consumeFormBridge below) — the handoff this exists for completes in well
+ * under a second, so bounding freshness costs it nothing while making a leftover entry from an
+ * abandoned earlier session (tab closed and reopened hours later, say) inert instead of
+ * silently overriding a fresh server read.
  */
 export interface ExerciseFormBridgeState {
   title: string;
@@ -156,11 +162,35 @@ function bridgeKey(id: string): string {
   return `sp-exercise-form-${id}`;
 }
 
+/**
+ * A bridge entry is only ever meant to survive the sub-second window of the /new -> /edit
+ * route-segment swap (see the module doc above) — that's the only legitimate producer of an
+ * entry. Anything older than this is presumed to be an abandoned earlier editing session (tab
+ * closed and reopened later, a direct visit to /[id]/edit long after the fact, etc.) rather
+ * than a live handoff, and consumeFormBridge treats it as absent. This is what stops a stale
+ * draft from silently overriding fresh server data on a normal, non-handoff visit to the edit
+ * page — the CRITICAL bug this bounds: without it, *every* mount of an existing exercise
+ * consumed whatever bridge entry happened to exist for that id, however old.
+ */
+export const FORM_BRIDGE_FRESHNESS_MS = 60_000;
+
+interface BridgeEnvelope {
+  writtenAt: number;
+  state: ExerciseFormBridgeState;
+}
+
+function isValidEnvelope(value: unknown): value is BridgeEnvelope {
+  if (!value || typeof value !== "object") return false;
+  const e = value as Partial<BridgeEnvelope>;
+  return typeof e.writtenAt === "number" && isValidBridgeState(e.state);
+}
+
 /** SSR-safe, best-effort mirror of the current draft — never throws (a full/unavailable store just skips the write). */
 export function writeFormBridge(id: string, state: ExerciseFormBridgeState): void {
   if (typeof window === "undefined") return;
   try {
-    window.sessionStorage.setItem(bridgeKey(id), JSON.stringify(state));
+    const envelope: BridgeEnvelope = { writtenAt: Date.now(), state };
+    window.sessionStorage.setItem(bridgeKey(id), JSON.stringify(envelope));
   } catch {
     /* storage full/unavailable — bridging is best-effort and must never block typing */
   }
@@ -169,8 +199,9 @@ export function writeFormBridge(id: string, state: ExerciseFormBridgeState): voi
 /**
  * Reads and deletes the bridge entry for `id` in one step — a bridged draft is only ever
  * meant to be applied once, by the next mount for that id. Returns null (having still deleted
- * the entry) on any parse failure or shape mismatch, so a corrupted or stale entry can never
- * resurrect on a later, unrelated edit session.
+ * the entry) on any parse failure, shape mismatch, or staleness (written more than
+ * FORM_BRIDGE_FRESHNESS_MS ago), so a corrupted or stale entry can never resurrect on a later,
+ * unrelated edit session.
  */
 export function consumeFormBridge(id: string): ExerciseFormBridgeState | null {
   if (typeof window === "undefined") return null;
@@ -189,7 +220,9 @@ export function consumeFormBridge(id: string): ExerciseFormBridgeState | null {
   if (!raw) return null;
   try {
     const parsed: unknown = JSON.parse(raw);
-    return isValidBridgeState(parsed) ? parsed : null;
+    if (!isValidEnvelope(parsed)) return null;
+    if (Date.now() - parsed.writtenAt > FORM_BRIDGE_FRESHNESS_MS) return null; // stale — the genuine handoff is sub-second
+    return parsed.state;
   } catch {
     return null;
   }

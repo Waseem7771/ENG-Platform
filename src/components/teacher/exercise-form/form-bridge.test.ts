@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
-import { describe, it, expect, beforeEach } from "vitest";
-import { consumeFormBridge, isValidBridgeState, writeFormBridge, type ExerciseFormBridgeState } from "./form-bridge";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import {
+  consumeFormBridge,
+  isValidBridgeState,
+  writeFormBridge,
+  FORM_BRIDGE_FRESHNESS_MS,
+  type ExerciseFormBridgeState,
+} from "./form-bridge";
 import { newGrammarItem } from "./types";
 
 const ID = "ex_123";
@@ -259,5 +265,42 @@ describe("writeFormBridge / consumeFormBridge", () => {
     circular.self = circular;
     expect(() => writeFormBridge(ID, circular as unknown as ExerciseFormBridgeState)).not.toThrow();
     expect(window.sessionStorage.getItem(KEY)).toBeNull();
+  });
+});
+
+describe("bridge freshness window (the /new -> /edit handoff is sub-second; anything older is a stale, unrelated session)", () => {
+  it("consumes an entry written well within the freshness window", () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    const state = validState();
+    writeFormBridge(ID, state);
+    nowSpy.mockReturnValue(1_000_000 + 5_000); // 5s later — still comfortably fresh
+    expect(consumeFormBridge(ID)).toEqual(state);
+    nowSpy.mockRestore();
+  });
+
+  it("consumes an entry written exactly at the freshness boundary", () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    const state = validState();
+    writeFormBridge(ID, state);
+    nowSpy.mockReturnValue(1_000_000 + FORM_BRIDGE_FRESHNESS_MS);
+    expect(consumeFormBridge(ID)).toEqual(state);
+    nowSpy.mockRestore();
+  });
+
+  it("does NOT consume (and still clears) an entry older than the freshness window", () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    writeFormBridge(ID, validState());
+    nowSpy.mockReturnValue(1_000_000 + FORM_BRIDGE_FRESHNESS_MS + 1);
+    expect(consumeFormBridge(ID)).toBeNull();
+    expect(window.sessionStorage.getItem(KEY)).toBeNull(); // still deleted, even though rejected as stale
+    nowSpy.mockRestore();
+  });
+
+  it("a same-tab reopen well past the window (e.g. hours later) never resurrects a leftover draft", () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(0);
+    writeFormBridge(ID, { ...validState(), title: "Stale draft from a previous session" });
+    nowSpy.mockReturnValue(1000 * 60 * 60 * 3); // 3 hours later
+    expect(consumeFormBridge(ID)).toBeNull();
+    nowSpy.mockRestore();
   });
 });

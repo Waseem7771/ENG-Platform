@@ -11,7 +11,7 @@ import { EXERCISE_TYPE_META, EXERCISE_TYPES } from "@/lib/exercise-meta";
 import { LevelSelect } from "@/components/teacher/level-select";
 import { Field, inputClass } from "./form-controls";
 import { DEFAULT_POINTS } from "./utils";
-import { consumeFormBridge, writeFormBridge } from "./form-bridge";
+import { consumeFormBridge, writeFormBridge, type ExerciseFormBridgeState } from "./form-bridge";
 import {
   conversationToPayload,
   dataToDraft,
@@ -83,6 +83,41 @@ interface ComputeDataResult {
   itemErrors?: string[][];
 }
 
+/**
+ * Coordinates the very first "create" persist() call against any concurrent one that starts
+ * while it's in flight — e.g. an explicit Save draft/Publish click firing while the first
+ * autosave POST hasn't resolved yet. Both calls would otherwise take the same POST branch
+ * (neither has a saved id yet) and create two exercise rows.
+ *
+ * If `lockRef` is empty, starts `create()`, publishes a never-throwing copy of it on `lockRef`
+ * (cleared once the request settles, success or failure) for any concurrent caller to piggyback
+ * on, and returns `{ started: true, request }` where `request` is the ORIGINAL (throwing)
+ * promise — so the call that actually started it keeps its normal error handling. If `lockRef`
+ * is already populated, returns `{ started: false, request: lockRef.current }`, a promise that
+ * resolves to `null` instead of throwing — a failed create belongs to whichever call started
+ * it, not to a piggybacking one.
+ *
+ * Pure and React-free by design so the de-dup logic is unit-testable without rendering the form.
+ */
+export function joinOrStartCreate<T>(
+  lockRef: { current: Promise<T | null> | null },
+  create: () => Promise<T>
+): { started: true; request: Promise<T> } | { started: false; request: Promise<T | null> } {
+  if (lockRef.current) {
+    return { started: false, request: lockRef.current };
+  }
+  const request = create();
+  lockRef.current = request.then(
+    (result): T | null => result,
+    (): T | null => null
+  );
+  const clearLock = () => {
+    lockRef.current = null;
+  };
+  request.then(clearLock, clearLock);
+  return { started: true, request };
+}
+
 export function ExerciseForm({
   exerciseId,
   onSaved,
@@ -149,6 +184,33 @@ export function ExerciseForm({
   // autosave the instant an explicit save starts — otherwise it could fire moments after a
   // Publish and re-open the same race.
   const autosaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Guards the very first (creating) POST: set the instant that request starts, cleared once
+  // it settles. A concurrent persist() call (e.g. Save draft/Publish firing while the first
+  // autosave POST is still in flight) awaits this SAME create instead of issuing a second POST
+  // — see joinOrStartCreate above and persist()'s create branch below.
+  const creatingRef = useRef<Promise<ExercisePersistResponse | null> | null>(null);
+
+  // Mirrors the form's full editable state on every render (not inside an effect, so it is
+  // always current). persist() reads this synchronously right after capturing a brand-new id
+  // so the very first save can snapshot whatever was typed during that POST's network
+  // round-trip to the bridge — the keystroke-triggered bridge-write effect further below can't
+  // have written it yet at that point (its guard requires savedIdRef to already be set, and a
+  // ref mutation alone doesn't re-run effects).
+  const latestBridgeSnapshotRef = useRef<ExerciseFormBridgeState>({
+    title,
+    difficulty,
+    points,
+    timeLimit,
+    draft: currentDraftForBridge(),
+  });
+  latestBridgeSnapshotRef.current = {
+    title,
+    difficulty,
+    points,
+    timeLimit,
+    draft: currentDraftForBridge(),
+  };
 
   useEffect(() => {
     if (!pointsTouched) setPoints(DEFAULT_POINTS[difficulty]);
@@ -320,6 +382,11 @@ export function ExerciseForm({
    * applying its (possibly older) snapshot over whatever the newer save already wrote.
    * In the normal, non-racing case `seq` always still matches, so behavior is unchanged:
    * state updates + the POST branch's onSaved fire exactly once.
+   *
+   * Create-race guard: before the id exists, a concurrent persist() call (e.g. autosave's POST
+   * still in flight when Save draft/Publish is clicked) would otherwise take this same POST
+   * branch and create a second row. joinOrStartCreate (see above) serializes that: only the
+   * first caller issues the POST, everyone else awaits and then PATCHes the resulting id.
    */
   async function persist(data: ExerciseData, explicitStatus?: ExerciseStatus): Promise<ExercisePersistResponse | null> {
     if (autosaveTimeoutRef.current) {
@@ -347,14 +414,48 @@ export function ExerciseForm({
       return updated;
     }
 
-    const created = await api<ExercisePersistResponse>("/api/exercises", {
-      method: "POST",
-      body: JSON.stringify({ ...body, type, status: explicitStatus ?? "DRAFT" }),
-    });
-    if (seq !== saveSeqRef.current) return null; // superseded — discard silently
+    // No id yet. joinOrStartCreate makes sure only ONE POST is ever issued for the first
+    // create: if another persist() call already started it (e.g. autosave's POST is still in
+    // flight when the teacher clicks Save draft/Publish), this call piggybacks on that SAME
+    // request instead of racing a second one — without this, both calls would see no saved id
+    // and each create their own row.
+    const createAttempt = joinOrStartCreate(creatingRef, () =>
+      api<ExercisePersistResponse>("/api/exercises", {
+        method: "POST",
+        body: JSON.stringify({ ...body, type, status: explicitStatus ?? "DRAFT" }),
+      })
+    );
+
+    if (!createAttempt.started) {
+      const created = await createAttempt.request; // never throws — see joinOrStartCreate
+      if (seq !== saveSeqRef.current) return null; // superseded — discard silently
+      if (!created) return null; // the in-flight create failed elsewhere; nothing to attach to
+      const updated = await api<ExercisePersistResponse>(`/api/exercises/${created.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      });
+      if (seq !== saveSeqRef.current) return null; // superseded — discard silently
+      setStatus(updated.status);
+      return updated;
+    }
+
+    const created = await createAttempt.request; // rethrows to this call's own catch on failure
+    // Capturing the id (and bridging/notifying about it) is a one-time, order-independent
+    // event — NOT gated by the seq check below. A concurrent piggybacking call (see the branch
+    // above) bumps saveSeqRef the instant it starts, typically well before this POST resolves,
+    // so gating this on `seq === saveSeqRef.current` would routinely discard it in exactly the
+    // race this lock exists for — leaving savedIdRef permanently null despite a row already
+    // existing server-side, so a later call would see neither an id nor an in-flight create and
+    // mint a second (duplicate) row, and onSaved (hence the /new -> /edit route replace) would
+    // never fire. Only `status` below — which a genuinely newer save's data can legitimately
+    // supersede — stays behind the guard.
     savedIdRef.current = created.id;
-    setStatus(created.status);
+    // Snapshot right at id-capture: anything typed during this POST's network round-trip would
+    // otherwise never reach the bridge (see latestBridgeSnapshotRef's comment above).
+    writeFormBridge(created.id, latestBridgeSnapshotRef.current);
     onSaved?.(created.id);
+    if (seq !== saveSeqRef.current) return null; // superseded — a newer save owns status/toast
+    setStatus(created.status);
     return created;
   }
 
