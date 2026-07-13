@@ -498,6 +498,64 @@ describe("GET /api/sessions/[id] (integration) — roster/results/phase", () => 
     const studentBody = await studentRes.json();
     expect(studentBody.results === undefined || studentBody.results.length === 0).toBe(true);
   });
+
+  it("dedupes re-pushed exercise in session results: same exercise pushed twice yields 1 result entry, not 2", async () => {
+    const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
+      "detail-dedupe-repush@test.local"
+    );
+    const student = await signUp("detail-dedupe-repush-s1@test.local");
+    await enroll(klass.id, student.userId);
+    const ex = await createExercise(teacherId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    // Push the same exercise twice.
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    // Record one result.
+    await db.exerciseResult.create({
+      data: { exerciseId: ex.id, studentId: student.userId, score: 75, sessionId: session.id },
+    });
+
+    // End the session.
+    await sessionPATCH(
+      req(`http://localhost/api/sessions/${session.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action: "end" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    // Teacher GETs the ended session and checks results are deduped.
+    const res = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(body.results).toHaveLength(1);
+    expect(body.results[0].exerciseId).toBe(ex.id);
+  });
 });
 
 describe("PATCH /api/sessions/[id] action:start (integration) — scheduled sessions", () => {

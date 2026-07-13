@@ -163,9 +163,9 @@ export async function GET(
         : [];
       const exerciseById = new Map(exercises.map((e) => [e.id, e]));
 
-      const pushed = exerciseMessageRows
-        .map((m) => {
-          const exercise = exerciseById.get(m.content);
+      const pushed = exerciseIds
+        .map((id) => {
+          const exercise = exerciseById.get(id);
           return exercise
             ? { exerciseId: exercise.id, title: exercise.title, type: exercise.type }
             : null;
