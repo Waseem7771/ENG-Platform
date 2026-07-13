@@ -27,6 +27,7 @@ export function Wordmark({ size = "md" }: { size?: "sm" | "md" }) {
   return (
     <Link href="/" className="inline-flex items-center gap-2.5">
       <span
+        aria-hidden="true"
         className={`flex ${s.badge} items-center justify-center rounded-lg bg-primary font-bold text-primary-foreground shadow-sticker`}
       >
         {initial}
