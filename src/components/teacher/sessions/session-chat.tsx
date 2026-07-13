@@ -69,7 +69,7 @@ export function SessionChat({
               <div key={m.id} className="flex justify-center py-1">
                 <div className="flex items-center gap-2 rounded-full border border-primary/25 bg-secondary px-4 py-2 text-sm text-primary">
                   <Radio className="h-3.5 w-3.5" />
-                  Pushed{info ? `: ${info.title}` : " an exercise"}
+                  {info ? t("session.pushedExercise", { title: info.title }) : t("session.pushedExerciseGeneric")}
                   {info && <ExerciseTypeBadge type={info.type} className="ms-1" />}
                 </div>
               </div>
@@ -79,7 +79,7 @@ export function SessionChat({
           return (
             <div key={m.id} className={`flex ${isOwn ? "justify-end" : "justify-start"}`}>
               <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${isOwn ? "bg-primary text-primary-foreground" : "border border-border bg-card text-foreground"}`}>
-                {!isOwn && <p className="mb-0.5 text-[11px] font-medium text-muted-foreground">{m.user.name}</p>}
+                {!isOwn && <p className="mb-0.5 text-[11px] font-medium text-muted-foreground"><bdi>{m.user.name}</bdi></p>}
                 <p className="whitespace-pre-wrap break-words">{m.content}</p>
               </div>
             </div>

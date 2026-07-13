@@ -27,7 +27,7 @@ export function SessionParticipants({ participants }: { participants: SessionPar
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-leaf opacity-75" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-leaf" />
                 </span>
-                <span className="truncate text-sm text-foreground">{p.name}</span>
+                <span className="truncate text-sm text-foreground"><bdi>{p.name}</bdi></span>
               </div>
               {p.joinedAt && (
                 <span className="shrink-0 text-[11px] text-muted-foreground">

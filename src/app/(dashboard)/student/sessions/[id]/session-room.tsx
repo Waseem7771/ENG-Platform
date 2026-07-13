@@ -16,6 +16,9 @@ import type { SessionDetail, SessionMessageDTO } from "../../_types";
 
 const POLL_MS = 2500;
 
+/** WAITING -> ACTIVE -> ENDED only moves forward; an out-of-order/slow poll can never regress it. */
+const STATUS_RANK: Record<string, number> = { WAITING: 0, ACTIVE: 1, ENDED: 2 };
+
 /** Presentational only: renders scheduledAt in the viewer's locale + local timezone. */
 function formatScheduledAt(iso: string, locale: Locale): string {
   return new Date(iso).toLocaleString(locale === "ar" ? "ar" : "en-US", {
@@ -50,7 +53,12 @@ export function SessionRoom({ id }: { id: string }) {
         const qs = cursorRef.current ? `?after=${encodeURIComponent(cursorRef.current)}` : "";
         const res = await api<SessionDetail>(`/api/sessions/${id}${qs}`);
         cursorRef.current = res.serverTime;
-        setDetail(res);
+        // A slower ACTIVE poll can resolve AFTER an ENDED poll; drop any response
+        // whose status would regress the phase, so the recap can't flip back to a
+        // phantom live room (once ENDED, polling also stops via endedRef).
+        setDetail((prev) =>
+          prev && STATUS_RANK[res.session.status] < STATUS_RANK[prev.session.status] ? prev : res
+        );
         setMessages((prev) => {
           const map = new Map(prev.map((m) => [m.id, m]));
           for (const m of res.messages) map.set(m.id, m);

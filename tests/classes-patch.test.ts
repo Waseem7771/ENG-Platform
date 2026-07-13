@@ -223,6 +223,42 @@ describe("DELETE /api/classes/[id]/students/[studentId] (integration)", () => {
     expect(studentUser).not.toBeNull();
   });
 
+  it("revokes the student's SessionStudent join tokens for THIS class's sessions, but not other classes'", async () => {
+    const { cookie, userId, klass } = await setupTeacherWithClass("class-remove-owner-sess@test.local");
+    const student = await signUp("class-remove-student-sess@test.local");
+    await db.classStudent.create({ data: { classId: klass.id, studentId: student.userId } });
+
+    // A live session in THIS class the student has joined (the token to revoke).
+    const thisSession = await db.liveSession.create({
+      data: { classId: klass.id, teacherId: userId, title: "This", status: "ACTIVE", startedAt: new Date() },
+    });
+    await db.sessionStudent.create({ data: { sessionId: thisSession.id, studentId: student.userId } });
+
+    // A session in a DIFFERENT class the same student joined — must be untouched.
+    const other = await setupTeacherWithClass("class-remove-owner-sess-b@test.local");
+    const otherSession = await db.liveSession.create({
+      data: { classId: other.klass.id, teacherId: other.userId, title: "Other", status: "ACTIVE", startedAt: new Date() },
+    });
+    await db.sessionStudent.create({ data: { sessionId: otherSession.id, studentId: student.userId } });
+
+    asUser(cookie);
+    const res = await removeStudent(
+      req(`http://localhost/api/classes/${klass.id}/students/${student.userId}`, { method: "DELETE" }),
+      { params: Promise.resolve({ id: klass.id, studentId: student.userId }) }
+    );
+    expect(res.status).toBe(200);
+
+    const revoked = await db.sessionStudent.findUnique({
+      where: { sessionId_studentId: { sessionId: thisSession.id, studentId: student.userId } },
+    });
+    expect(revoked).toBeNull();
+
+    const survivor = await db.sessionStudent.findUnique({
+      where: { sessionId_studentId: { sessionId: otherSession.id, studentId: student.userId } },
+    });
+    expect(survivor).not.toBeNull();
+  });
+
   it("404s when the student isn't enrolled in the class", async () => {
     const { cookie, klass } = await setupTeacherWithClass("class-remove-owner2@test.local");
     const student = await signUp("class-remove-student2@test.local");

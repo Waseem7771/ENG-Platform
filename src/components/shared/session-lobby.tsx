@@ -36,7 +36,7 @@ export function SessionLobby({
         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
           {teacherName.charAt(0).toUpperCase()}
         </div>
-        <span className="truncate text-sm text-foreground">{teacherName}</span>
+        <span className="truncate text-sm text-foreground"><bdi>{teacherName}</bdi></span>
         <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">{t("session.teacher")}</span>
       </div>
 
@@ -49,7 +49,7 @@ export function SessionLobby({
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
               {r.name.charAt(0).toUpperCase()}
             </div>
-            <span className="truncate text-sm text-foreground">{r.name}</span>
+            <span className="truncate text-sm text-foreground"><bdi>{r.name}</bdi></span>
             <span
               className={`ms-auto flex shrink-0 items-center gap-1.5 text-[11px] ${
                 r.joined ? "text-leaf-text" : "text-muted-foreground"
