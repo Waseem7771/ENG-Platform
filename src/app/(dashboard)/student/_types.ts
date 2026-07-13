@@ -1,4 +1,5 @@
 import type { ExerciseData, ExerciseType, Level, ProgressCategory, UserRole } from "@/types";
+import type { ScoreboardExercise } from "@/lib/session";
 
 // ==================== /api/me ====================
 
@@ -111,6 +112,13 @@ export interface SessionDetail {
   roster: RosterEntry[];
   phase: SessionPhase;
   serverTime: string;
+  /**
+   * The exercise scoreboard for the session recap. Present once the session has
+   * ENDED (the server also sends it live to the owning teacher, which students
+   * never are). For a student the entries are redacted server-side to their own
+   * score per exercise; `completedCount`/`averageScore` remain class aggregates.
+   */
+  results?: ScoreboardExercise[];
 }
 
 // ==================== /api/results ====================

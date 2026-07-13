@@ -112,3 +112,46 @@ export function buildScoreboard(
     };
   });
 }
+
+/**
+ * Privacy filter for a student viewing an ENDED session's recap. A student may
+ * see their OWN score per exercise, never their peers' individual scores, so we
+ * strip every entry that isn't theirs. `completedCount` and `averageScore` are
+ * class-level aggregates (not attributable to any one peer) and are preserved so
+ * the student still sees the class average and how many classmates completed.
+ *
+ * Pure and non-mutating: returns fresh exercise objects with a filtered
+ * `entries` array; the input board is left untouched. The route calls this for
+ * any non-owner requester; the owning teacher receives the full scoreboard.
+ */
+export function redactScoreboardForStudent(
+  board: ScoreboardExercise[],
+  studentId: string,
+): ScoreboardExercise[] {
+  return board.map((exercise) => ({
+    ...exercise,
+    entries: exercise.entries.filter((entry) => entry.studentId === studentId),
+  }));
+}
+
+/**
+ * Pure i18n descriptor for a session's elapsed duration, derived from its
+ * start/end instants. Returns a `{ key, vars }` pair the caller feeds to `t()`
+ * so the units ("min", "h", "m") are localized rather than baked into the UI:
+ *   - either endpoint missing        -> session.notCompleted ("—")
+ *   - under a minute                 -> session.durationUnder1 ("<1 min")
+ *   - under an hour                  -> session.durationMinutes ("{n} min")
+ *   - an hour or more                -> session.durationHours ("{h}h {m}m")
+ * Extracted from the old room-local `sessionDuration` helper and unit-tested.
+ */
+export function durationLabel(
+  startedAt: Date | string | null,
+  endedAt: Date | string | null,
+): { key: string; vars?: Record<string, number> } {
+  if (!startedAt || !endedAt) return { key: "session.notCompleted" };
+  const ms = new Date(endedAt).getTime() - new Date(startedAt).getTime();
+  const minutes = Math.round(ms / 60000);
+  if (minutes < 1) return { key: "session.durationUnder1" };
+  if (minutes < 60) return { key: "session.durationMinutes", vars: { n: minutes } };
+  return { key: "session.durationHours", vars: { h: Math.floor(minutes / 60), m: minutes % 60 } };
+}

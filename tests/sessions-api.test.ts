@@ -455,6 +455,77 @@ describe("GET /api/sessions/[id] (integration) — roster/results/phase", () => 
     expect(shapedEx1.entries[0].studentId).toBe(student.userId);
   });
 
+  it("PRIVACY: on an ENDED session a student's `results` contain only their own entry — never a peer's individual score — while aggregates stay intact and the teacher still sees everyone", async () => {
+    const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
+      "detail-redact1@test.local"
+    );
+    const s1 = await signUp("detail-redact-s1@test.local");
+    const s2 = await signUp("detail-redact-s2@test.local");
+    await enroll(klass.id, s1.userId);
+    await enroll(klass.id, s2.userId);
+    const ex = await createExercise(teacherId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    // Both students complete the same exercise with different scores.
+    await db.exerciseResult.create({
+      data: { exerciseId: ex.id, studentId: s1.userId, score: 90, sessionId: session.id },
+    });
+    await db.exerciseResult.create({
+      data: { exerciseId: ex.id, studentId: s2.userId, score: 40, sessionId: session.id },
+    });
+
+    await sessionPATCH(
+      req(`http://localhost/api/sessions/${session.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action: "end" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    // Student s1 sees ONLY their own entry, but the aggregates still reflect both.
+    asUser(s1.cookie);
+    const s1Res = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    const s1Body = await s1Res.json();
+    const s1Ex = s1Body.results.find((r: { exerciseId: string }) => r.exerciseId === ex.id);
+    expect(s1Ex.entries).toHaveLength(1);
+    expect(s1Ex.entries[0].studentId).toBe(s1.userId);
+    expect(s1Ex.entries[0].score).toBe(90);
+    // No peer entry leaked, in particular s2's 40 must be absent.
+    expect(s1Ex.entries.some((e: { studentId: string }) => e.studentId === s2.userId)).toBe(false);
+    expect(s1Ex.completedCount).toBe(2);
+    expect(s1Ex.averageScore).toBe(65); // (90 + 40) / 2 — aggregate preserved
+
+    // The owning teacher still sees BOTH students' individual scores.
+    asUser(teacherCookie);
+    const tRes = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    const tBody = await tRes.json();
+    const tEx = tBody.results.find((r: { exerciseId: string }) => r.exerciseId === ex.id);
+    expect(tEx.entries).toHaveLength(2);
+    expect(tEx.entries.map((e: { studentId: string }) => e.studentId).sort()).toEqual(
+      [s1.userId, s2.userId].sort()
+    );
+  });
+
   it("includes `results` for the owning teacher on a live (non-ENDED) session, but omits/empties it for a non-owner student", async () => {
     const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
       "detail-live-results1@test.local"

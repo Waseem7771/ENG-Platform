@@ -8,6 +8,7 @@ import { api, ApiClientError } from "@/lib/api";
 import { useLocale, useT } from "@/components/providers/locale-provider";
 import { SessionStatusBadge } from "@/components/teacher/badges";
 import { SessionLobby } from "@/components/shared/session-lobby";
+import { SessionRecap } from "@/components/shared/session-recap";
 import { EmbeddedExercise } from "@/components/exercise/embedded-exercise";
 import { Button } from "@/components/ui/button";
 import type { Locale } from "@/lib/i18n-shared";
@@ -144,6 +145,18 @@ export function SessionRoom({ id }: { id: string }) {
   }
 
   const isEnded = detail.session.status === "ENDED";
+
+  // Opening (or landing on) an ENDED session shows the recap in place of the
+  // live room — the read-only transcript is threaded from the merged `messages`
+  // state, and peer scores in `detail.results` were already redacted server-side.
+  if (isEnded) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] flex-col">
+        <SessionRecap detail={detail} messages={messages} role="STUDENT" currentUserId={meId} />
+      </div>
+    );
+  }
+
   const isLobby = detail.phase === "LOBBY" || detail.phase === "SCHEDULED";
   const isLive = detail.phase === "LIVE";
   const pushed = detail.pushedExercise;
@@ -320,18 +333,6 @@ export function SessionRoom({ id }: { id: string }) {
             )}
           </div>
         </>
-      )}
-
-      {isEnded && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/70">
-          <div className="rounded-2xl border border-border bg-background p-8 text-center">
-            <p className="text-lg font-semibold text-foreground">Session ended</p>
-            <p className="mt-2 text-sm text-muted-foreground">Thanks for participating!</p>
-            <Link href="/student/sessions" className="mt-4 inline-block rounded-full bg-primary px-6 py-2 text-sm text-primary-foreground">
-              Back to Sessions
-            </Link>
-          </div>
-        </div>
       )}
     </div>
   );

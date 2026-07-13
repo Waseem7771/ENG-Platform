@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { ApiError, errorResponse, requireTeacher, requireUser } from "@/lib/guard";
-import { buildRoster, sessionPhase, type ScoreboardExercise } from "@/lib/session";
+import { buildRoster, redactScoreboardForStudent, sessionPhase, type ScoreboardExercise } from "@/lib/session";
 import { loadSessionScoreboard } from "@/lib/session-data";
 
 async function loadSessionOrThrow(id: string) {
@@ -157,9 +157,15 @@ export async function GET(
     // to the owning teacher (a live scoreboard while it's still running). A
     // non-owner student on a non-ENDED session gets `results: undefined`,
     // which JSON.stringify drops from the response entirely.
+    //
+    // PRIVACY: the full scoreboard carries EVERY student's individual score.
+    // Only the owning teacher may see peers' scores; a student (necessarily a
+    // non-owner here) gets the board redacted to their OWN entry per exercise,
+    // with the class-level aggregates (completedCount, averageScore) preserved.
     let results: ScoreboardExercise[] | undefined;
     if (session.status === "ENDED" || isTeacherOwner) {
-      results = await loadSessionScoreboard(id);
+      const scoreboard = await loadSessionScoreboard(id);
+      results = isTeacherOwner ? scoreboard : redactScoreboardForStudent(scoreboard, user.id);
     }
 
     return Response.json({

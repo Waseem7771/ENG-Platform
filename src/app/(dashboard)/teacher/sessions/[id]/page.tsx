@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Clock, MessageSquare, Play, Square, Users } from "lucide-react";
+import { ArrowLeft, Clock, Play, Square } from "lucide-react";
 import { ErrorState } from "@/components/teacher/state-views";
 import { SessionStatusBadge, ExerciseTypeBadge } from "@/components/teacher/badges";
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
@@ -12,6 +12,7 @@ import { SessionChat, type ExerciseCacheEntry } from "@/components/teacher/sessi
 import { SessionParticipants } from "@/components/teacher/sessions/session-participants";
 import { Scoreboard } from "@/components/teacher/sessions/scoreboard";
 import { SessionLobby } from "@/components/shared/session-lobby";
+import { SessionRecap } from "@/components/shared/session-recap";
 import { PushExerciseDialog } from "@/components/teacher/sessions/push-exercise-dialog";
 import { useElapsedTimer } from "@/components/teacher/sessions/use-elapsed-timer";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export default function TeacherSessionRoomPage() {
   const [roster, setRoster] = useState<TeacherSessionDetail["roster"]>([]);
   const [messages, setMessages] = useState<SessionMessageItem[]>([]);
   const [pushedExercise, setPushedExercise] = useState<TeacherSessionDetail["pushedExercise"]>(null);
+  const [results, setResults] = useState<TeacherSessionDetail["results"]>(undefined);
   const [exerciseCache, setExerciseCache] = useState<Record<string, ExerciseCacheEntry>>({});
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [clockOffsetMs, setClockOffsetMs] = useState(0);
@@ -63,6 +65,8 @@ export default function TeacherSessionRoomPage() {
       setParticipants(data.participants);
       setRoster(data.roster);
       setPushedExercise(data.pushedExercise);
+      // Owner always receives the full scoreboard; drives the ENDED recap.
+      setResults(data.results);
       if (data.pushedExercise) {
         setExerciseCache((prev) => ({ ...prev, [data.pushedExercise!.id]: { title: data.pushedExercise!.title, type: data.pushedExercise!.type } }));
       }
@@ -132,7 +136,7 @@ export default function TeacherSessionRoomPage() {
       content,
       type: "TEXT",
       createdAt: new Date().toISOString(),
-      user: { id: currentUserId ?? "me", name: "You", role: "TEACHER" },
+      user: { id: currentUserId ?? "me", name: t("session.you"), role: "TEACHER" },
     };
     setMessages((prev) => mergeMessages(prev, [optimistic]));
     try {
@@ -169,9 +173,9 @@ export default function TeacherSessionRoomPage() {
 
   if (!session) return null;
 
-  const studentCount = participants.length;
   // WAITING == phase LOBBY or SCHEDULED (server-computed): pre-start waiting room with chat enabled.
   const isLobby = session.status === "WAITING";
+  const isEnded = session.status === "ENDED";
 
   return (
     <div className="relative flex h-[calc(100vh-4rem)] flex-col">
@@ -219,74 +223,56 @@ export default function TeacherSessionRoomPage() {
         </div>
       </div>
 
-      {session.status === "ENDED" && (
-        <div className="mb-4 grid grid-cols-3 gap-3">
-          <SummaryStat icon={<Clock className="h-4 w-4" />} label="Duration" value={sessionDuration(session.startedAt, session.endedAt)} />
-          <SummaryStat icon={<Users className="h-4 w-4" />} label="Participants" value={String(studentCount)} />
-          <SummaryStat icon={<MessageSquare className="h-4 w-4" />} label="Messages" value={String(messages.filter((m) => m.type === "TEXT").length)} />
-        </div>
-      )}
-
-      {pushedExercise && (
-        <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/25 bg-secondary px-4 py-3">
-          <span className="text-xs uppercase tracking-widest text-primary/70">{t("session.pinned")}</span>
-          <span className="text-sm font-medium text-foreground">{pushedExercise.title}</span>
-          <ExerciseTypeBadge type={pushedExercise.type} />
-        </div>
-      )}
-
-      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1fr_280px]">
-        <div className="min-h-0 rounded-2xl border border-border bg-card">
-          <SessionChat
-            messages={messages}
-            exerciseCache={exerciseCache}
-            currentUserId={currentUserId}
-            onSend={handleSend}
-            disabled={session.status === "ENDED"}
-            disabledPlaceholder={t("session.chatEnded")}
-          />
-        </div>
-
-        <div className="flex min-h-0 flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-card p-4">
-          {isLobby ? (
-            <SessionLobby teacherName={session.teacherName} roster={roster} />
-          ) : (
-            <>
-              <PushExerciseDialog
-                sessionId={sessionId}
-                disabled={session.status !== "ACTIVE"}
-                onPushed={(ex) => {
-                  setExerciseCache((prev) => ({ ...prev, [ex.id]: { title: ex.title, type: ex.type } }));
-                  poll();
-                }}
-              />
-              {session.status === "ACTIVE" && <Scoreboard sessionId={sessionId} total={roster.length} />}
-              <SessionParticipants participants={participants} />
-            </>
+      {isEnded ? (
+        <SessionRecap
+          detail={{ session, participants, roster, results }}
+          messages={messages}
+          role="TEACHER"
+          currentUserId={currentUserId}
+        />
+      ) : (
+        <>
+          {pushedExercise && (
+            <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/25 bg-secondary px-4 py-3">
+              <span className="text-xs uppercase tracking-widest text-primary/70">{t("session.pinned")}</span>
+              <span dir="auto" className="text-sm font-medium text-foreground">{pushedExercise.title}</span>
+              <ExerciseTypeBadge type={pushedExercise.type} />
+            </div>
           )}
-        </div>
-      </div>
+
+          <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[1fr_280px]">
+            <div className="min-h-0 rounded-2xl border border-border bg-card">
+              <SessionChat
+                messages={messages}
+                exerciseCache={exerciseCache}
+                currentUserId={currentUserId}
+                onSend={handleSend}
+                disabled={false}
+                disabledPlaceholder={t("session.chatEnded")}
+              />
+            </div>
+
+            <div className="flex min-h-0 flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-card p-4">
+              {isLobby ? (
+                <SessionLobby teacherName={session.teacherName} roster={roster} />
+              ) : (
+                <>
+                  <PushExerciseDialog
+                    sessionId={sessionId}
+                    disabled={session.status !== "ACTIVE"}
+                    onPushed={(ex) => {
+                      setExerciseCache((prev) => ({ ...prev, [ex.id]: { title: ex.title, type: ex.type } }));
+                      poll();
+                    }}
+                  />
+                  {session.status === "ACTIVE" && <Scoreboard sessionId={sessionId} total={roster.length} />}
+                  <SessionParticipants participants={participants} />
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
-}
-
-function SummaryStat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-primary">{icon}</div>
-      <div>
-        <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
-        <p className="text-lg font-semibold text-foreground">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function sessionDuration(startedAt: string | null, endedAt: string | null): string {
-  if (!startedAt || !endedAt) return "—";
-  const ms = new Date(endedAt).getTime() - new Date(startedAt).getTime();
-  const minutes = Math.round(ms / 60000);
-  if (minutes < 1) return "<1 min";
-  if (minutes < 60) return `${minutes} min`;
-  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 }

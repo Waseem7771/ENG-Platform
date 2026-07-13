@@ -1,4 +1,5 @@
 import type { ExerciseStatus, ExerciseType, Level, ProgressCategory, SessionStatus } from "@/types";
+import type { ScoreboardExercise } from "@/lib/session";
 
 export interface TeacherClassListItem {
   id: string;
@@ -142,6 +143,8 @@ export interface TeacherSessionDetail {
   roster: SessionRosterEntry[];
   phase: SessionPhase;
   serverTime: string;
+  /** Full exercise scoreboard for the recap — the owning teacher sees every student's score. */
+  results?: ScoreboardExercise[];
 }
 
 export interface StudentProgressRow {

@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { sessionPhase, buildRoster, buildScoreboard } from "@/lib/session";
+import {
+  sessionPhase,
+  buildRoster,
+  buildScoreboard,
+  redactScoreboardForStudent,
+  durationLabel,
+  type ScoreboardExercise,
+} from "@/lib/session";
 
 const now = new Date("2026-07-13T12:00:00Z");
 
@@ -47,5 +54,74 @@ describe("buildScoreboard", () => {
     expect(board[0].entries).toEqual([]);
     expect(board[0].averageScore).toBeNull();
     expect(board[0].completedCount).toBe(0);
+  });
+});
+
+describe("redactScoreboardForStudent", () => {
+  const board: ScoreboardExercise[] = [
+    {
+      exerciseId: "e1",
+      title: "Grammar",
+      type: "GRAMMAR",
+      entries: [
+        { studentId: "me", name: "Me", exerciseId: "e1", score: 90, completedAt: "2026-07-13T12:05:00.000Z" },
+        { studentId: "peer", name: "Peer", exerciseId: "e1", score: 40, completedAt: "2026-07-13T12:06:00.000Z" },
+      ],
+      completedCount: 2,
+      averageScore: 65,
+    },
+  ];
+
+  it("strips peers' entries and keeps only the requesting student's own entry", () => {
+    const redacted = redactScoreboardForStudent(board, "me");
+    expect(redacted[0].entries).toHaveLength(1);
+    expect(redacted[0].entries[0].studentId).toBe("me");
+    expect(redacted[0].entries.some((e) => e.studentId === "peer")).toBe(false);
+  });
+
+  it("leaves completedCount and averageScore (aggregates) unchanged", () => {
+    const redacted = redactScoreboardForStudent(board, "me");
+    expect(redacted[0].completedCount).toBe(2);
+    expect(redacted[0].averageScore).toBe(65);
+  });
+
+  it("yields empty entries for a student who did not complete, but keeps the aggregates", () => {
+    const redacted = redactScoreboardForStudent(board, "absent");
+    expect(redacted[0].entries).toEqual([]);
+    expect(redacted[0].completedCount).toBe(2);
+    expect(redacted[0].averageScore).toBe(65);
+  });
+
+  it("does not mutate the input board", () => {
+    redactScoreboardForStudent(board, "me");
+    expect(board[0].entries).toHaveLength(2);
+  });
+});
+
+describe("durationLabel", () => {
+  it("returns notCompleted when either endpoint is missing", () => {
+    expect(durationLabel(null, "2026-07-13T12:05:00Z")).toEqual({ key: "session.notCompleted" });
+    expect(durationLabel("2026-07-13T12:00:00Z", null)).toEqual({ key: "session.notCompleted" });
+  });
+  it("under a minute -> durationUnder1", () => {
+    expect(durationLabel("2026-07-13T12:00:00Z", "2026-07-13T12:00:20Z")).toEqual({
+      key: "session.durationUnder1",
+    });
+  });
+  it("minutes-only -> durationMinutes with n", () => {
+    expect(durationLabel("2026-07-13T12:00:00Z", "2026-07-13T12:05:00Z")).toEqual({
+      key: "session.durationMinutes",
+      vars: { n: 5 },
+    });
+  });
+  it("an hour or more -> durationHours with h and m", () => {
+    expect(durationLabel("2026-07-13T12:00:00Z", "2026-07-13T13:30:00Z")).toEqual({
+      key: "session.durationHours",
+      vars: { h: 1, m: 30 },
+    });
+    expect(durationLabel("2026-07-13T12:00:00Z", "2026-07-13T13:00:00Z")).toEqual({
+      key: "session.durationHours",
+      vars: { h: 1, m: 0 },
+    });
   });
 });
