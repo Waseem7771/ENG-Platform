@@ -90,20 +90,25 @@ export async function recommendForStudent(
   level: string | null,
   excludeId?: string
 ): Promise<Recommendation | null> {
-  const where: { difficulty?: string } = {};
+  // Drafts are the owning teacher's work-in-progress and must never be a
+  // recommendation candidate — same convention as studentExerciseWhere and
+  // the single-GET draft-404. Without this, an unplaced student (level=null)
+  // falls into `where {}`, which would surface every teacher's drafts.
+  const where: { difficulty?: string; status: "PUBLISHED" } = { status: "PUBLISHED" };
   if (level) where.difficulty = level;
 
-  const exercises = await db.exercise.findMany({
-    where,
-    orderBy: { createdAt: "asc" },
-    select: { id: true, title: true, type: true, difficulty: true },
-  });
-
-  const passedResults = await db.exerciseResult.groupBy({
-    by: ["exerciseId"],
-    where: { studentId },
-    _max: { score: true },
-  });
+  const [exercises, passedResults] = await Promise.all([
+    db.exercise.findMany({
+      where,
+      orderBy: { createdAt: "asc" },
+      select: { id: true, title: true, type: true, difficulty: true },
+    }),
+    db.exerciseResult.groupBy({
+      by: ["exerciseId"],
+      where: { studentId },
+      _max: { score: true },
+    }),
+  ]);
   const passedIds = new Set(
     passedResults
       .filter((r) => (r._max.score ?? 0) >= PASS_SCORE)

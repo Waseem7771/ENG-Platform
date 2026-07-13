@@ -48,6 +48,9 @@ export async function POST(request: Request) {
 
     const exercise = await db.exercise.findUnique({ where: { id: exerciseId } });
     if (!exercise) throw new ApiError(404, "Exercise not found");
+    // A DRAFT is the owning teacher's work-in-progress: don't let a student
+    // run AI turns against its scenario — same 404 as the single-GET route.
+    if (exercise.status !== "PUBLISHED") throw new ApiError(404, "Exercise not found");
     if (exercise.type !== "CONVERSATION") {
       throw new ApiError(400, "Exercise is not a conversation exercise");
     }

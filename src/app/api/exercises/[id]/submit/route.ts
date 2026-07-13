@@ -50,6 +50,10 @@ export async function POST(
 
     const exercise = await db.exercise.findUnique({ where: { id } });
     if (!exercise) throw new ApiError(404, "Exercise not found");
+    // A DRAFT is the owning teacher's work-in-progress: requireStudent is the
+    // only caller here (no owner carve-out), so treat it exactly like the
+    // single-GET route does — 404, not a distinguishable error.
+    if (exercise.status !== "PUBLISHED") throw new ApiError(404, "Exercise not found");
 
     const type = exercise.type as ExerciseType;
     let data: unknown;

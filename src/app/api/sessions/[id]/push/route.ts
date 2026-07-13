@@ -27,6 +27,12 @@ export async function POST(
 
     const exercise = await db.exercise.findUnique({ where: { id: exerciseId } });
     if (!exercise) throw new ApiError(404, "Exercise not found");
+    // A teacher may only push an exercise THEY created into their own live
+    // session — otherwise teacher A could push teacher B's exercise (DRAFT or
+    // not) and the response would leak its id/title/type as an existence
+    // oracle. 404, not 403, so a foreign id can't be distinguished from one
+    // that doesn't exist at all.
+    if (exercise.createdById !== user.id) throw new ApiError(404, "Exercise not found");
 
     await db.sessionMessage.create({
       data: { sessionId: id, userId: user.id, content: exerciseId, type: "EXERCISE" },
