@@ -69,11 +69,11 @@ export default function TeacherSessionRoomPage() {
       setClockOffsetMs(Date.parse(data.serverTime) - Date.now());
       setError(null);
     } catch (e) {
-      if (mountedRef.current) setError(e instanceof ApiClientError ? e.message : "Couldn't load this session.");
+      if (mountedRef.current) setError(e instanceof ApiClientError ? e.message : t("session.loadFailed"));
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, t]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -144,7 +144,7 @@ export default function TeacherSessionRoomPage() {
       ));
     } catch (e) {
       setMessages((prev) => prev.filter((m) => m.id !== tempId));
-      toast.error(e instanceof ApiClientError ? e.message : "Message failed to send.");
+      toast.error(e instanceof ApiClientError ? e.message : t("session.messageSendFailed"));
     }
   }
 
@@ -173,7 +173,7 @@ export default function TeacherSessionRoomPage() {
         <div className="min-w-0">
           <Link href="/teacher/sessions" className="mb-1.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-3 w-3" />
-            All sessions
+            {t("session.allSessions")}
           </Link>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="truncate text-xl font-bold tracking-tight">{session.title}</h1>
@@ -223,7 +223,7 @@ export default function TeacherSessionRoomPage() {
 
       {pushedExercise && (
         <div className="mb-4 flex items-center gap-3 rounded-xl border border-primary/25 bg-secondary px-4 py-3">
-          <span className="text-xs uppercase tracking-widest text-primary/70">Pinned</span>
+          <span className="text-xs uppercase tracking-widest text-primary/70">{t("session.pinned")}</span>
           <span className="text-sm font-medium text-foreground">{pushedExercise.title}</span>
           <ExerciseTypeBadge type={pushedExercise.type} />
         </div>
