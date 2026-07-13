@@ -10,6 +10,7 @@ import { useLocale, useT } from "@/components/providers/locale-provider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Wordmark } from "@/components/shared/wordmark";
 
 const ease = [0.35, 0.35, 0, 1] as const;
 
@@ -62,14 +63,9 @@ function SignupForm() {
       >
         <div className="rounded-card border-2 border-border bg-card shadow-sticker p-8">
           <div className="mb-8 text-center">
-            <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-lg shadow-violet-500/20">
-                S
-              </div>
-              <span className="text-xl font-semibold tracking-tight">
-                Speak<span className="text-primary">Path</span>
-              </span>
-            </Link>
+            <div className="mb-6 inline-flex">
+              <Wordmark />
+            </div>
             <h1 className="text-2xl font-bold tracking-tight">{t("auth.createAccount")}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{t("auth.signUpSubtitle")}</p>
           </div>
