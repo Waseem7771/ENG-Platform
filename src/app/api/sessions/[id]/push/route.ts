@@ -33,6 +33,10 @@ export async function POST(
     // oracle. 404, not 403, so a foreign id can't be distinguished from one
     // that doesn't exist at all.
     if (exercise.createdById !== user.id) throw new ApiError(404, "Exercise not found");
+    // Can't push a draft into a live session: a pushed exercise must already
+    // be PUBLISHED. 404 (not a distinct "not published" error) so a DRAFT's
+    // existence isn't distinguishable from a nonexistent/foreign id.
+    if (exercise.status !== "PUBLISHED") throw new ApiError(404, "Exercise not found");
 
     await db.sessionMessage.create({
       data: { sessionId: id, userId: user.id, content: exerciseId, type: "EXERCISE" },
