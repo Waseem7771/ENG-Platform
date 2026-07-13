@@ -29,6 +29,7 @@ import { POST as pushPOST } from "@/app/api/sessions/[id]/push/route";
 import { GET as sessionDetailGET, PATCH as sessionPATCH } from "@/app/api/sessions/[id]/route";
 import { POST as joinPOST } from "@/app/api/sessions/[id]/join/route";
 import { POST as messagePOST } from "@/app/api/sessions/[id]/messages/route";
+import { GET as scoreboardGET } from "@/app/api/sessions/[id]/scoreboard/route";
 
 const GRAMMAR_DATA = {
   items: [
@@ -657,5 +658,141 @@ describe("POST /api/sessions/[id]/messages (integration) — lobby chat gate", (
       { params: Promise.resolve({ id: session.id }) }
     );
     expect(res.status).toBe(403);
+  });
+});
+
+// ==================== Task 6: live scoreboard endpoint ====================
+
+describe("GET /api/sessions/[id]/scoreboard (integration)", () => {
+  it("teacher-owner gets a scoreboard reflecting a student's in-session completion", async () => {
+    const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
+      "scoreboard-owner1@test.local"
+    );
+    const student = await signUp("scoreboard-owner-s1@test.local");
+    await enroll(klass.id, student.userId);
+    const ex = await createExercise(teacherId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    // A result recorded WITH sessionId set, as the submit route would after
+    // an in-session completion (Task 5).
+    await db.exerciseResult.create({
+      data: { exerciseId: ex.id, studentId: student.userId, score: 85, sessionId: session.id },
+    });
+
+    const res = await scoreboardGET(req(`http://localhost/api/sessions/${session.id}/scoreboard`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(typeof body.serverTime).toBe("string");
+    expect(body.scoreboard).toHaveLength(1);
+    expect(body.scoreboard[0].exerciseId).toBe(ex.id);
+    expect(body.scoreboard[0].completedCount).toBe(1);
+    expect(body.scoreboard[0].averageScore).toBe(85);
+    expect(body.scoreboard[0].entries[0].studentId).toBe(student.userId);
+    expect(body.scoreboard[0].entries[0].name).toBe("Test User");
+  });
+
+  it("a non-owner teacher hitting another teacher's session scoreboard gets 404", async () => {
+    const owner = await setupTeacherWithClass("scoreboard-nonowner1@test.local");
+    asUser(owner.cookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: owner.klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    const intruder = await signUp("scoreboard-intruder1@test.local", "TEACHER");
+    asUser(intruder.cookie);
+    const res = await scoreboardGET(req(`http://localhost/api/sessions/${session.id}/scoreboard`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it("a student hitting the scoreboard endpoint gets 403 (requireTeacher)", async () => {
+    const { cookie: teacherCookie, klass } = await setupTeacherWithClass("scoreboard-student1@test.local");
+    const student = await signUp("scoreboard-student-s1@test.local");
+    await enroll(klass.id, student.userId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    asUser(student.cookie);
+    const res = await scoreboardGET(req(`http://localhost/api/sessions/${session.id}/scoreboard`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(403);
+  });
+
+  it("dedupes a re-pushed exercise into a single scoreboard entry", async () => {
+    const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
+      "scoreboard-dedupe1@test.local"
+    );
+    const student = await signUp("scoreboard-dedupe-s1@test.local");
+    await enroll(klass.id, student.userId);
+    const ex = await createExercise(teacherId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    // Push the same exercise twice.
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    await db.exerciseResult.create({
+      data: { exerciseId: ex.id, studentId: student.userId, score: 50, sessionId: session.id },
+    });
+
+    const res = await scoreboardGET(req(`http://localhost/api/sessions/${session.id}/scoreboard`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.scoreboard).toHaveLength(1);
+    expect(body.scoreboard[0].exerciseId).toBe(ex.id);
   });
 });
