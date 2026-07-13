@@ -22,6 +22,42 @@ function asNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
+/**
+ * Server-validate an optional client-supplied `sessionId` before it's ever
+ * stored on an ExerciseResult. A student could otherwise pass an arbitrary
+ * sessionId to forge attribution onto a live session's scoreboard/recap they
+ * weren't part of, so ALL of the following must hold or this returns null
+ * (the submit still succeeds as normal practice — never a 400):
+ *  (a) the session exists and is ACTIVE (not WAITING/ENDED),
+ *  (b) the student has actually joined it (a SessionStudent row exists),
+ *  (c) the exercise was actually pushed into that session (a
+ *      SessionMessage{type:"EXERCISE", content: exerciseId} exists) — so a
+ *      student in a real, joined, active session still can't attribute an
+ *      unrelated exercise's result to it.
+ */
+export async function resolveSubmitSessionId(
+  sessionId: unknown,
+  exerciseId: string,
+  studentId: string
+): Promise<string | null> {
+  if (typeof sessionId !== "string" || sessionId.length === 0) return null;
+
+  const session = await db.liveSession.findUnique({ where: { id: sessionId } });
+  if (!session || session.status !== "ACTIVE") return null;
+
+  const joined = await db.sessionStudent.findUnique({
+    where: { sessionId_studentId: { sessionId, studentId } },
+  });
+  if (!joined) return null;
+
+  const pushed = await db.sessionMessage.findFirst({
+    where: { sessionId, type: "EXERCISE", content: exerciseId },
+  });
+  if (!pushed) return null;
+
+  return sessionId;
+}
+
 const MAX_TURNS = 40;
 const MAX_CONTENT = 2000;
 const MAX_TEXT = 5000;
@@ -198,6 +234,8 @@ export async function POST(
         ? Math.round(body.timeSpent as number)
         : null;
 
+    const sessionId = await resolveSubmitSessionId(body.sessionId, exercise.id, user.id);
+
     await db.exerciseResult.create({
       data: {
         exerciseId: exercise.id,
@@ -205,6 +243,7 @@ export async function POST(
         score,
         timeSpent,
         answers: JSON.stringify(body ?? {}),
+        sessionId,
       },
     });
 
