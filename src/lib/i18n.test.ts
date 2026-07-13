@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { pickLocale, dirFor, translate } from "@/lib/i18n-shared";
+import { pickLocale, dirFor, translate, bidiIsolate } from "@/lib/i18n-shared";
 import { getMessages } from "@/lib/i18n";
 import en from "../../messages/en.json";
 import ar from "../../messages/ar.json";
@@ -24,6 +24,15 @@ describe("pickLocale", () => {
   });
   it("drops q=0 entries entirely", () => {
     expect(pickLocale(undefined, "en,ar;q=0")).toBe("en");
+  });
+});
+
+describe("bidiIsolate", () => {
+  it("wraps the value in U+2068 FSI and U+2069 PDI", () => {
+    const wrapped = bidiIsolate("Ann");
+    expect(wrapped.charCodeAt(0)).toBe(0x2068);
+    expect(wrapped.charCodeAt(wrapped.length - 1)).toBe(0x2069);
+    expect(wrapped.slice(1, -1)).toBe("Ann");
   });
 });
 

@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { exerciseHref } from "@/lib/exercise-href";
+import { bidiIsolate } from "@/lib/i18n-shared";
 import type { PathResponse, PathLesson, PathUnit } from "@/lib/path";
 import type { MeResponse } from "./_types";
 
@@ -53,7 +54,7 @@ export default function StudentPathPage() {
     <motion.div initial="hidden" animate="visible" variants={container} className="space-y-8">
       <motion.div variants={item} className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="text-3xl font-bold tracking-tight">
-          {t("path.greeting", { name: user.name.split(" ")[0] })}
+          {t("path.greeting", { name: bidiIsolate(user.name.split(" ")[0]) })}
         </h1>
         <div className="flex items-center gap-2">
           <Badge variant="streak" className="gap-1">

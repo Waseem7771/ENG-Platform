@@ -11,7 +11,7 @@ import { SessionLobby } from "@/components/shared/session-lobby";
 import { SessionRecap } from "@/components/shared/session-recap";
 import { EmbeddedExercise } from "@/components/exercise/embedded-exercise";
 import { Button } from "@/components/ui/button";
-import type { Locale } from "@/lib/i18n-shared";
+import { bidiIsolate, type Locale } from "@/lib/i18n-shared";
 import type { SessionDetail, SessionMessageDTO } from "../../_types";
 
 const POLL_MS = 2500;
@@ -310,7 +310,7 @@ export function SessionRoom({ id }: { id: string }) {
                 roster={detail.roster}
                 waitingText={
                   <>
-                    <p>{t("session.waitingForTeacher", { teacher: detail.session.teacherName })}</p>
+                    <p>{t("session.waitingForTeacher", { teacher: bidiIsolate(detail.session.teacherName) })}</p>
                     {detail.phase === "SCHEDULED" && detail.session.scheduledAt && (
                       <p className="mt-1">
                         {t("session.scheduledFor", { when: formatScheduledAt(detail.session.scheduledAt, locale) })}

@@ -11,6 +11,7 @@ import { api, ApiClientError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { bidiIsolate } from "@/lib/i18n-shared";
 import type { ClassSummary } from "../_types";
 
 type T = ReturnType<typeof useT>;
@@ -41,7 +42,7 @@ export default function StudentClassesPage() {
         method: "POST",
         body: JSON.stringify({ code: trimmed }),
       });
-      toast.success(t("classes.joined", { name: res.class.name }));
+      toast.success(t("classes.joined", { name: bidiIsolate(res.class.name) }));
       setCode("");
       classes.refetch();
     } catch (err) {
@@ -121,7 +122,7 @@ function ClassRow({ classItem, t }: { classItem: ClassSummary; t: T }) {
           <Badge variant="level">{classItem.level}</Badge>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {t("classes.teacherLabel", { name: classItem.teacherName })}
+          {t("classes.teacherLabel", { name: bidiIsolate(classItem.teacherName) })}
         </p>
       </div>
       <Button

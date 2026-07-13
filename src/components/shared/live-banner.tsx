@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { usePoll } from "@/hooks/use-poll";
 import { useT } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
+import { bidiIsolate } from "@/lib/i18n-shared";
 import { shouldShowBanner, type LiveInfo } from "./live-banner-logic";
 
 // The banner is a discovery nudge, not a live transcript — a calm ~15s poll is
@@ -46,9 +47,7 @@ export function LiveBanner() {
       <div className="flex min-w-0 items-center gap-2.5">
         <LivePulse />
         <p className="truncate text-sm font-medium text-secondary-foreground">
-          {/* Isolate a possibly-Latin class name (U+2068 FSI … U+2069 PDI) so it
-              can't reorder neighbouring neutrals inside the Arabic RTL sentence. */}
-          {t("session.liveBanner", { className: `⁨${live.className}⁩` })}
+          {t("session.liveBanner", { className: bidiIsolate(live.className) })}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1">

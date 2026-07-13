@@ -9,6 +9,17 @@ export function dirFor(locale: Locale): "ltr" | "rtl" {
 }
 
 /**
+ * Wrap a value in Unicode directional isolates (U+2068 FSI … U+2069 PDI) so a
+ * possibly-opposite-direction run — e.g. a Latin name interpolated into an
+ * Arabic sentence — can't reorder the surrounding neutrals. Use at `t()` call
+ * sites for user / class / teacher names (flat-string interpolation); for
+ * rendered nodes prefer a `<bdi>` element instead.
+ */
+export function bidiIsolate(value: string): string {
+  return `⁨${value}⁩`;
+}
+
+/**
  * Parses an `Accept-Language` header into (tag, q) pairs, honoring RFC 7231
  * quality values: entries with q=0 are unacceptable and dropped, entries
  * without an explicit q default to 1, and the remaining tags are ranked

@@ -1,6 +1,8 @@
 # SpeakPath
 
-**Your Path to Speaking English** — an AI-powered, interactive English learning platform built for Arabic-speaking teens and adults. Students learn through AI conversation scenarios, gamified exercises, CEFR-aligned placement, and live teacher-led sessions. Teachers manage classes, author exercises, and run real-time group sessions.
+**Your Path to Speaking English** — an AI-powered, interactive English learning platform built for Arabic-speaking teens and adults. Students learn through a guided lesson path, AI conversation scenarios, gamified exercises, CEFR-aligned placement, and live teacher-led sessions. Teachers manage classes, author exercises, and run real-time group sessions.
+
+The interface is **fully bilingual (Arabic / English) with complete right-to-left support** — every string is localized and the layout mirrors for Arabic — on a light, "sticker/pressable" design system (violet + sunshine, Rubik Latin+Arabic), with all colour, spacing, and motion driven by design tokens and gated behind `prefers-reduced-motion`.
 
 ## Features
 
@@ -8,20 +10,21 @@
 - CEFR-aligned placement exam (Grammar / Vocabulary / Reading breakdown → Beginner / Intermediate / Advanced)
 - 8 exercise types: Grammar Puzzles, Vocabulary Match, Translation Challenge (Arabic ↔ English, AI-scored), Listening Practice (browser text-to-speech), Speed Quiz, AI Conversation, Picture Description, Story Builder
 - AI conversation partner with 10 real-world scenarios (restaurant, job interview, airport…), inline grammar corrections tuned to common Arabic-speaker errors, voice input where the browser supports it, and an end-of-chat score
+- A guided **learning path** (grouped units + checkpoints) plus a level-defaulted practice library
 - XP, daily streaks, and per-skill progress tracking
-- Join classes with a 6-character code; join live sessions with chat and teacher-pushed exercises
+- Join a class with a 6-character code (or a shareable invite link); join live sessions to chat, do teacher-pushed exercises **in the room** (no page-hop), and see a post-session recap
 
 **Teachers**
-- Class management with auto-generated join codes and student rosters
-- Exercise builder for all 8 types with per-type editors
-- Live sessions: start/end control, group chat, push exercises to every student in the room
+- Class management with auto-generated join codes, shareable invite links, and student rosters
+- Full-page exercise authoring for all 8 types (autosave drafts, AI-assisted draft generation) + lesson organisation
+- Live sessions: one-click go-live or scheduling, a real lobby with pre-start chat, push exercises that render in each student's room, a **live scoreboard**, and an end-of-session recap
 - Student analytics: skill breakdowns, exercise history, placement results
 
 **Works without an OpenAI key** — every AI feature degrades gracefully to deterministic scoring/canned replies and tells the user AI is offline.
 
 ## Tech Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 + shadcn/ui + framer-motion · Prisma 7 + SQLite (libsql) · Better Auth · OpenAI API
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 (CSS-first `@theme` tokens) + base-ui/shadcn primitives + framer-motion · bilingual AR/EN with full RTL · Prisma 7 + SQLite (libsql) · Better Auth · OpenAI API (with deterministic offline fallbacks)
 
 ## Local Development
 
@@ -151,5 +154,6 @@ prisma/                     # schema, migrations, seed
 
 ## Product Docs
 
-- [SpeakPath-PRD.md](SpeakPath-PRD.md) — product requirements
-- [SpeakPath-Design-Brief.md](SpeakPath-Design-Brief.md) — design system and page specs
+- [docs/superpowers/specs/2026-07-11-speakpath-redesign-design.md](docs/superpowers/specs/2026-07-11-speakpath-redesign-design.md) — the current design spec (design system, bilingual/RTL architecture, student/teacher/live-session experience)
+- [SpeakPath-PRD.md](SpeakPath-PRD.md) — original product requirements
+- [SpeakPath-Design-Brief.md](SpeakPath-Design-Brief.md) — original design brief (superseded by the redesign spec above)
