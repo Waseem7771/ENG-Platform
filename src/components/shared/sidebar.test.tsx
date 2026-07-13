@@ -30,5 +30,7 @@ describe("Sidebar", () => {
       </LocaleProvider>,
     );
     expect(screen.getByText("Students")).toBeTruthy();
+    expect(screen.getByText("Content")).toBeTruthy();
+    expect(screen.queryByText("Exercises")).toBeNull();
   });
 });

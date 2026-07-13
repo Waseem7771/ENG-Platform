@@ -32,7 +32,7 @@ const teacherNav: NavItem[] = [
   { key: "nav.dashboard", href: "/teacher", icon: LayoutDashboard },
   { key: "nav.classes", href: "/teacher/classes", icon: BookOpen },
   { key: "nav.sessions", href: "/teacher/sessions", icon: Video },
-  { key: "nav.exercises", href: "/teacher/exercises", icon: PencilLine },
+  { key: "nav.content", href: "/teacher/exercises", icon: PencilLine },
   { key: "nav.students", href: "/teacher/students", icon: Users },
 ];
 

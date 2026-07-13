@@ -8,6 +8,7 @@ import { CountUp } from "@/components/shared/count-up";
 import { ErrorState } from "@/components/teacher/state-views";
 import { SessionStatusBadge } from "@/components/teacher/badges";
 import { api, ApiClientError } from "@/lib/api";
+import { useT } from "@/components/providers/locale-provider";
 import type { TeacherClassListItem, TeacherExerciseListItem, TeacherSessionListItem, TeacherStudentListItem } from "@/components/teacher/types";
 
 const container = {
@@ -28,6 +29,7 @@ interface DashboardData {
 }
 
 export default function TeacherDashboard() {
+  const t = useT();
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,11 +46,11 @@ export default function TeacherDashboard() {
       ]);
       setData({ students, classes, sessions: sessionsRes.sessions, exercises });
     } catch (e) {
-      setError(e instanceof ApiClientError ? e.message : "Couldn't load your dashboard.");
+      setError(e instanceof ApiClientError ? e.message : t("teacher.loadDashboardFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     load();
@@ -64,9 +66,9 @@ export default function TeacherDashboard() {
       <motion.div initial="hidden" animate="visible" variants={container} className="space-y-8">
         <motion.div variants={item}>
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            Teacher Command Center
+            {t("teacher.dashboardTitle")}
           </h1>
-          <p className="mt-2 text-muted-foreground">Inspire your students and track their progress.</p>
+          <p className="mt-2 text-muted-foreground">{t("teacher.dashboardSubtitle")}</p>
         </motion.div>
 
         {error && !loading && (
@@ -79,23 +81,23 @@ export default function TeacherDashboard() {
           <>
             <motion.div variants={container} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <motion.div variants={item}>
-                <StatCard title="Total Students" value={data?.students.length ?? 0} loading={loading} />
+                <StatCard title={t("teacher.statStudents")} value={data?.students.length ?? 0} loading={loading} />
               </motion.div>
               <motion.div variants={item}>
-                <StatCard title="Active Classes" value={data?.classes.length ?? 0} loading={loading} />
+                <StatCard title={t("teacher.statClasses")} value={data?.classes.length ?? 0} loading={loading} />
               </motion.div>
               <motion.div variants={item}>
-                <StatCard title="Live Sessions" value={liveSessionsCount} loading={loading} />
+                <StatCard title={t("teacher.statSessions")} value={liveSessionsCount} loading={loading} />
               </motion.div>
               <motion.div variants={item}>
-                <StatCard title="Exercises Created" value={data?.exercises.length ?? 0} loading={loading} />
+                <StatCard title={t("teacher.statExercises")} value={data?.exercises.length ?? 0} loading={loading} />
               </motion.div>
             </motion.div>
 
             <motion.div variants={container} className="grid gap-6 lg:grid-cols-3">
               <motion.div variants={item} className="lg:col-span-2">
                 <div className="rounded-2xl border border-border bg-card p-7">
-                  <h2 className="mb-6 text-lg font-semibold tracking-tight">Recent Activity</h2>
+                  <h2 className="mb-6 text-lg font-semibold tracking-tight">{t("teacher.recentActivity")}</h2>
                   {loading ? (
                     <div className="space-y-3">
                       {Array.from({ length: 3 }, (_, i) => (
@@ -107,8 +109,7 @@ export default function TeacherDashboard() {
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary">
                         <Radio className="h-6 w-6" />
                       </div>
-                      <p className="font-medium text-muted-foreground">No activity yet</p>
-                      <p className="mt-1 text-sm text-muted-foreground">Create a class and invite students to get started.</p>
+                      <p className="font-medium text-muted-foreground">{t("teacher.noActivity")}</p>
                     </div>
                   ) : (
                     <ul className="space-y-2">
@@ -133,11 +134,11 @@ export default function TeacherDashboard() {
 
               <motion.div variants={item}>
                 <div className="rounded-2xl border border-border bg-card p-7">
-                  <h2 className="mb-6 text-lg font-semibold tracking-tight">Quick Actions</h2>
+                  <h2 className="mb-6 text-lg font-semibold tracking-tight">{t("teacher.quickActions")}</h2>
                   <div className="space-y-3">
-                    <QuickAction label="Create a Class" href="/teacher/classes" icon={<Users className="h-4 w-4" />} color="leaf" />
-                    <QuickAction label="Start a Session" href="/teacher/sessions" icon={<Video className="h-4 w-4" />} color="violet" />
-                    <QuickAction label="Create an Exercise" href="/teacher/exercises" icon={<PenSquare className="h-4 w-4" />} color="sun" />
+                    <QuickAction label={t("teacher.quickCreateClass")} href="/teacher/classes" icon={<Users className="h-4 w-4" />} color="leaf" />
+                    <QuickAction label={t("teacher.quickStartSession")} href="/teacher/sessions" icon={<Video className="h-4 w-4" />} color="violet" />
+                    <QuickAction label={t("teacher.quickCreateExercise")} href="/teacher/content/exercises/new" icon={<PenSquare className="h-4 w-4" />} color="sun" />
                   </div>
                 </div>
               </motion.div>
