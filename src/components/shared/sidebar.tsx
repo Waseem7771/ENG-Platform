@@ -1,26 +1,22 @@
 "use client";
 
-import { useTransition } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
 import {
   LayoutDashboard,
   BookOpen,
   Video,
   PencilLine,
   Users,
-  Languages,
   LogOut,
   Route,
   LineChart,
   type LucideIcon,
 } from "lucide-react";
-import { useT, useLocale } from "@/components/providers/locale-provider";
-import { setLocale } from "@/app/actions/set-locale";
+import { useT } from "@/components/providers/locale-provider";
 import { signOut } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { LanguageToggle } from "@/components/shared/language-toggle";
 
 interface NavItem {
   key: string;
@@ -72,22 +68,8 @@ export function Sidebar({
   user?: { name: string; email: string };
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const t = useT();
-  const locale = useLocale();
   const navItems = role === "TEACHER" ? teacherNav : studentNav;
-  const [isPending, startTransition] = useTransition();
-
-  function toggleLocale() {
-    startTransition(async () => {
-      try {
-        await setLocale(locale === "en" ? "ar" : "en");
-        router.refresh();
-      } catch {
-        toast.error(t("common.error"));
-      }
-    });
-  }
 
   return (
     <aside className="flex h-screen w-64 flex-col border-e-2 border-sidebar-border bg-sidebar">
@@ -143,16 +125,7 @@ export function Sidebar({
 
       {/* Language toggle */}
       <div className="px-4 pt-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start gap-2"
-          onClick={toggleLocale}
-          disabled={isPending}
-        >
-          <Languages className="size-4" />
-          {t("common.language")}
-        </Button>
+        <LanguageToggle className="w-full justify-start" />
       </div>
 
       {/* User + Sign out */}

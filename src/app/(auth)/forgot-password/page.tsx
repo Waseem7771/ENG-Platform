@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/shared/wordmark";
+import { LanguageToggle } from "@/components/shared/language-toggle";
 
 const ease = [0.35, 0.35, 0, 1] as const;
 
@@ -36,6 +37,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+      <LanguageToggle className="absolute end-4 top-4 z-20" />
       <motion.div
         className="relative z-10 w-full max-w-md"
         initial={{ opacity: 0, y: 30, scale: 0.97 }}
