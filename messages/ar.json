@@ -178,6 +178,7 @@
   "session.completedCount": "{done} من {total} أنجزوا",
   "session.avgScore": "المتوسط {score}%",
   "session.notCompleted": "—",
+  "session.scoreboardEmpty": "شارك تمرينًا لبدء تتبع النتائج.",
   "session.recapTitle": "ملخص الجلسة",
   "session.recapDuration": "المدة",
   "session.recapParticipants": "المشاركون",

@@ -178,6 +178,7 @@
   "session.completedCount": "{done} of {total} done",
   "session.avgScore": "Avg {score}%",
   "session.notCompleted": "—",
+  "session.scoreboardEmpty": "Push an exercise to start tracking scores.",
   "session.recapTitle": "Session recap",
   "session.recapDuration": "Duration",
   "session.recapParticipants": "Participants",

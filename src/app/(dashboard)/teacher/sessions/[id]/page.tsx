@@ -10,6 +10,7 @@ import { SessionStatusBadge, ExerciseTypeBadge } from "@/components/teacher/badg
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
 import { SessionChat, type ExerciseCacheEntry } from "@/components/teacher/sessions/session-chat";
 import { SessionParticipants } from "@/components/teacher/sessions/session-participants";
+import { Scoreboard } from "@/components/teacher/sessions/scoreboard";
 import { SessionLobby } from "@/components/shared/session-lobby";
 import { PushExerciseDialog } from "@/components/teacher/sessions/push-exercise-dialog";
 import { useElapsedTimer } from "@/components/teacher/sessions/use-elapsed-timer";
@@ -259,6 +260,7 @@ export default function TeacherSessionRoomPage() {
                   poll();
                 }}
               />
+              {session.status === "ACTIVE" && <Scoreboard sessionId={sessionId} total={roster.length} />}
               <SessionParticipants participants={participants} />
             </>
           )}
