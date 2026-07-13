@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { ApiError, errorResponse, requireTeacher, requireUser } from "@/lib/guard";
-import { buildRoster, buildScoreboard, sessionPhase, type ScoreboardExercise } from "@/lib/session";
+import { buildRoster, sessionPhase, type ScoreboardExercise } from "@/lib/session";
+import { loadSessionScoreboard } from "@/lib/session-data";
 
 async function loadSessionOrThrow(id: string) {
   const session = await db.liveSession.findUnique({
@@ -157,36 +158,7 @@ export async function GET(
     // which JSON.stringify drops from the response entirely.
     let results: ScoreboardExercise[] | undefined;
     if (session.status === "ENDED" || isTeacherOwner) {
-      const exerciseIds = Array.from(new Set(exerciseMessageRows.map((m) => m.content)));
-      const exercises = exerciseIds.length
-        ? await db.exercise.findMany({ where: { id: { in: exerciseIds } } })
-        : [];
-      const exerciseById = new Map(exercises.map((e) => [e.id, e]));
-
-      const pushed = exerciseIds
-        .map((id) => {
-          const exercise = exerciseById.get(id);
-          return exercise
-            ? { exerciseId: exercise.id, title: exercise.title, type: exercise.type }
-            : null;
-        })
-        .filter((e): e is { exerciseId: string; title: string; type: string } => e !== null);
-
-      const resultRows = await db.exerciseResult.findMany({
-        where: { sessionId: id },
-        include: { student: { select: { name: true } } },
-      });
-
-      results = buildScoreboard(
-        pushed,
-        resultRows.map((r) => ({
-          studentId: r.studentId,
-          name: r.student.name,
-          exerciseId: r.exerciseId,
-          score: r.score,
-          completedAt: r.completedAt,
-        })),
-      );
+      results = await loadSessionScoreboard(id);
     }
 
     return Response.json({
