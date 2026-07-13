@@ -170,6 +170,7 @@
   "session.startExercise": "ابدأ",
   "session.submitAndReturn": "إرسال",
   "session.completedInRoom": "تم — عد إلى الجلسة",
+  "session.backToChat": "العودة إلى الدردشة",
   "session.waitingForPush": "سيشارك معلمك التمارين هنا.",
   "session.scoreboard": "لوحة النتائج المباشرة",
   "session.completedCount": "{done} من {total} أنجزوا",

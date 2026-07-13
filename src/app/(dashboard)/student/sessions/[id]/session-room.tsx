@@ -3,12 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api, ApiClientError } from "@/lib/api";
 import { useLocale, useT } from "@/components/providers/locale-provider";
 import { SessionStatusBadge } from "@/components/teacher/badges";
 import { SessionLobby } from "@/components/shared/session-lobby";
+import { EmbeddedExercise } from "@/components/exercise/embedded-exercise";
 import { Button } from "@/components/ui/button";
 import type { Locale } from "@/lib/i18n-shared";
 import type { SessionDetail, SessionMessageDTO } from "../../_types";
@@ -26,7 +26,6 @@ function formatScheduledAt(iso: string, locale: Locale): string {
 export function SessionRoom({ id }: { id: string }) {
   const t = useT();
   const locale = useLocale();
-  const router = useRouter();
   const [meId, setMeId] = useState<string | null>(null);
   const [detail, setDetail] = useState<SessionDetail | null>(null);
   const [messages, setMessages] = useState<SessionMessageDTO[]>([]);
@@ -34,6 +33,9 @@ export function SessionRoom({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  // The pushed exercise the student has opened in-room. Null = normal chat +
+  // roster view; setting it swaps in the split-pane player (never a navigation).
+  const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
 
   const cursorRef = useRef<string | undefined>(undefined);
   const prevPushedIdRef = useRef<string | null>(null);
@@ -54,7 +56,7 @@ export function SessionRoom({ id }: { id: string }) {
           return Array.from(map.values()).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
         });
         if (res.pushedExercise && res.pushedExercise.id !== prevPushedIdRef.current) {
-          if (prevPushedIdRef.current !== null) toast.info(`Your teacher pushed: ${res.pushedExercise.title}`);
+          if (prevPushedIdRef.current !== null) toast.info(`${t("session.pushedTitle")}: ${res.pushedExercise.title}`);
           prevPushedIdRef.current = res.pushedExercise.id;
         }
         if (res.session.status === "ENDED") endedRef.current = true;
@@ -143,125 +145,182 @@ export function SessionRoom({ id }: { id: string }) {
 
   const isEnded = detail.session.status === "ENDED";
   const isLobby = detail.phase === "LOBBY" || detail.phase === "SCHEDULED";
+  const isLive = detail.phase === "LIVE";
+  const pushed = detail.pushedExercise;
+  // Only render the in-room player while the session is genuinely live; if it
+  // ends mid-exercise we fall back to the normal view (the ENDED overlay covers it).
+  const inExercise = isLive && activeExerciseId !== null;
+
+  // The push banner (opens the pane) / waiting hint sits at the top of the chat
+  // in the normal view; it's omitted while the player pane is open.
+  const pushArea = (
+    <AnimatePresence>
+      {isLive && pushed && (
+        <motion.div
+          key={pushed.id}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="m-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-secondary px-4 py-3"
+        >
+          <div>
+            <p className="text-[11px] uppercase tracking-wider text-primary">{t("session.pushedTitle")}</p>
+            <p className="text-sm font-semibold text-foreground">{pushed.title}</p>
+          </div>
+          <Button size="sm" onClick={() => setActiveExerciseId(pushed.id)}>
+            {t("session.startExercise")}
+          </Button>
+        </motion.div>
+      )}
+      {isLive && !pushed && (
+        <motion.p
+          key="waiting"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="m-3 rounded-xl border border-border bg-card px-4 py-3 text-center text-sm text-muted-foreground"
+        >
+          {t("session.waitingForPush")}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  );
+
+  const chatCard = (topSlot: React.ReactNode, containerClassName: string) => (
+    <div className={`flex min-h-0 flex-col rounded-2xl border border-border bg-card ${containerClassName}`}>
+      <div className="flex items-center justify-between border-b border-border p-4">
+        <div>
+          <p className="font-medium text-foreground">{detail.session.title}</p>
+          <p className="text-xs text-muted-foreground">
+            {detail.session.className} · {detail.session.teacherName}
+          </p>
+        </div>
+        <SessionStatusBadge status={detail.session.status} />
+      </div>
+
+      {topSlot}
+
+      <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+        {messages.length === 0 && <p className="text-center text-sm text-muted-foreground">{t("session.chatEmpty")}</p>}
+        {messages
+          .filter((m) => m.type !== "EXERCISE")
+          .map((m) => {
+            if (m.type === "SYSTEM") {
+              return (
+                <p key={m.id} className="text-center text-xs italic text-muted-foreground">
+                  {m.content}
+                </p>
+              );
+            }
+            const isMe = m.user.id === meId;
+            return (
+              <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                {!isMe && <span className="mb-1 text-[11px] text-muted-foreground">{m.user.name}</span>}
+                <div
+                  dir="auto"
+                  className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
+                    isMe ? "bg-primary text-primary-foreground" : "border border-border bg-card text-foreground"
+                  }`}
+                >
+                  {m.content}
+                </div>
+              </div>
+            );
+          })}
+      </div>
+
+      <form onSubmit={sendMessage} className="flex items-center gap-2 border-t border-border p-3">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={isEnded}
+          placeholder={isEnded ? t("session.chatEnded") : t("session.chatPlaceholder")}
+          aria-label={t("session.chatPlaceholder")}
+          dir="auto"
+          maxLength={1000}
+          className="h-11 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none disabled:opacity-40"
+        />
+        <Button type="submit" disabled={sending || isEnded || !input.trim()}>
+          {t("session.send")}
+        </Button>
+      </form>
+    </div>
+  );
 
   return (
     <div className="relative flex h-[calc(100vh-4rem)] flex-col gap-4 lg:flex-row">
-      <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card">
-        <div className="flex items-center justify-between border-b border-border p-4">
-          <div>
-            <p className="font-medium text-foreground">{detail.session.title}</p>
-            <p className="text-xs text-muted-foreground">{detail.session.className} · {detail.session.teacherName}</p>
-          </div>
-          <SessionStatusBadge status={detail.session.status} />
-        </div>
-
-        <AnimatePresence>
-          {detail.pushedExercise && (
-            <motion.div
-              key={detail.pushedExercise.id}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="m-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/30 bg-secondary px-4 py-3"
-            >
-              <p className="text-sm text-foreground">
-                Your teacher pushed: <span className="font-semibold">{detail.pushedExercise.title}</span>
-              </p>
-              <button
-                onClick={() => router.push(`/student/exercises/${detail.pushedExercise!.id}`)}
-                className="shrink-0 rounded-full bg-primary px-4 py-1.5 text-xs font-medium uppercase tracking-wider text-primary-foreground"
-              >
-                Start Exercise
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-          {messages.length === 0 && <p className="text-center text-sm text-muted-foreground">{t("session.chatEmpty")}</p>}
-          {messages
-            .filter((m) => m.type !== "EXERCISE")
-            .map((m) => {
-              if (m.type === "SYSTEM") {
-                return (
-                  <p key={m.id} className="text-center text-xs italic text-muted-foreground">
-                    {m.content}
-                  </p>
-                );
-              }
-              const isMe = m.user.id === meId;
-              return (
-                <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                  {!isMe && <span className="mb-1 text-[11px] text-muted-foreground">{m.user.name}</span>}
-                  <div
-                    dir="auto"
-                    className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
-                      isMe
-                        ? "bg-primary text-primary-foreground"
-                        : "border border-border bg-card text-foreground"
-                    }`}
-                  >
-                    {m.content}
-                  </div>
-                </div>
-              );
-            })}
-        </div>
-
-        <form onSubmit={sendMessage} className="flex items-center gap-2 border-t border-border p-3">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isEnded}
-            placeholder={isEnded ? t("session.chatEnded") : t("session.chatPlaceholder")}
-            aria-label={t("session.chatPlaceholder")}
-            dir="auto"
-            maxLength={1000}
-            className="h-11 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none disabled:opacity-40"
-          />
-          <Button type="submit" disabled={sending || isEnded || !input.trim()}>
-            {t("session.send")}
-          </Button>
-        </form>
-      </div>
-
-      <div className="flex w-full shrink-0 flex-col rounded-2xl border border-border bg-card p-5 lg:w-72">
-        {isLobby ? (
-          <SessionLobby
-            teacherName={detail.session.teacherName}
-            roster={detail.roster}
-            waitingText={
-              <>
-                <p>{t("session.waitingForTeacher", { teacher: detail.session.teacherName })}</p>
-                {detail.phase === "SCHEDULED" && detail.session.scheduledAt && (
-                  <p className="mt-1">
-                    {t("session.scheduledFor", { when: formatScheduledAt(detail.session.scheduledAt, locale) })}
-                  </p>
+      {inExercise ? (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex min-h-0 flex-1 flex-col rounded-2xl border border-border bg-card"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-border p-4">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-primary">{t("session.pushedTitle")}</p>
+                {pushed && pushed.id === activeExerciseId && (
+                  <p className="text-sm font-semibold text-foreground">{pushed.title}</p>
                 )}
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setActiveExerciseId(null)}>
+                {t("session.backToChat")}
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              <EmbeddedExercise
+                exerciseId={activeExerciseId}
+                sessionId={detail.session.id}
+                onDone={() => setActiveExerciseId(null)}
+              />
+            </div>
+          </motion.div>
+
+          {chatCard(null, "h-72 w-full shrink-0 lg:h-auto lg:w-80")}
+        </>
+      ) : (
+        <>
+          {chatCard(pushArea, "flex-1")}
+
+          <div className="flex w-full shrink-0 flex-col rounded-2xl border border-border bg-card p-5 lg:w-72">
+            {isLobby ? (
+              <SessionLobby
+                teacherName={detail.session.teacherName}
+                roster={detail.roster}
+                waitingText={
+                  <>
+                    <p>{t("session.waitingForTeacher", { teacher: detail.session.teacherName })}</p>
+                    {detail.phase === "SCHEDULED" && detail.session.scheduledAt && (
+                      <p className="mt-1">
+                        {t("session.scheduledFor", { when: formatScheduledAt(detail.session.scheduledAt, locale) })}
+                      </p>
+                    )}
+                  </>
+                }
+              />
+            ) : (
+              <>
+                <h3 className="mb-4 text-xs uppercase tracking-wider text-muted-foreground">
+                  {t("session.participants")} ({roster.length})
+                </h3>
+                <ul className="space-y-2">
+                  {roster.map((p) => (
+                    <li key={p.id} className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
+                        {p.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate text-sm text-foreground">{p.name}</span>
+                      {p.isTeacher && (
+                        <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">{t("session.teacher")}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </>
-            }
-          />
-        ) : (
-          <>
-            <h3 className="mb-4 text-xs uppercase tracking-wider text-muted-foreground">
-              {t("session.participants")} ({roster.length})
-            </h3>
-            <ul className="space-y-2">
-              {roster.map((p) => (
-                <li key={p.id} className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
-                    {p.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="truncate text-sm text-foreground">{p.name}</span>
-                  {p.isTeacher && (
-                    <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">{t("session.teacher")}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
+            )}
+          </div>
+        </>
+      )}
 
       {isEnded && (
         <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-black/70">

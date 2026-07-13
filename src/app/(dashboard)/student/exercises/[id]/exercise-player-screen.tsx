@@ -9,29 +9,12 @@ import { useApi } from "@/hooks/use-api";
 import { api, ApiClientError } from "@/lib/api";
 import { useT } from "@/components/providers/locale-provider";
 import { ResultsScreen } from "@/components/exercise/results-screen";
-import { GrammarPlayer } from "@/components/exercise/grammar-player";
-import { VocabMatch } from "@/components/exercise/vocab-match";
-import { TranslationPlayer } from "@/components/exercise/translation-player";
-import { ListeningPlayer } from "@/components/exercise/listening-player";
-import { SpeedQuiz } from "@/components/exercise/speed-quiz";
-import { ConversationChat } from "@/components/exercise/conversation-chat";
-import { PicturePlayer } from "@/components/exercise/picture-player";
-import { StoryPlayer } from "@/components/exercise/story-player";
+import { renderPlayer } from "@/components/exercise/render-player";
 import { exerciseHref } from "@/lib/exercise-href";
 import type { ExerciseFull } from "../../_types";
 import type { PathResponse } from "@/lib/path";
 import type { Recommendation } from "@/lib/recommend";
-import type {
-  ConversationData,
-  GrammarData,
-  ListeningData,
-  PictureData,
-  QuizData,
-  StoryData,
-  SubmitResponse,
-  TranslationData,
-  VocabularyData,
-} from "@/types";
+import type { SubmitResponse } from "@/types";
 
 const difficultyColor: Record<string, string> = {
   BEGINNER: "border-leaf bg-leaf-soft text-leaf-text",
@@ -209,43 +192,6 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
       </motion.div>
     </div>
   );
-}
-
-function renderPlayer(
-  exercise: ExerciseFull,
-  onSubmit: (payload: unknown) => void,
-  submitting: boolean,
-  registerForceSubmit: (fn: () => void) => void
-) {
-  const summary = { id: exercise.id, title: exercise.title, type: exercise.type, difficulty: exercise.difficulty, points: exercise.points, timeLimit: exercise.timeLimit };
-  switch (exercise.type) {
-    case "GRAMMAR":
-      return <GrammarPlayer exercise={summary} data={exercise.data as GrammarData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />;
-    case "VOCABULARY":
-      return <VocabMatch exercise={summary} data={exercise.data as VocabularyData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />;
-    case "TRANSLATION":
-      return <TranslationPlayer exercise={summary} data={exercise.data as TranslationData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />;
-    case "LISTENING":
-      return <ListeningPlayer exercise={summary} data={exercise.data as ListeningData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />;
-    case "QUIZ":
-      return <SpeedQuiz exercise={summary} data={exercise.data as QuizData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />;
-    case "CONVERSATION":
-      return (
-        <div className="h-[70vh]">
-          <ConversationChat exercise={summary} data={exercise.data as ConversationData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />
-        </div>
-      );
-    case "PICTURE":
-      return <PicturePlayer exercise={summary} data={exercise.data as PictureData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />;
-    case "STORY":
-      return (
-        <div className="h-[70vh]">
-          <StoryPlayer exercise={summary} data={exercise.data as StoryData} onSubmit={onSubmit} submitting={submitting} registerForceSubmit={registerForceSubmit} />
-        </div>
-      );
-    default:
-      return <p className="text-muted-foreground">This exercise type isn&apos;t supported yet.</p>;
-  }
 }
 
 function PlayerSkeleton() {

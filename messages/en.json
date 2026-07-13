@@ -170,6 +170,7 @@
   "session.startExercise": "Start",
   "session.submitAndReturn": "Submit",
   "session.completedInRoom": "Done — back to the session",
+  "session.backToChat": "Back to chat",
   "session.waitingForPush": "Your teacher will share exercises here.",
   "session.scoreboard": "Live scoreboard",
   "session.completedCount": "{done} of {total} done",
