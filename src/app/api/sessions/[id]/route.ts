@@ -22,6 +22,7 @@ function shapeSession(session: Awaited<ReturnType<typeof loadSessionOrThrow>>) {
     status: session.status,
     startedAt: session.startedAt,
     endedAt: session.endedAt,
+    scheduledAt: session.scheduledAt,
     classId: session.classId,
     className: session.class.name,
     teacherId: session.teacherId,

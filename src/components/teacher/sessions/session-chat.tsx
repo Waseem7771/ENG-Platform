@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Radio, Send } from "lucide-react";
 import { ExerciseTypeBadge } from "@/components/teacher/badges";
+import { useT } from "@/components/providers/locale-provider";
 import type { SessionMessageItem } from "@/components/teacher/types";
 import type { ExerciseType } from "@/types";
 
@@ -26,6 +27,7 @@ export function SessionChat({
   disabled: boolean;
   disabledPlaceholder: string;
 }) {
+  const t = useT();
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -51,7 +53,7 @@ export function SessionChat({
     <div className="flex h-full flex-col">
       <div className="flex-1 space-y-3 overflow-y-auto p-5">
         {messages.length === 0 && (
-          <p className="py-10 text-center text-sm text-muted-foreground">No messages yet. Say hello to get things started.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("session.chatEmpty")}</p>
         )}
         {messages.map((m) => {
           if (m.type === "SYSTEM") {
@@ -91,7 +93,7 @@ export function SessionChat({
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           disabled={disabled}
-          placeholder={disabled ? disabledPlaceholder : "Message your class..."}
+          placeholder={disabled ? disabledPlaceholder : t("session.chatPlaceholder")}
           maxLength={1000}
           className="h-11 flex-1 rounded-xl border border-border bg-muted px-3.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary/50 focus:ring-2 focus:ring-primary/20 disabled:opacity-40"
         />
@@ -99,7 +101,7 @@ export function SessionChat({
           type="submit"
           disabled={disabled || sending || !draft.trim()}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-transform hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-40"
-          aria-label="Send message"
+          aria-label={t("session.send")}
         >
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         </button>

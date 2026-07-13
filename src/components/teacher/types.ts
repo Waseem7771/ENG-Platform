@@ -112,6 +112,17 @@ export interface SessionMessageItem {
   user: { id: string; name: string; role: "STUDENT" | "TEACHER" };
 }
 
+/** Mirrors src/lib/session.ts SessionPhase (server-computed; the client never recomputes it). */
+export type SessionPhase = "SCHEDULED" | "LOBBY" | "LIVE" | "ENDED";
+
+/** Mirrors src/lib/session.ts RosterEntry: the full class roster unioned with who has joined. */
+export interface SessionRosterEntry {
+  studentId: string;
+  name: string;
+  joined: boolean;
+  joinedAt: string | null;
+}
+
 export interface TeacherSessionDetail {
   session: {
     id: string;
@@ -123,10 +134,13 @@ export interface TeacherSessionDetail {
     teacherName: string;
     startedAt: string | null;
     endedAt: string | null;
+    scheduledAt: string | null;
   };
   participants: SessionParticipant[];
   messages: SessionMessageItem[];
   pushedExercise: { id: string; title: string; type: ExerciseType } | null;
+  roster: SessionRosterEntry[];
+  phase: SessionPhase;
   serverTime: string;
 }
 

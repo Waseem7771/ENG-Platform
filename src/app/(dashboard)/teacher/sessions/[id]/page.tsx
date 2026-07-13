@@ -10,6 +10,7 @@ import { SessionStatusBadge, ExerciseTypeBadge } from "@/components/teacher/badg
 import { ConfirmDialog } from "@/components/teacher/confirm-dialog";
 import { SessionChat, type ExerciseCacheEntry } from "@/components/teacher/sessions/session-chat";
 import { SessionParticipants } from "@/components/teacher/sessions/session-participants";
+import { SessionLobby } from "@/components/shared/session-lobby";
 import { PushExerciseDialog } from "@/components/teacher/sessions/push-exercise-dialog";
 import { useElapsedTimer } from "@/components/teacher/sessions/use-elapsed-timer";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export default function TeacherSessionRoomPage() {
 
   const [session, setSession] = useState<TeacherSessionDetail["session"] | null>(null);
   const [participants, setParticipants] = useState<TeacherSessionDetail["participants"]>([]);
+  const [roster, setRoster] = useState<TeacherSessionDetail["roster"]>([]);
   const [messages, setMessages] = useState<SessionMessageItem[]>([]);
   const [pushedExercise, setPushedExercise] = useState<TeacherSessionDetail["pushedExercise"]>(null);
   const [exerciseCache, setExerciseCache] = useState<Record<string, ExerciseCacheEntry>>({});
@@ -58,6 +60,7 @@ export default function TeacherSessionRoomPage() {
       if (!mountedRef.current) return;
       setSession((prev) => (prev && STATUS_RANK[data.session.status] < STATUS_RANK[prev.status] ? prev : data.session));
       setParticipants(data.participants);
+      setRoster(data.roster);
       setPushedExercise(data.pushedExercise);
       if (data.pushedExercise) {
         setExerciseCache((prev) => ({ ...prev, [data.pushedExercise!.id]: { title: data.pushedExercise!.title, type: data.pushedExercise!.type } }));
@@ -166,6 +169,8 @@ export default function TeacherSessionRoomPage() {
   if (!session) return null;
 
   const studentCount = participants.length;
+  // WAITING == phase LOBBY or SCHEDULED (server-computed): pre-start waiting room with chat enabled.
+  const isLobby = session.status === "WAITING";
 
   return (
     <div className="relative flex h-[calc(100vh-4rem)] flex-col">
@@ -236,21 +241,27 @@ export default function TeacherSessionRoomPage() {
             exerciseCache={exerciseCache}
             currentUserId={currentUserId}
             onSend={handleSend}
-            disabled={session.status !== "ACTIVE"}
-            disabledPlaceholder={session.status === "WAITING" ? "Start the session to chat" : "This session has ended"}
+            disabled={session.status === "ENDED"}
+            disabledPlaceholder={t("session.chatEnded")}
           />
         </div>
 
-        <div className="space-y-4 overflow-y-auto rounded-2xl border border-border bg-card p-4">
-          <PushExerciseDialog
-            sessionId={sessionId}
-            disabled={session.status !== "ACTIVE"}
-            onPushed={(ex) => {
-              setExerciseCache((prev) => ({ ...prev, [ex.id]: { title: ex.title, type: ex.type } }));
-              poll();
-            }}
-          />
-          <SessionParticipants participants={participants} />
+        <div className="flex min-h-0 flex-col gap-4 overflow-y-auto rounded-2xl border border-border bg-card p-4">
+          {isLobby ? (
+            <SessionLobby teacherName={session.teacherName} roster={roster} />
+          ) : (
+            <>
+              <PushExerciseDialog
+                sessionId={sessionId}
+                disabled={session.status !== "ACTIVE"}
+                onPushed={(ex) => {
+                  setExerciseCache((prev) => ({ ...prev, [ex.id]: { title: ex.title, type: ex.type } }));
+                  poll();
+                }}
+              />
+              <SessionParticipants participants={participants} />
+            </>
+          )}
         </div>
       </div>
     </div>

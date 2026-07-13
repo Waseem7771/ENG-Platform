@@ -81,6 +81,17 @@ export interface PushedExercise {
   pushedAt: string;
 }
 
+/** Mirrors src/lib/session.ts SessionPhase (server sends it — the client never recomputes it). */
+export type SessionPhase = "SCHEDULED" | "LOBBY" | "LIVE" | "ENDED";
+
+/** Mirrors src/lib/session.ts RosterEntry: the full class roster unioned with who has joined. */
+export interface RosterEntry {
+  studentId: string;
+  name: string;
+  joined: boolean;
+  joinedAt: string | null;
+}
+
 export interface SessionDetail {
   session: {
     id: string;
@@ -88,6 +99,7 @@ export interface SessionDetail {
     status: LiveSessionStatus;
     startedAt: string | null;
     endedAt: string | null;
+    scheduledAt: string | null;
     classId: string;
     className: string;
     teacherId: string;
@@ -96,6 +108,8 @@ export interface SessionDetail {
   participants: ParticipantDTO[];
   messages: SessionMessageDTO[];
   pushedExercise: PushedExercise | null;
+  roster: RosterEntry[];
+  phase: SessionPhase;
   serverTime: string;
 }
 

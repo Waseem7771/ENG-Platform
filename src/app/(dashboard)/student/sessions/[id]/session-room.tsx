@@ -6,17 +6,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api, ApiClientError } from "@/lib/api";
+import { useLocale, useT } from "@/components/providers/locale-provider";
+import { SessionStatusBadge } from "@/components/teacher/badges";
+import { SessionLobby } from "@/components/shared/session-lobby";
+import { Button } from "@/components/ui/button";
+import type { Locale } from "@/lib/i18n-shared";
 import type { SessionDetail, SessionMessageDTO } from "../../_types";
 
 const POLL_MS = 2500;
 
-const statusColor: Record<string, string> = {
-  ACTIVE: "border-leaf bg-leaf-soft text-leaf-text",
-  WAITING: "border-sun-deep/30 bg-sun-soft text-sun-deep",
-  ENDED: "border-border bg-card text-muted-foreground",
-};
+/** Presentational only: renders scheduledAt in the viewer's locale + local timezone. */
+function formatScheduledAt(iso: string, locale: Locale): string {
+  return new Date(iso).toLocaleString(locale === "ar" ? "ar" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
 
 export function SessionRoom({ id }: { id: string }) {
+  const t = useT();
+  const locale = useLocale();
   const router = useRouter();
   const [meId, setMeId] = useState<string | null>(null);
   const [detail, setDetail] = useState<SessionDetail | null>(null);
@@ -51,12 +60,12 @@ export function SessionRoom({ id }: { id: string }) {
         if (res.session.status === "ENDED") endedRef.current = true;
         setError(null);
       } catch (err) {
-        if (isInitial) setError(err instanceof ApiClientError ? err.message : "Couldn't load this session.");
+        if (isInitial) setError(err instanceof ApiClientError ? err.message : t("session.loadFailed"));
       } finally {
         if (isInitial) setLoading(false);
       }
     },
-    [id]
+    [id, t]
   );
 
   useEffect(() => {
@@ -112,26 +121,28 @@ export function SessionRoom({ id }: { id: string }) {
   if (error || !detail) {
     return (
       <div className="mx-auto max-w-lg rounded-2xl border border-destructive/20 bg-coral-soft p-8 text-center">
-        <p className="text-foreground">{error ?? "Session not found."}</p>
+        <p className="text-foreground">{error ?? t("session.loadFailed")}</p>
         <div className="mt-4 flex justify-center gap-3">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => {
               setLoading(true);
               fetchUpdates(true);
             }}
-            className="rounded-full border border-border px-5 py-2 text-sm text-foreground hover:border-line-strong"
           >
-            Retry
-          </button>
-          <Link href="/student/sessions" className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">
-            Back to Sessions
-          </Link>
+            {t("common.retry")}
+          </Button>
+          <Button render={<Link href="/student/sessions" />} nativeButton={false} role="link" size="sm">
+            {t("session.backToSessions")}
+          </Button>
         </div>
       </div>
     );
   }
 
   const isEnded = detail.session.status === "ENDED";
+  const isLobby = detail.phase === "LOBBY" || detail.phase === "SCHEDULED";
 
   return (
     <div className="relative flex h-[calc(100vh-4rem)] flex-col gap-4 lg:flex-row">
@@ -141,7 +152,7 @@ export function SessionRoom({ id }: { id: string }) {
             <p className="font-medium text-foreground">{detail.session.title}</p>
             <p className="text-xs text-muted-foreground">{detail.session.className} · {detail.session.teacherName}</p>
           </div>
-          <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusColor[detail.session.status]}`}>{detail.session.status}</span>
+          <SessionStatusBadge status={detail.session.status} />
         </div>
 
         <AnimatePresence>
@@ -167,7 +178,7 @@ export function SessionRoom({ id }: { id: string }) {
         </AnimatePresence>
 
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-          {messages.length === 0 && <p className="text-center text-sm text-muted-foreground">No messages yet — say hello!</p>}
+          {messages.length === 0 && <p className="text-center text-sm text-muted-foreground">{t("session.chatEmpty")}</p>}
           {messages
             .filter((m) => m.type !== "EXERCISE")
             .map((m) => {
@@ -202,35 +213,54 @@ export function SessionRoom({ id }: { id: string }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isEnded}
-            placeholder={isEnded ? "This session has ended" : "Type a message…"}
-            aria-label="Message"
+            placeholder={isEnded ? t("session.chatEnded") : t("session.chatPlaceholder")}
+            aria-label={t("session.chatPlaceholder")}
             dir="auto"
             maxLength={1000}
             className="h-11 flex-1 rounded-xl border border-border bg-card px-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none disabled:opacity-40"
           />
-          <button
-            type="submit"
-            disabled={sending || isEnded || !input.trim()}
-            className="h-11 shrink-0 rounded-xl bg-primary px-5 text-sm font-medium text-primary-foreground transition disabled:opacity-40"
-          >
-            Send
-          </button>
+          <Button type="submit" disabled={sending || isEnded || !input.trim()}>
+            {t("session.send")}
+          </Button>
         </form>
       </div>
 
-      <div className="w-full shrink-0 rounded-2xl border border-border bg-card p-5 lg:w-72">
-        <h3 className="mb-4 text-xs uppercase tracking-wider text-muted-foreground">Participants ({roster.length})</h3>
-        <ul className="space-y-2">
-          {roster.map((p) => (
-            <li key={p.id} className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2">
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
-                {p.name.charAt(0).toUpperCase()}
-              </div>
-              <span className="truncate text-sm text-foreground">{p.name}</span>
-              {p.isTeacher && <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">Teacher</span>}
-            </li>
-          ))}
-        </ul>
+      <div className="flex w-full shrink-0 flex-col rounded-2xl border border-border bg-card p-5 lg:w-72">
+        {isLobby ? (
+          <SessionLobby
+            teacherName={detail.session.teacherName}
+            roster={detail.roster}
+            waitingText={
+              <>
+                <p>{t("session.waitingForTeacher", { teacher: detail.session.teacherName })}</p>
+                {detail.phase === "SCHEDULED" && detail.session.scheduledAt && (
+                  <p className="mt-1">
+                    {t("session.scheduledFor", { when: formatScheduledAt(detail.session.scheduledAt, locale) })}
+                  </p>
+                )}
+              </>
+            }
+          />
+        ) : (
+          <>
+            <h3 className="mb-4 text-xs uppercase tracking-wider text-muted-foreground">
+              {t("session.participants")} ({roster.length})
+            </h3>
+            <ul className="space-y-2">
+              {roster.map((p) => (
+                <li key={p.id} className="flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
+                    {p.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="truncate text-sm text-foreground">{p.name}</span>
+                  {p.isTeacher && (
+                    <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">{t("session.teacher")}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
 
       {isEnded && (

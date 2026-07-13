@@ -1,20 +1,22 @@
 "use client";
 
 import { Users } from "lucide-react";
+import { useT } from "@/components/providers/locale-provider";
 import type { SessionParticipant } from "@/components/teacher/types";
 
 /** The session API only returns joined students here — the teacher is the room owner, not a participant row. */
 export function SessionParticipants({ participants }: { participants: SessionParticipant[] }) {
+  const t = useT();
   return (
     <div>
       <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         <Users className="h-3.5 w-3.5" />
-        Participants
+        {t("session.participants")}
         <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">{participants.length}</span>
       </div>
       {participants.length === 0 ? (
         <p className="rounded-xl border border-border bg-card p-4 text-center text-xs text-muted-foreground">
-          Waiting for students to join.
+          {t("session.waitingForStudents")}
         </p>
       ) : (
         <ul className="space-y-1.5">
