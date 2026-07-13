@@ -79,7 +79,7 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
         if (prev <= 1) {
           if (!timedOutRef.current) {
             timedOutRef.current = true;
-            toast.info("Time's up — submitting your answers.");
+            toast.info(t("exercise.timeUp"));
             forceSubmitRef.current?.();
           }
           return 0;
@@ -103,11 +103,11 @@ export function ExercisePlayerScreen({ id }: { id: string }) {
       setResult(res);
       setPhase("results");
       setNext(null);
-      toast.success(`Scored ${res.score}% · +${res.xpEarned} XP`);
+      toast.success(t("exercise.scored", { score: res.score, xp: res.xpEarned }));
       // Fetch the follow-up CTA after showing results — must not block the results screen.
       fetchNext();
     } catch (err) {
-      toast.error(err instanceof ApiClientError ? err.message : "Couldn't submit your answers. Try again.");
+      toast.error(err instanceof ApiClientError ? err.message : t("exercise.submitError"));
       setSubmitFailed(true);
     } finally {
       setSubmitting(false);

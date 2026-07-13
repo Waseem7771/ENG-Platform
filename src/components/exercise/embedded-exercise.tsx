@@ -58,7 +58,7 @@ export function EmbeddedExercise({
         if (prev <= 1) {
           if (!timedOutRef.current) {
             timedOutRef.current = true;
-            toast.info("Time's up — submitting your answers.");
+            toast.info(t("exercise.timeUp"));
             forceSubmitRef.current?.();
           }
           return 0;
@@ -79,9 +79,9 @@ export function EmbeddedExercise({
           body: JSON.stringify(buildSubmitBody(payload, sessionId)),
         });
         setResult(res);
-        toast.success(`Scored ${res.score}% · +${res.xpEarned} XP`);
+        toast.success(t("exercise.scored", { score: res.score, xp: res.xpEarned }));
       } catch (err) {
-        toast.error(err instanceof ApiClientError ? err.message : "Couldn't submit your answers. Try again.");
+        toast.error(err instanceof ApiClientError ? err.message : t("exercise.submitError"));
       } finally {
         setSubmitting(false);
       }

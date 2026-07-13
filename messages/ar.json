@@ -122,6 +122,8 @@
   "exercise.points": "{n} نقطة",
   "exercise.submitFailed": "تعذّر حفظ إرسالك الأخير.",
   "exercise.submitFailedHint": "تحقق من اتصالك وحاول مجددًا.",
+  "exercise.scored": "النتيجة {score}% · +{xp} نقطة",
+  "exercise.submitError": "تعذّر إرسال إجاباتك. حاول مجددًا.",
   "progress.title": "تقدّمي",
   "progress.streakNudge": "تدرّب اليوم لتحافظ على سلسلة {n} يوم!",
   "progress.streakSafe": "سلسلتك آمنة اليوم — اليوم {n}.",

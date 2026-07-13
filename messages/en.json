@@ -122,6 +122,8 @@
   "exercise.points": "{n} pts",
   "exercise.submitFailed": "Your last submission failed to save.",
   "exercise.submitFailedHint": "Check your connection and retry.",
+  "exercise.scored": "Scored {score}% · +{xp} XP",
+  "exercise.submitError": "Couldn't submit your answers. Try again.",
   "progress.title": "My progress",
   "progress.streakNudge": "Practice today to keep your {n}-day streak!",
   "progress.streakSafe": "Streak safe for today — day {n}.",
