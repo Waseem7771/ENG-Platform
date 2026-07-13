@@ -30,6 +30,7 @@ import { GET as sessionDetailGET, PATCH as sessionPATCH } from "@/app/api/sessio
 import { POST as joinPOST } from "@/app/api/sessions/[id]/join/route";
 import { POST as messagePOST } from "@/app/api/sessions/[id]/messages/route";
 import { GET as scoreboardGET } from "@/app/api/sessions/[id]/scoreboard/route";
+import { GET as liveGET } from "@/app/api/sessions/live/route";
 
 const GRAMMAR_DATA = {
   items: [
@@ -794,5 +795,118 @@ describe("GET /api/sessions/[id]/scoreboard (integration)", () => {
     const body = await res.json();
     expect(body.scoreboard).toHaveLength(1);
     expect(body.scoreboard[0].exerciseId).toBe(ex.id);
+  });
+});
+
+// ==================== Task 7: student live-discovery endpoint ====================
+
+describe("GET /api/sessions/live (integration)", () => {
+  it("returns the single ACTIVE session in the student's enrolled class as {id,title,className}", async () => {
+    const { cookie: teacherCookie, klass } = await setupTeacherWithClass("live-hit1@test.local");
+    const student = await signUp("live-hit-s1@test.local");
+    await enroll(klass.id, student.userId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live Now", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+    expect(session.status).toBe("ACTIVE");
+
+    asUser(student.cookie);
+    const res = await liveGET();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.live).toEqual({
+      id: session.id,
+      title: "Live Now",
+      className: "Test Class",
+    });
+  });
+
+  it("returns null when the student's enrolled class has only a WAITING (scheduled) session, not ACTIVE", async () => {
+    const { cookie: teacherCookie, klass } = await setupTeacherWithClass("live-null1@test.local");
+    const student = await signUp("live-null-s1@test.local");
+    await enroll(klass.id, student.userId);
+
+    asUser(teacherCookie);
+    const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Later", mode: "schedule", scheduledAt: future }),
+      })
+    );
+    expect((await sessionRes.json()).session.status).toBe("WAITING");
+
+    asUser(student.cookie);
+    const res = await liveGET();
+    expect(res.status).toBe(200);
+    expect((await res.json()).live).toBeNull();
+  });
+
+  it("does NOT leak an ACTIVE session from a class the student is not enrolled in", async () => {
+    // classA has a live session; the student is enrolled only in classB.
+    const { cookie: teacherACookie, klass: classA } = await setupTeacherWithClass("live-leak-a1@test.local");
+    const { klass: classB } = await setupTeacherWithClass("live-leak-b1@test.local");
+    const student = await signUp("live-leak-s1@test.local");
+    await enroll(classB.id, student.userId);
+
+    asUser(teacherACookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: classA.id, title: "Secret Live", mode: "now" }),
+      })
+    );
+    expect((await sessionRes.json()).session.status).toBe("ACTIVE");
+
+    asUser(student.cookie);
+    const res = await liveGET();
+    expect(res.status).toBe(200);
+    expect((await res.json()).live).toBeNull();
+  });
+
+  it("picks the MOST-RECENT active session when the student is live in two enrolled classes", async () => {
+    const teacherA = await setupTeacherWithClass("live-recent-a1@test.local");
+    const teacherB = await setupTeacherWithClass("live-recent-b1@test.local");
+    const student = await signUp("live-recent-s1@test.local");
+    await enroll(teacherA.klass.id, student.userId);
+    await enroll(teacherB.klass.id, student.userId);
+
+    // Go live on classA first (older).
+    asUser(teacherA.cookie);
+    await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: teacherA.klass.id, title: "Older Live", mode: "now" }),
+      })
+    );
+
+    // Then go live on classB (newer) as its owning teacher.
+    asUser(teacherB.cookie);
+    const newer = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: teacherB.klass.id, title: "Newer Live", mode: "now" }),
+      })
+    );
+    const newerSession = (await newer.json()).session;
+
+    asUser(student.cookie);
+    const res = await liveGET();
+    const body = await res.json();
+    expect(body.live.id).toBe(newerSession.id);
+    expect(body.live.title).toBe("Newer Live");
+  });
+
+  it("rejects a teacher with 403 (students only)", async () => {
+    const { cookie: teacherCookie } = await setupTeacherWithClass("live-teacher1@test.local");
+    asUser(teacherCookie);
+    const res = await liveGET();
+    expect(res.status).toBe(403);
   });
 });
