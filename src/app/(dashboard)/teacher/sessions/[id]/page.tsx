@@ -12,6 +12,8 @@ import { SessionChat, type ExerciseCacheEntry } from "@/components/teacher/sessi
 import { SessionParticipants } from "@/components/teacher/sessions/session-participants";
 import { PushExerciseDialog } from "@/components/teacher/sessions/push-exercise-dialog";
 import { useElapsedTimer } from "@/components/teacher/sessions/use-elapsed-timer";
+import { Button } from "@/components/ui/button";
+import { useT } from "@/components/providers/locale-provider";
 import { api, ApiClientError } from "@/lib/api";
 import type { SessionMessageItem, TeacherSessionDetail } from "@/components/teacher/types";
 import type { SessionStatus } from "@/types";
@@ -29,6 +31,7 @@ function mergeMessages(prev: SessionMessageItem[], incoming: SessionMessageItem[
 }
 
 export default function TeacherSessionRoomPage() {
+  const t = useT();
   const params = useParams<{ id: string }>();
   const sessionId = params.id;
 
@@ -95,10 +98,10 @@ export default function TeacherSessionRoomPage() {
         body: JSON.stringify({ action: "start" }),
       });
       setSession(res.session);
-      toast.success("Session is live");
+      toast.success(t("session.sessionLive"));
       poll();
     } catch (e) {
-      toast.error(e instanceof ApiClientError ? e.message : "Couldn't start the session.");
+      toast.error(e instanceof ApiClientError ? e.message : t("session.startFailed"));
     } finally {
       setBusy(false);
     }
@@ -111,10 +114,10 @@ export default function TeacherSessionRoomPage() {
         body: JSON.stringify({ action: "end" }),
       });
       setSession(res.session);
-      toast.success("Session ended");
+      toast.success(t("session.sessionEnded"));
       poll();
     } catch (e) {
-      toast.error(e instanceof ApiClientError ? e.message : "Couldn't end the session.");
+      toast.error(e instanceof ApiClientError ? e.message : t("session.endFailed"));
     }
   }
 
@@ -187,26 +190,22 @@ export default function TeacherSessionRoomPage() {
             </span>
           )}
           {session.status === "WAITING" && (
-            <button
-              onClick={handleStart}
-              disabled={busy}
-              className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
-            >
+            <Button variant="brand" onClick={handleStart} disabled={busy}>
               <Play className="h-3.5 w-3.5" />
-              Start Session
-            </button>
+              {t("session.startSession")}
+            </Button>
           )}
           {session.status === "ACTIVE" && (
             <ConfirmDialog
               trigger={
-                <button className="flex items-center gap-2 rounded-full border border-destructive/25 bg-destructive/10 px-5 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20">
+                <Button variant="destructive">
                   <Square className="h-3.5 w-3.5" />
-                  End Session
-                </button>
+                  {t("session.endSession")}
+                </Button>
               }
-              title="End this session?"
-              description="Students will be disconnected and the session will move to Ended."
-              confirmLabel="End session"
+              title={t("session.endConfirmTitle")}
+              description={t("session.endConfirmDescription")}
+              confirmLabel={t("session.endSession")}
               destructive
               onConfirm={handleEnd}
             />
