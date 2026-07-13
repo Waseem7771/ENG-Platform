@@ -51,7 +51,7 @@ const studentNav: NavItem[] = [
  * exercise-authoring routes live under /teacher/content/exercises, a different path
  * than its own href (/teacher/exercises), so it's matched in addition.
  */
-function isNavItemActive(pathname: string, href: string): boolean {
+export function isNavItemActive(pathname: string, href: string): boolean {
   if (href === "/teacher" || href === "/student") {
     return pathname === href;
   }
