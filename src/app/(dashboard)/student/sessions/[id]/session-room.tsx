@@ -111,7 +111,7 @@ export function SessionRoom({ id }: { id: string }) {
       setInput("");
       await fetchUpdates(false);
     } catch (err) {
-      toast.error(err instanceof ApiClientError ? err.message : "Message failed to send.");
+      toast.error(err instanceof ApiClientError ? err.message : t("session.messageSendFailed"));
     } finally {
       setSending(false);
     }
