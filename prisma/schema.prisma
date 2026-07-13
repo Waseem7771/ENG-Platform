@@ -128,12 +128,14 @@ model LiveSession {
   status    String    @default("WAITING") // WAITING | ACTIVE | ENDED
   startedAt DateTime?
   endedAt   DateTime?
+  scheduledAt DateTime?
   createdAt DateTime  @default(now())
 
   class    Class            @relation(fields: [classId], references: [id], onDelete: Cascade)
   teacher  User             @relation("TeacherSessions", fields: [teacherId], references: [id])
   messages SessionMessage[]
   students SessionStudent[]
+  results  ExerciseResult[]
 }
 
 model SessionStudent {
@@ -207,10 +209,12 @@ model ExerciseResult {
   score       Int      // 0-100
   timeSpent   Int?     // Time spent in seconds
   answers     String?  // JSON string of student answers
+  sessionId   String?
   completedAt DateTime @default(now())
 
   exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   student  User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  session  LiveSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 }
 
 // ==================== PLACEMENT EXAM ====================
