@@ -228,7 +228,7 @@ export function SessionRoom({ id }: { id: string }) {
             const isMe = m.user.id === meId;
             return (
               <div key={m.id} className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}>
-                {!isMe && <span className="mb-1 text-[11px] text-muted-foreground">{m.user.name}</span>}
+                {!isMe && <span className="mb-1 text-[11px] text-muted-foreground"><bdi>{m.user.name}</bdi></span>}
                 <div
                   dir="auto"
                   className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
@@ -322,7 +322,7 @@ export function SessionRoom({ id }: { id: string }) {
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-foreground">
                         {p.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="truncate text-sm text-foreground">{p.name}</span>
+                      <span className="truncate text-sm text-foreground"><bdi>{p.name}</bdi></span>
                       {p.isTeacher && (
                         <span className="ms-auto text-[10px] uppercase tracking-wider text-primary">{t("session.teacher")}</span>
                       )}
