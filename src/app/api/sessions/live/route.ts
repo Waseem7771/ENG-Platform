@@ -30,10 +30,13 @@ export async function GET() {
     }
 
     const session = await db.liveSession.findFirst({
-      where: { classId: { in: classIds }, status: "ACTIVE" },
-      // Most-recent first. ACTIVE sessions always have `startedAt` set (both the
-      // go-live-now create and the scheduled "start" path set it), so it is the
-      // truest "which class is live now" key; `createdAt` is a stable tiebreaker.
+      // ACTIVE sessions always have `startedAt` set (both the go-live-now create
+      // and the scheduled "start" path set it) — assert it in the query too so
+      // the `startedAt`-desc ordering never has to reason about a NULL, rather
+      // than depending on that invariant being enforced only in other files.
+      where: { classId: { in: classIds }, status: "ACTIVE", startedAt: { not: null } },
+      // Most-recent first: `startedAt` is the truest "which class is live now"
+      // key; `createdAt` is a stable tiebreaker.
       orderBy: [{ startedAt: "desc" }, { createdAt: "desc" }],
       select: {
         id: true,

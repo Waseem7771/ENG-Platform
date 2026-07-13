@@ -150,6 +150,47 @@ describe("usePoll", () => {
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
+  it("holds a steady intervalMs cadence even when a fetch has latency (no every-other-tick skipping)", async () => {
+    // Regression guard: the cadence is measured from when a fetch BEGINS, not
+    // when it completes. With completion-stamping, the mount fetch's 100ms of
+    // latency pushes the first tick's due-time from 5000 to 5100, so the tick
+    // at 5000 is skipped and the effective period doubles. This test introduces
+    // that latency and asserts a fetch at BOTH t=5000 and t=10000.
+    vi.useFakeTimers();
+    const d = deferred<string>();
+    let first = true;
+    const fetcher = vi.fn(() => {
+      if (first) {
+        first = false;
+        return d.promise; // hold the mount fetch in flight so time can pass
+      }
+      return Promise.resolve("x");
+    });
+    renderHook(() => usePoll(fetcher, 5_000));
+
+    // Let 100ms of "fetch latency" elapse while the mount fetch is in flight,
+    // then let it complete.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+    await act(async () => {
+      d.resolve("mount");
+    });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+
+    // First interval tick at t=5000 must fire (completion-stamping would skip it).
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4_900);
+    });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+
+    // Second interval tick at t=10000 must fire too — cadence stays at intervalMs.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5_000);
+    });
+    expect(fetcher).toHaveBeenCalledTimes(3);
+  });
+
   it("stops polling and detaches listeners on unmount", async () => {
     const fetcher = vi.fn(async () => "x");
     const { unmount } = renderHook(() => usePoll(fetcher, 10_000));

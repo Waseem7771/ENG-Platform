@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Pure, SSR-safe timing primitive: has at least `intervalMs` elapsed since the
- * last completed fetch at `lastAt`? Boundary is inclusive — `now - lastAt`
+ * last fetch *began* at `lastAt`? Boundary is inclusive — `now - lastAt`
  * exactly equal to `intervalMs` counts as due. Extracted so the interval
  * decision can be unit-tested deterministically without wrestling fake timers
  * and async flushes inside jsdom (see use-poll.test.ts).
@@ -45,21 +45,27 @@ export function usePoll<T>(fetcher: () => Promise<T>, intervalMs: number): { dat
     const runFetch = async () => {
       if (inFlightRef.current) return; // drop overlapping triggers
       inFlightRef.current = true;
+      // Stamp the poll-window START, not completion: the interval cadence is
+      // measured from when a fetch *begins*, so ticks stay aligned to
+      // `intervalMs` regardless of fetch latency. Stamping in `finally` would
+      // record completion time (tick + latency), pushing each next due-time out
+      // by the fetch duration and degrading the effective period toward
+      // 2×intervalMs for any non-trivial latency (every other tick skipped).
+      lastAtRef.current = Date.now();
       try {
         const result = await fetcherRef.current();
         if (mountedRef.current) setData(result);
       } catch {
         // Swallow — polling is best-effort; the next trigger retries.
       } finally {
-        lastAtRef.current = Date.now();
         inFlightRef.current = false;
       }
     };
 
     // The interval trigger fetches only if the poll window has actually elapsed
-    // since the last completed fetch. A focus/visibility refetch may have just
-    // run, in which case `shouldRefetch` suppresses the redundant poll — one
-    // fetch per `intervalMs` at most from the timer.
+    // since the last fetch began. A focus/visibility refetch may have just run,
+    // in which case `shouldRefetch` suppresses the redundant poll — one fetch
+    // per `intervalMs` at most from the timer.
     const onInterval = () => {
       if (shouldRefetch(lastAtRef.current, Date.now(), intervalMs)) void runFetch();
     };
