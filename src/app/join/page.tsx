@@ -10,6 +10,7 @@ import { useApi } from "@/hooks/use-api";
 import { api, ApiClientError } from "@/lib/api";
 import { useT } from "@/components/providers/locale-provider";
 import { Button } from "@/components/ui/button";
+import { Wordmark } from "@/components/shared/wordmark";
 import type { UserRole } from "@/types";
 
 const ease = [0.35, 0.35, 0, 1] as const;
@@ -69,14 +70,9 @@ function JoinForm() {
         transition={{ duration: 0.8, ease }}
       >
         <div className="rounded-card border-2 border-border bg-card shadow-sticker p-8 text-center">
-          <Link href="/" className="mb-6 inline-flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-lg shadow-violet-500/20">
-              S
-            </div>
-            <span className="text-xl font-semibold tracking-tight">
-              Speak<span className="text-primary">Path</span>
-            </span>
-          </Link>
+          <div className="mb-6 inline-flex">
+            <Wordmark size="md" />
+          </div>
 
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-primary">
             <GraduationCap className="h-7 w-7" />
