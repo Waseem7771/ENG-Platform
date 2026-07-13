@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "./db";
 import { sendEmail } from "./email";
+import { resetEmailContent } from "./reset-email";
 
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
@@ -29,11 +30,11 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
-        to: user.email,
-        subject: "Reset your SpeakPath password",
-        text: `Reset your password: ${url}\nIf you didn't ask for this, ignore this email.`,
-      });
+      // `locale` is a registered additionalField (defaults "ar"), so it rides on
+      // the better-auth user object; fall back to English if it's ever absent.
+      const locale = (user as { locale?: string }).locale ?? "en";
+      const { subject, text } = resetEmailContent(locale, url);
+      await sendEmail({ to: user.email, subject, text });
     },
   },
   session: {
