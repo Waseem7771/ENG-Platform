@@ -46,7 +46,9 @@ export function LiveBanner() {
       <div className="flex min-w-0 items-center gap-2.5">
         <LivePulse />
         <p className="truncate text-sm font-medium text-secondary-foreground">
-          {t("session.liveBanner", { className: live.className })}
+          {/* Isolate a possibly-Latin class name (U+2068 FSI … U+2069 PDI) so it
+              can't reorder neighbouring neutrals inside the Arabic RTL sentence. */}
+          {t("session.liveBanner", { className: `⁨${live.className}⁩` })}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1">
