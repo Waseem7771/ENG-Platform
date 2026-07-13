@@ -24,7 +24,11 @@ export async function POST(
       throw new ApiError(403, "Join the session before sending messages");
     }
 
-    if (session.status === "ENDED") throw new ApiError(400, "Session has ended");
+    // Pre-start lobby chat is allowed (WAITING) as well as the live room
+    // (ACTIVE); only an ENDED session is closed to new messages.
+    if (session.status !== "WAITING" && session.status !== "ACTIVE") {
+      throw new ApiError(403, "Session has ended");
+    }
 
     let body: unknown;
     try {

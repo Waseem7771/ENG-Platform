@@ -26,6 +26,9 @@ import { db } from "@/lib/db";
 import { ApiError } from "@/lib/guard";
 import { POST as createSessionPOST, buildSessionCreate } from "@/app/api/sessions/route";
 import { POST as pushPOST } from "@/app/api/sessions/[id]/push/route";
+import { GET as sessionDetailGET, PATCH as sessionPATCH } from "@/app/api/sessions/[id]/route";
+import { POST as joinPOST } from "@/app/api/sessions/[id]/join/route";
+import { POST as messagePOST } from "@/app/api/sessions/[id]/messages/route";
 
 const GRAMMAR_DATA = {
   items: [
@@ -333,5 +336,268 @@ describe("POST /api/sessions/[id]/push (integration)", () => {
     });
     expect(messages).toHaveLength(1);
     expect(messages[0].content).toBe(publishedEx.id);
+  });
+});
+
+// ==================== Task 4: detail GET roster/results/phase; lobby chat ====================
+
+async function enroll(classId: string, studentId: string) {
+  await db.classStudent.create({ data: { classId, studentId } });
+}
+
+describe("GET /api/sessions/[id] (integration) — roster/results/phase", () => {
+  it("unions the class's 3 enrolled students with 1 joined into `roster`, and sets `phase`", async () => {
+    const { cookie: teacherCookie, klass } = await setupTeacherWithClass("detail-roster1@test.local");
+    const s1 = await signUp("detail-roster-s1@test.local");
+    const s2 = await signUp("detail-roster-s2@test.local");
+    const s3 = await signUp("detail-roster-s3@test.local");
+    await enroll(klass.id, s1.userId);
+    await enroll(klass.id, s2.userId);
+    await enroll(klass.id, s3.userId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    // Only s2 actually joins the session.
+    asUser(s2.cookie);
+    const joinRes = await joinPOST(
+      req(`http://localhost/api/sessions/${session.id}/join`, { method: "POST" }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    expect(joinRes.status).toBe(200);
+
+    asUser(teacherCookie);
+    const res = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(body.roster).toHaveLength(3);
+    const joinedEntries = body.roster.filter((r: { joined: boolean }) => r.joined);
+    expect(joinedEntries).toHaveLength(1);
+    expect(joinedEntries[0].studentId).toBe(s2.userId);
+    expect(body.phase).toBe("LIVE");
+  });
+
+  it("an ENDED session with 2 pushed exercises + results shapes `results` for anyone with access", async () => {
+    const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
+      "detail-results1@test.local"
+    );
+    const student = await signUp("detail-results-s1@test.local");
+    await enroll(klass.id, student.userId);
+
+    const ex1 = await createExercise(teacherId);
+    const ex2 = await createExercise(teacherId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex1.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex2.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    await db.exerciseResult.create({
+      data: { exerciseId: ex1.id, studentId: student.userId, score: 80, sessionId: session.id },
+    });
+    await db.exerciseResult.create({
+      data: { exerciseId: ex2.id, studentId: student.userId, score: 60, sessionId: session.id },
+    });
+
+    // End the session.
+    const endRes = await sessionPATCH(
+      req(`http://localhost/api/sessions/${session.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action: "end" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    expect(endRes.status).toBe(200);
+
+    // Student (not owner) can still see results, since the session is ENDED.
+    asUser(student.cookie);
+    const res = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    expect(res.status).toBe(200);
+    const body = await res.json();
+
+    expect(body.phase).toBe("ENDED");
+    expect(body.results).toHaveLength(2);
+    const shapedEx1 = body.results.find((r: { exerciseId: string }) => r.exerciseId === ex1.id);
+    expect(shapedEx1.completedCount).toBe(1);
+    expect(shapedEx1.averageScore).toBe(80);
+    expect(shapedEx1.entries[0].studentId).toBe(student.userId);
+  });
+
+  it("includes `results` for the owning teacher on a live (non-ENDED) session, but omits/empties it for a non-owner student", async () => {
+    const { cookie: teacherCookie, userId: teacherId, klass } = await setupTeacherWithClass(
+      "detail-live-results1@test.local"
+    );
+    const student = await signUp("detail-live-results-s1@test.local");
+    await enroll(klass.id, student.userId);
+    const ex = await createExercise(teacherId);
+
+    asUser(teacherCookie);
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    await pushPOST(
+      req(`http://localhost/api/sessions/${session.id}/push`, {
+        method: "POST",
+        body: JSON.stringify({ exerciseId: ex.id }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    await db.exerciseResult.create({
+      data: { exerciseId: ex.id, studentId: student.userId, score: 70, sessionId: session.id },
+    });
+
+    // Teacher (owner) sees live results.
+    asUser(teacherCookie);
+    const teacherRes = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    const teacherBody = await teacherRes.json();
+    expect(teacherBody.results).toHaveLength(1);
+    expect(teacherBody.results[0].completedCount).toBe(1);
+
+    // Student (non-owner) on the same still-ACTIVE session gets results omitted or empty.
+    asUser(student.cookie);
+    const studentRes = await sessionDetailGET(req(`http://localhost/api/sessions/${session.id}`), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    const studentBody = await studentRes.json();
+    expect(studentBody.results === undefined || studentBody.results.length === 0).toBe(true);
+  });
+});
+
+describe("PATCH /api/sessions/[id] action:start (integration) — scheduled sessions", () => {
+  it("starts a SCHEDULED (WAITING) session early, regardless of scheduledAt being in the future", async () => {
+    const { cookie, klass } = await setupTeacherWithClass("start-early1@test.local");
+    asUser(cookie);
+
+    const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Scheduled", mode: "schedule", scheduledAt: future }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+    expect(session.status).toBe("WAITING");
+
+    const res = await sessionPATCH(
+      req(`http://localhost/api/sessions/${session.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action: "start" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.session.status).toBe("ACTIVE");
+    expect(body.session.startedAt).not.toBeNull();
+  });
+});
+
+describe("POST /api/sessions/[id]/messages (integration) — lobby chat gate", () => {
+  it("allows posting a message while WAITING (pre-start lobby chat) -> 201", async () => {
+    const { cookie: teacherCookie, klass } = await setupTeacherWithClass("msg-waiting1@test.local");
+    const student = await signUp("msg-waiting-s1@test.local");
+    await enroll(klass.id, student.userId);
+
+    asUser(teacherCookie);
+    const future = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Scheduled", mode: "schedule", scheduledAt: future }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+    expect(session.status).toBe("WAITING");
+
+    // Teacher can chat pre-start.
+    const teacherMsgRes = await messagePOST(
+      req(`http://localhost/api/sessions/${session.id}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ content: "Hello, we'll start soon" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    expect(teacherMsgRes.status).toBe(201);
+
+    // A student who joined the lobby can chat pre-start too.
+    asUser(student.cookie);
+    await joinPOST(req(`http://localhost/api/sessions/${session.id}/join`, { method: "POST" }), {
+      params: Promise.resolve({ id: session.id }),
+    });
+    const studentMsgRes = await messagePOST(
+      req(`http://localhost/api/sessions/${session.id}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ content: "Hi teacher!" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    expect(studentMsgRes.status).toBe(201);
+  });
+
+  it("rejects posting a message once the session has ENDED -> 403", async () => {
+    const { cookie, klass } = await setupTeacherWithClass("msg-ended1@test.local");
+    asUser(cookie);
+
+    const sessionRes = await createSessionPOST(
+      req("http://localhost/api/sessions", {
+        method: "POST",
+        body: JSON.stringify({ classId: klass.id, title: "Live", mode: "now" }),
+      })
+    );
+    const session = (await sessionRes.json()).session;
+
+    await sessionPATCH(
+      req(`http://localhost/api/sessions/${session.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ action: "end" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+
+    const res = await messagePOST(
+      req(`http://localhost/api/sessions/${session.id}/messages`, {
+        method: "POST",
+        body: JSON.stringify({ content: "Can I still post?" }),
+      }),
+      { params: Promise.resolve({ id: session.id }) }
+    );
+    expect(res.status).toBe(403);
   });
 });

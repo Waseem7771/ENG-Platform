@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { ApiError, errorResponse, requireTeacher, requireUser } from "@/lib/guard";
+import { buildRoster, buildScoreboard, sessionPhase, type ScoreboardExercise } from "@/lib/session";
 
 async function loadSessionOrThrow(id: string) {
   const session = await db.liveSession.findUnique({
@@ -64,7 +65,7 @@ export async function GET(
     // ascending (gte, not gt, so a message sharing the boundary millisecond is
     // never skipped — clients de-dupe by id). Without `after` (first load),
     // fetch the LATEST 200 so long sessions don't lose recent chat to the cap.
-    const [participantRows, messageRows, lastExerciseMessage] = await Promise.all([
+    const [participantRows, messageRows, classStudentRows, exerciseMessageRows] = await Promise.all([
       db.sessionStudent.findMany({
         where: { sessionId: id },
         orderBy: { joinedAt: "asc" },
@@ -76,11 +77,21 @@ export async function GET(
         take: 200,
         include: { user: { select: { id: true, name: true, role: true } } },
       }),
-      db.sessionMessage.findFirst({
+      // Full class roster (enrolled), unioned below with the session's joins
+      // (participantRows) so the lobby can show who's present vs waiting.
+      db.classStudent.findMany({
+        where: { classId: session.classId },
+        include: { student: { select: { id: true, name: true } } },
+      }),
+      // Every exercise pushed into THIS session, in push order — the basis for
+      // both `pushedExercise` (the latest one) and the results/scoreboard
+      // shaping below.
+      db.sessionMessage.findMany({
         where: { sessionId: id, type: "EXERCISE" },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "asc" },
       }),
     ]);
+    const lastExerciseMessage = exerciseMessageRows[exerciseMessageRows.length - 1] ?? null;
 
     // First load came back newest-first; present ascending like the poll path.
     if (!after) messageRows.reverse();
@@ -133,11 +144,59 @@ export async function GET(
       }
     }
 
+    const roster = buildRoster(
+      classStudentRows.map((cs) => ({ studentId: cs.studentId, name: cs.student.name })),
+      participantRows.map((p) => ({ studentId: p.student.id, joinedAt: p.joinedAt })),
+    );
+
+    const phase = sessionPhase(session, new Date());
+
+    // Results are only meaningful once the session has ended (final recap) or
+    // to the owning teacher (a live scoreboard while it's still running). A
+    // non-owner student on a non-ENDED session gets `results: undefined`,
+    // which JSON.stringify drops from the response entirely.
+    let results: ScoreboardExercise[] | undefined;
+    if (session.status === "ENDED" || isTeacherOwner) {
+      const exerciseIds = Array.from(new Set(exerciseMessageRows.map((m) => m.content)));
+      const exercises = exerciseIds.length
+        ? await db.exercise.findMany({ where: { id: { in: exerciseIds } } })
+        : [];
+      const exerciseById = new Map(exercises.map((e) => [e.id, e]));
+
+      const pushed = exerciseMessageRows
+        .map((m) => {
+          const exercise = exerciseById.get(m.content);
+          return exercise
+            ? { exerciseId: exercise.id, title: exercise.title, type: exercise.type }
+            : null;
+        })
+        .filter((e): e is { exerciseId: string; title: string; type: string } => e !== null);
+
+      const resultRows = await db.exerciseResult.findMany({
+        where: { sessionId: id },
+        include: { student: { select: { name: true } } },
+      });
+
+      results = buildScoreboard(
+        pushed,
+        resultRows.map((r) => ({
+          studentId: r.studentId,
+          name: r.student.name,
+          exerciseId: r.exerciseId,
+          score: r.score,
+          completedAt: r.completedAt,
+        })),
+      );
+    }
+
     return Response.json({
       session: shapeSession(session),
       participants,
       messages,
       pushedExercise,
+      roster,
+      results,
+      phase,
       // `serverTime` is the polling cursor the client echoes back as `after`.
       // Named for backward compatibility; value is the newest returned message.
       serverTime: nextCursor,
