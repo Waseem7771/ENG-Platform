@@ -107,7 +107,7 @@ function JoinForm() {
             ) : !authed ? (
               <div className="space-y-3">
                 <Button
-                  render={<Link href="/signup?role=student" />}
+                  render={<Link href={`/signup?role=student&code=${encodeURIComponent(code)}`} />}
                   nativeButton={false}
                   role="link"
                   className="w-full gap-2"

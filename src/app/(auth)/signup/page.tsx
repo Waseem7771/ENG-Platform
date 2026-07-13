@@ -26,6 +26,11 @@ function SignupForm() {
   const [role, setRole] = useState<"STUDENT" | "TEACHER">(
     searchParams.get("role") === "teacher" ? "TEACHER" : "STUDENT"
   );
+  // Preserve a class-invite code arriving from /join so a new student lands back
+  // on the join flow after signup instead of the generic onboarding. Validated
+  // to the 6-char code shape; anything else is ignored (fails closed).
+  const codeParam = (searchParams.get("code") ?? "").trim().toUpperCase();
+  const joinCode = /^[A-Z0-9]{6}$/.test(codeParam) ? codeParam : null;
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +49,13 @@ function SignupForm() {
       if (result.error) {
         setError(result.error.message ?? t("common.error"));
       } else {
-        router.push(role === "TEACHER" ? "/teacher" : "/student/onboarding");
+        router.push(
+          role === "TEACHER"
+            ? "/teacher"
+            : joinCode
+              ? `/join?code=${encodeURIComponent(joinCode)}`
+              : "/student/onboarding"
+        );
         router.refresh();
       }
     } catch {
