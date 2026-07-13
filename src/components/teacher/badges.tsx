@@ -1,6 +1,9 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import type { ExerciseType, Level, SessionStatus } from "@/types";
 import { EXERCISE_TYPE_META } from "@/lib/exercise-meta";
+import { useT } from "@/components/providers/locale-provider";
 
 const LEVEL_STYLES: Record<Level, string> = {
   BEGINNER: "border-leaf bg-leaf-soft text-leaf-text",
@@ -8,11 +11,8 @@ const LEVEL_STYLES: Record<Level, string> = {
   ADVANCED: "border-primary/25 bg-secondary text-primary",
 };
 
-function titleCase(value: string) {
-  return value.charAt(0) + value.slice(1).toLowerCase();
-}
-
 export function LevelBadge({ level, className }: { level: Level; className?: string }) {
+  const t = useT();
   return (
     <span
       className={cn(
@@ -21,7 +21,7 @@ export function LevelBadge({ level, className }: { level: Level; className?: str
         className
       )}
     >
-      {titleCase(level)}
+      {t(`level.${level.toLowerCase()}`)}
     </span>
   );
 }
@@ -32,7 +32,14 @@ const SESSION_STATUS_STYLES: Record<SessionStatus, string> = {
   ENDED: "border-border bg-muted text-muted-foreground",
 };
 
+const SESSION_STATUS_KEYS: Record<SessionStatus, string> = {
+  WAITING: "session.waiting",
+  ACTIVE: "session.active",
+  ENDED: "session.ended",
+};
+
 export function SessionStatusBadge({ status, className }: { status: SessionStatus; className?: string }) {
+  const t = useT();
   return (
     <span
       className={cn(
@@ -47,7 +54,7 @@ export function SessionStatusBadge({ status, className }: { status: SessionStatu
           <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-leaf" />
         </span>
       )}
-      {titleCase(status)}
+      {t(SESSION_STATUS_KEYS[status])}
     </span>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/providers/locale-provider";
 
 /**
  * `navigator.clipboard` is only defined on secure contexts (HTTPS/localhost) — it is
@@ -33,6 +34,7 @@ function legacyCopy(text: string): boolean {
 }
 
 export function CopyCode({ code, className }: { code: string; className?: string }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -51,10 +53,10 @@ export function CopyCode({ code, className }: { code: string; className?: string
 
     if (succeeded) {
       setCopied(true);
-      toast.success("Join code copied");
+      toast.success(t("teacher.codeCopied"));
       setTimeout(() => setCopied(false), 1500);
     } else {
-      toast.error("Couldn't copy — copy it manually");
+      toast.error(t("teacher.copyFailed"));
     }
   }
 
@@ -65,7 +67,7 @@ export function CopyCode({ code, className }: { code: string; className?: string
         "group inline-flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-1.5 font-mono text-sm tracking-[0.2em] text-primary transition-colors hover:border-primary/30 hover:bg-secondary",
         className
       )}
-      title="Copy join code"
+      title={t("teacher.copyCodeTitle")}
     >
       {code}
       {copied ? (

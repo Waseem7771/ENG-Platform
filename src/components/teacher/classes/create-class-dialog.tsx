@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { LevelSelect } from "@/components/teacher/level-select";
 import { Invite } from "@/components/shared/invite";
 import { api, ApiClientError } from "@/lib/api";
@@ -50,7 +51,7 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) {
-      setError("Class name is required.");
+      setError(t("teacher.classNameRequired"));
       return;
     }
     setSubmitting(true);
@@ -68,7 +69,7 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
       setStep("success");
       onCreated();
     } catch (e) {
-      setError(e instanceof ApiClientError ? e.message : "Couldn't create the class.");
+      setError(e instanceof ApiClientError ? e.message : t("teacher.createClassFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -84,19 +85,19 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
     >
       <DialogTrigger
         render={
-          <button className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-transform hover:scale-[1.02] active:scale-[0.98]">
+          <Button variant="brand">
             <Plus className="h-4 w-4" />
-            Create Class
-          </button>
+            {t("teacher.createClassButton")}
+          </Button>
         }
       />
       <DialogContent className="border border-border bg-popover text-foreground sm:max-w-md">
         {step === "form" ? (
           <>
             <DialogHeader>
-              <DialogTitle className="text-foreground">Create a class</DialogTitle>
+              <DialogTitle className="text-foreground">{t("teacher.createClassTitle")}</DialogTitle>
               <DialogDescription className="text-muted-foreground">
-                Students will join using an auto-generated code.
+                {t("teacher.createClassSubtitle")}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,42 +106,38 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
               )}
               <div className="space-y-1.5">
                 <Label htmlFor="class-name" className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Class name
+                  {t("teacher.className")}
                 </Label>
                 <input
                   id="class-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Evening Conversation Group"
+                  placeholder={t("teacher.classNamePlaceholder")}
                   className={inputClass}
                   required
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="class-description" className="text-xs uppercase tracking-wider text-muted-foreground">
-                  Description <span className="normal-case text-muted-foreground">(optional)</span>
+                  {t("teacher.classDescription")} <span className="normal-case text-muted-foreground">({t("teacher.optional")})</span>
                 </Label>
                 <textarea
                   id="class-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What's this class about?"
+                  placeholder={t("teacher.classDescriptionPlaceholder")}
                   rows={2}
                   className={`${inputClass} h-auto resize-none py-2.5`}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-wider text-muted-foreground">Level</Label>
+                <Label className="text-xs uppercase tracking-wider text-muted-foreground">{t("teacher.classLevel")}</Label>
                 <LevelSelect value={level} onChange={setLevel} />
               </div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99] disabled:pointer-events-none disabled:opacity-50"
-              >
+              <Button type="submit" variant="brand" disabled={submitting} className="w-full">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                Create class
-              </button>
+                {t("teacher.createClassSubmit")}
+              </Button>
             </form>
           </>
         ) : (
@@ -149,22 +146,19 @@ export function CreateClassDialog({ onCreated }: { onCreated: () => void }) {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2 text-foreground">
                   <PartyPopper className="h-5 w-5 text-sun-deep" />
-                  {created.name} is ready
+                  {t("teacher.classReady", { name: created.name })}
                 </DialogTitle>
                 <DialogDescription className="text-muted-foreground">
-                  Share this join code with your students.
+                  {t("teacher.shareCodeHint")}
                 </DialogDescription>
               </DialogHeader>
               <div className="rounded-2xl border border-primary/25 bg-secondary p-6">
                 <span className="text-xs uppercase tracking-widest text-muted-foreground">{t("teacher.invite")}</span>
                 <Invite code={created.code} className="mt-3" />
               </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="w-full rounded-full border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-line-strong"
-              >
-                Done
-              </button>
+              <Button variant="outline" className="w-full" onClick={() => setOpen(false)}>
+                {t("teacher.done")}
+              </Button>
             </>
           )
         )}

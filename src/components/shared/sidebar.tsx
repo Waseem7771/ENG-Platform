@@ -43,6 +43,27 @@ const studentNav: NavItem[] = [
   { key: "nav.progress", href: "/student/progress", icon: LineChart },
 ];
 
+/**
+ * Dashboard-root entries ("/teacher", "/student") match exactly only — a prefix match
+ * would otherwise make them "active" on every nested route. All other entries match
+ * their href or any nested path below it, so e.g. /teacher/students/[id] still
+ * highlights the Students nav item. The Content nav item is a special case: the new
+ * exercise-authoring routes live under /teacher/content/exercises, a different path
+ * than its own href (/teacher/exercises), so it's matched in addition.
+ */
+function isNavItemActive(pathname: string, href: string): boolean {
+  if (href === "/teacher" || href === "/student") {
+    return pathname === href;
+  }
+  if (pathname === href || pathname.startsWith(`${href}/`)) {
+    return true;
+  }
+  if (href === "/teacher/exercises") {
+    return pathname === "/teacher/content" || pathname.startsWith("/teacher/content/");
+  }
+  return false;
+}
+
 export function Sidebar({
   role,
   user,
@@ -91,7 +112,7 @@ export function Sidebar({
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = isNavItemActive(pathname, item.href);
           const Icon = item.icon;
           return (
             <Link key={item.href} href={item.href} className="relative block">

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/providers/locale-provider";
 
 export function CardSkeleton({ className }: { className?: string }) {
   return (
@@ -35,23 +36,26 @@ export function ListSkeleton({ count = 5, className }: { count?: number; classNa
 }
 
 export function ErrorState({
-  message = "Something went wrong.",
+  message,
+  retryLabel,
   onRetry,
 }: {
   message?: string;
+  retryLabel?: string;
   onRetry: () => void;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-destructive/20 bg-coral-soft p-12 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
         <AlertTriangle className="h-6 w-6" />
       </div>
-      <p className="font-medium text-foreground">{message}</p>
+      <p className="font-medium text-foreground">{message ?? t("common.error")}</p>
       <button
         onClick={onRetry}
         className="mt-4 rounded-full border border-border px-5 py-2 text-sm font-medium text-foreground transition-colors hover:border-line-strong"
       >
-        Try again
+        {retryLabel ?? t("common.tryAgain")}
       </button>
     </div>
   );
